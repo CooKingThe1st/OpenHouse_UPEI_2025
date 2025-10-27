@@ -1,0 +1,724 @@
+/*
+ * ================= ADVANCED SLAVE WIXEL CODE (WITH AUX) =================
+ *
+ * State Machine: IDLE -> HOME -> RUN -> IDLE
+ * Commands: CMD_STOP, CMD_GO_TO, CMD_PREP, CMD_RUN, CMD_AUX
+ * LED States: RED (IDLE), BLUE (HOME), GREEN (RUN), PURPLE (PREP)
+ *
+ * Features:
+ * - State machine with RGB LED flashing
+ * - Position localization (Data0=X, Data1=Y, Data2=θ)
+ * - Position filtering with threshold-based jump detection
+ * - Waypoint collection (20 max) for path following
+ * - NEW: CMD_AUX support (position updates without state changes)
+ * - Placeholder path/goal control (timeout-based)
+ * - One-way communication (RX only, no TX back to master)
+ *
+ * C89 Style: All variables at the top.
+ * ============================================================
+ */
+
+#include <wixel.h>
+#include <radio_registers.h>
+
+/* ================== CONFIGURATION CONSTANTS ================== */
+
+// --- Slave Configuration ---
+#define THIS_SLAVE_ADDRESS      0x01
+
+// --- Command Definitions ---
+#define CMD_STOP                0x10
+#define CMD_GO_TO               0x11
+#define CMD_PREP                0x12
+#define CMD_RUN                 0x13
+#define CMD_AUX                 0x14    // NEW: Auxiliary command (no state change)
+
+// --- Protocol Definitions ---
+#define MESSAGE_DELIMITER       0xFF
+#define BYTES_PER_SLAVE         16
+#define MAX_RADIO_PACKET_SIZE   64      // 4 slaves * 16 bytes (MATCH MASTER!)
+#define RADIO_PACKET_SIZE       48      // Default (will work for 3 slaves)
+
+// --- GPIO Pin Definitions (RGB Control) ---
+#define LED_RED_PIN             1   // P1_1 = RGB Red
+#define LED_GREEN_PIN           2   // P1_2 = RGB Green
+#define LED_BLUE_PIN            7   // P1_7 = RGB Blue
+
+// --- Motor Control Pins (FROM ALPHA.C) ---
+#define R_PWM_PIN               3   // P1_3 = Right Motor PWM (D9)
+#define R_DIR_PIN               5   // P1_5 = Right Motor Direction (D7)
+#define L_PWM_PIN               4   // P1_4 = Left Motor PWM (D10)
+#define L_DIR_PIN               6   // P1_6 = Left Motor Direction (D8)
+
+// --- Motor Control Values ---
+#define MOTOR_SPEED             0   // 0 for MVP (no motor control yet)
+
+// --- Timing Constants ---
+#define CONNECTION_TIMEOUT      2000   // 2 seconds without packet = no connection
+#define LED_FLASH_PERIOD        500    // Flash period (ms)
+#define LED_FLASH_DUTY          250    // On-time within period (ms)
+#define PATH_FOLLOW_TIMEOUT     10000  // 10 seconds timeout for RUN state (ms)
+#define GO_TO_TIMEOUT           5000   // 5 seconds timeout for HOME state (ms)
+
+// --- Waypoint Configuration ---
+#define MAX_WAYPOINTS           20
+#define WAYPOINT_ORDER_OFFSET   3
+#define WAYPOINT_X_OFFSET       4
+#define WAYPOINT_Y_OFFSET       5
+
+// --- Position Filtering ---
+#define POSITION_JUMP_THRESHOLD 500    // mm - threshold for detecting OptiTrack errors
+#define FILTER_ALPHA_HIGH       0.9    // High alpha for small changes
+#define FILTER_ALPHA_LOW        0.2    // Low alpha for large jumps
+
+/* ================== STATE MACHINE DEFINITIONS ================== */
+
+#define STATE_IDLE              0
+#define STATE_HOME              1
+#define STATE_RUN               2
+
+/* ================== GLOBAL VARIABLES (C89 Style) ================== */
+
+// Radio RX packet buffer
+static volatile XDATA uint8 rxPacket[1 + RADIO_PACKET_SIZE + 2];
+
+// State machine
+uint8 currentState = STATE_IDLE;
+uint8 nextState = STATE_IDLE;
+
+// RGB LED control
+uint8 ledRed = 0;
+uint8 ledGreen = 0;
+uint8 ledBlue = 0;
+uint8 ledPurple = 0;  // For PREP state (red + blue mix)
+
+// LED flashing
+uint16 lastLedFlashTime = 0;
+uint32 lastHeartbeatTime = 0;
+uint32 now = 0;
+BIT rxPulseActive = 0;
+uint32 rxPulseStart = 0;
+uint16 lastPacketTimeCheck = 0;
+
+// Last time we received a valid packet
+uint16 lastPacketTime = 0;
+
+// Position data (from OptiTrack)
+int16 posX = 0;        // Current X position (mm)
+int16 posY = 0;        // Current Y position (mm)
+int8 posTheta = 0;     // Current theta (degrees)
+
+// Filtered position
+int16 filteredX = 0;
+int16 filteredY = 0;
+int8 filteredTheta = 0;
+
+// Target location (for GO_TO)
+int16 targetX = 0;
+int16 targetY = 0;
+
+// Waypoint buffer
+typedef struct
+{
+    uint8 order;
+    int16 x;
+    int16 y;
+} Waypoint;
+
+Waypoint waypoints[MAX_WAYPOINTS];
+uint8 waypointCount = 0;
+uint8 currentWaypointIndex = 0;
+
+// Obstacle avoidance flag
+BIT obstacleAvoidanceEnabled = 0;
+
+// State timeout tracking
+uint32 stateStartTime = 0;
+
+// Misc
+uint8 fsi;  // Loop counter for failSafeBootloader
+
+/* ================== HELPER FUNCTIONS ================== */
+
+/*
+ * Calculate distance between two points
+ */
+int16 calculateDistance(int16 x1, int16 y1, int16 x2, int16 y2)
+{
+    int32 dx = (int32)x2 - (int32)x1;
+    int32 dy = (int32)y2 - (int32)y1;
+    return (int16)(dx*dx + dy*dy);  // Return squared distance for comparison
+}
+
+/*
+ * Filter position data (threshold-based jump detection)
+ */
+void filterPosition()
+{
+    int16 dx, dy;
+    int32 distSquared;
+    float alpha;
+    
+    dx = posX - filteredX;
+    dy = posY - filteredY;
+    distSquared = (int32)dx * dx + (int32)dy * dy;
+    
+    // If change is large (jump detected), use low alpha; otherwise high alpha
+    if (distSquared > (int32)POSITION_JUMP_THRESHOLD * POSITION_JUMP_THRESHOLD)
+    {
+        alpha = FILTER_ALPHA_LOW;  // Smooth out the jump
+    }
+    else
+    {
+        alpha = FILTER_ALPHA_HIGH;  // Accept readily
+    }
+    
+    filteredX = (int16)(alpha * posX + (1.0 - alpha) * filteredX);
+    filteredY = (int16)(alpha * posY + (1.0 - alpha) * filteredY);
+    filteredTheta = (int8)(alpha * posTheta + (1.0 - alpha) * filteredTheta);
+}
+
+/*
+ * Fail-safe bootloader (from alpha.c)
+ */
+void failSafeBootloader()
+{
+    LED_RED(0);
+    LED_RED_TOGGLE();
+    
+    delayMs(200);
+    // doesnt work somehow, so maybe dont need
+    for(fsi = 0; fsi < 20; fsi++)
+    {
+        LED_RED_TOGGLE();
+        boardService();
+        delayMs(100);
+    }
+    
+    LED_RED(0);
+}
+
+/*
+ * Initialize Timer3 for PWM output (MATCHING ALPHA.C)
+ */
+void timer3Init()
+{
+    T3CTL = 0b01110000;
+    T3CC0 = T3CC1 = 0;
+    T3CCTL0 = T3CCTL1 = 0b00100100;
+    PERCFG &= ~(1<<5);
+    P1SEL |= (1<<R_PWM_PIN) | (1<<L_PWM_PIN);
+}
+
+/*
+ * Initialize the radio for direct reception
+ */
+void radioInit()
+{
+    radioRegistersInit();
+    
+    CHANNR = 128;
+    PKTLEN = RADIO_PACKET_SIZE; // Set to max size to allow any number of slaves
+    
+    MCSM0 = 0x14;
+    MCSM1 = 0x00;
+    
+    // DMA configuration for variable length packets
+    dmaConfig.radio.DC6 = 19;
+    
+    dmaConfig.radio.SRCADDRH = XDATA_SFR_ADDRESS(RFD) >> 8;
+    dmaConfig.radio.SRCADDRL = XDATA_SFR_ADDRESS(RFD);
+    dmaConfig.radio.DESTADDRH = (unsigned int)rxPacket >> 8;
+    dmaConfig.radio.DESTADDRL = (unsigned int)rxPacket;
+    dmaConfig.radio.LENL = 1 + MAX_RADIO_PACKET_SIZE + 2;  // [Length] [Data...] [RSSI] [LQI]
+    dmaConfig.radio.VLEN_LENH = 0b10000000;  // Variable length enabled
+    dmaConfig.radio.DC7 = 0x10;
+    
+    DMAARM |= (1<<DMA_CHANNEL_RADIO);
+    RFST = 2;  // Switch to RX mode
+}
+
+/*
+ * Initialize GPIO pins for RGB LED and motor control
+ */
+void gpioInit()
+{
+    failSafeBootloader();
+    
+    // Force ALL P1 pins to GPIO mode
+    P1SEL = 0x00;
+    P1DIR = 0x00;
+    P1 = 0x00;
+    
+    // Disable conflicting timers
+    T1CTL = 0x00;
+    T3CTL = 0x00;
+    T4CTL = 0x00;
+    
+    // Set RGB and motor pins as outputs
+    P1DIR |= (1 << LED_RED_PIN) | (1 << LED_GREEN_PIN) | (1 << LED_BLUE_PIN);
+    P1DIR |= (1 << R_DIR_PIN) | (1 << L_DIR_PIN);
+    
+    P1SEL = 0x00;
+    
+    // Initialize RGB LEDs to OFF (active-low)
+    P1_1 = 1;
+    P1_2 = 1;
+    P1_7 = 1;
+    
+    // Initialize motor to STOP
+    T3CC0 = 0;
+    T3CC1 = 0;
+    P1_5 = 0;
+    P1_6 = 0;
+}
+
+/* ================== LED CONTROL ================== */
+
+/*
+ * Update RGB LEDs based on current state (flashing pattern)
+ * Uses global 'now' variable to avoid recalculating getMs()
+ */
+void updateRgbLeds()
+{
+    uint16 timeInFlash = (uint16)(now - lastLedFlashTime) % LED_FLASH_PERIOD;
+    BIT shouldFlashOn = (timeInFlash < LED_FLASH_DUTY);
+    
+    uint8 flashRed = 0, flashGreen = 0, flashBlue = 0;
+    
+    switch(currentState)
+    {
+        case STATE_IDLE:
+            flashRed = shouldFlashOn ? 255 : 0;
+            break;
+            
+        case STATE_HOME:
+            flashBlue = shouldFlashOn ? 255 : 0;
+            break;
+            
+        case STATE_RUN:
+            flashGreen = shouldFlashOn ? 255 : 0;
+            break;
+    }
+    
+    // Apply purple mix if in PREP mode
+    if (currentState == STATE_IDLE && ledPurple)
+    {
+        flashRed = (shouldFlashOn && ledPurple) ? 255 : 0;
+        flashBlue = (shouldFlashOn && ledPurple) ? 255 : 0;
+    }
+    
+    // Output to pins (active-low)
+    P1_1 = (flashRed > 127) ? 0 : 1;
+    P1_2 = (flashGreen > 127) ? 0 : 1;
+    P1_7 = (flashBlue > 127) ? 0 : 1;
+}
+
+
+/* ================== MOTOR CONTROL ================== */
+
+/*
+ * Update motor (MVP: set to 0 for now)
+ */
+void updateMotor()
+{
+    // Motor control disabled for MVP
+    T3CC0 = 0;
+    T3CC1 = 0;
+    P1_5 = 0;
+    P1_6 = 0;
+}
+
+/* ================== PACKET RECEPTION AND PARSING ================== */
+
+/*
+ * Extract position data from packet
+ * Packet layout: [ADD] [X_high] [X_low] [Y_high] [Y_low] [Theta] [Cmd] [Data3..Data13] [Delimiter]
+ *                [0]   [1]      [2]     [3]      [4]     [5]     [6]   [7..13]        [15]
+ */
+void extractPositionData(uint8 offset)
+{
+    // offset points to ADD, so position starts at offset+1
+    posX = (int16)((rxPacket[offset + 1] << 8) | rxPacket[offset + 2]);
+    posY = (int16)((rxPacket[offset + 3] << 8) | rxPacket[offset + 4]);
+    posTheta = (int8)rxPacket[offset + 5];
+}
+
+/*
+ * Extract command from packet
+ */
+uint8 extractCommand(uint8 offset)
+{
+    // Command is at offset+6 (after ADD + 5 position bytes)
+    return rxPacket[offset + 6];
+}
+
+/*
+ * Process CMD_STOP command
+ */
+void handleCmdStop()
+{
+    currentState = STATE_IDLE;
+    ledPurple = 0;
+    waypointCount = 0;
+    currentWaypointIndex = 0;
+}
+
+
+/*
+ * Process CMD_GO_TO command
+ * Packet: [ADD] [X] [Y] [Theta] [Cmd=GO_TO] [Target_X_high] [Target_X_low] [Target_Y_high] [Target_Y_low] [Data7..Data13] [Delim]
+ *         [0]   [1][2] [3]     [4]         [5]              [6]            [7]             [8]             [9..14]       [15]
+ */
+void handleCmdGoTo(uint8 offset)
+{
+    targetX = (int16)((rxPacket[offset + 7] << 8) | rxPacket[offset + 8]);
+    targetY = (int16)((rxPacket[offset + 9] << 8) | rxPacket[offset + 10]);
+    
+    currentState = STATE_HOME;
+    ledPurple = 0;
+    waypointCount = 0;
+    currentWaypointIndex = 0;
+    stateStartTime = (uint16)getMs();
+}
+
+/*
+ * Process CMD_PREP command
+ * Packet: [ADD] [X] [Y] [Theta] [Cmd=PREP] [WP1_Order] [WP1_X_high] [WP1_X_low] [WP1_Y_high] [WP1_Y_low] [WP2_Order] ... [Data13] [Delim]
+ *         [0]   [1][2] [3]     [4]        [5]         [6]          [7]        [8]         [9]         [10]       ...  [14]     [15]
+ * Can send up to 2 waypoints per packet (5 bytes each)
+ */
+void handleCmdPrep(uint8 offset)
+{
+    uint8 i;
+    
+    // If not in PREP mode, clear buffer and enter PREP
+    if (!ledPurple)
+    {
+        waypointCount = 0;
+        ledPurple = 1;  // Enter PREP mode (purple LED)
+    }
+    
+    // Parse up to 2 waypoints from this packet (since we have limited space)
+    for (i = 0; i < 2 && waypointCount < MAX_WAYPOINTS; i++)
+    {
+        uint8 dataOffset = offset + 5 + (i * 5);  // Start at offset+5 (after cmd)
+        
+        waypoints[waypointCount].order = rxPacket[dataOffset + 0];
+        waypoints[waypointCount].x = (int16)((rxPacket[dataOffset + 1] << 8) | rxPacket[dataOffset + 2]);
+        waypoints[waypointCount].y = (int16)((rxPacket[dataOffset + 3] << 8) | rxPacket[dataOffset + 4]);
+        
+        waypointCount++;
+    }
+    
+    // Extract obstacle avoidance flag from Data13 (offset+14)
+    obstacleAvoidanceEnabled = (rxPacket[offset + 14] & 0x01) ? 1 : 0;
+}
+/*
+ * Process CMD_RUN command
+ */
+void handleCmdRun()
+{
+    // Only transition to RUN if enough waypoints collected
+    if (waypointCount >= MAX_WAYPOINTS)
+    {
+        currentState = STATE_RUN;
+        ledPurple = 0;
+        currentWaypointIndex = 0;
+        stateStartTime = (uint16)getMs();
+    }
+    // Otherwise stay in IDLE and ignore CMD_RUN
+}
+
+/*
+ * Process CMD_AUX command (NEW)
+ * Auxiliary command: updates position but does NOT change state
+ * Can contain optional backdoor data in Data3:
+ *   Data3 = 0: Normal position update (no action)
+ *   Data3 = 5: Backdoor forward test (placeholder for motor control)
+ */
+void handleCmdAux(uint8 offset)
+{
+    uint8 auxData3 = rxPacket[offset + 3];
+    
+    // In MVP, just ignore the command and keep current state
+    // In future: implement backdoor motor control here if needed
+    // e.g., if (auxData3 == 5) { activate forward motor movement for 3 seconds }
+    
+    // For now, do nothing - state machine unchanged
+    // Position is already updated in receiveAndProcessPackets()
+}
+
+
+/* ================== PACKET RECEPTION WITH LOGGING ================== */
+
+void receiveAndProcessPackets()
+{
+    if (RFIF & (1<<4))  // RX packet received
+    {
+        if (radioCrcPassed())
+        {
+            uint8 slaveAddress;
+            uint8 cmd;
+            uint8 packetOffset;
+            uint8 packetLength;
+            
+            // Get packet length from first byte
+            packetLength = rxPacket[0];
+            
+            // Flag that we received a packet (for RED LED pulse in main loop)
+            // DO NOT delay here - let main loop handle LED timing!
+            lastPacketTime = (uint16)getMs();
+            
+            // Validate packet length
+            if (packetLength < 16)
+            {
+                RFIF &= ~(1<<4);
+                DMAARM |= (1<<DMA_CHANNEL_RADIO);
+                RFST = 2;
+                return;
+            }
+            
+            // Determine slave offset based on THIS_SLAVE_ADDRESS
+            if (THIS_SLAVE_ADDRESS == 0x01)
+            {
+                packetOffset = 1;
+            }
+            else if (THIS_SLAVE_ADDRESS == 0x02)
+            {
+                packetOffset = 17;
+            }
+            else if (THIS_SLAVE_ADDRESS == 0x03)
+            {
+                packetOffset = 33;
+            }
+            else if (THIS_SLAVE_ADDRESS == 0x04)
+            {
+                packetOffset = 49;
+            }
+            else
+            {
+                RFIF &= ~(1<<4);
+                DMAARM |= (1<<DMA_CHANNEL_RADIO);
+                RFST = 2;
+                return;
+            }
+            
+            // Check if this packet contains data for this slave
+            if (packetLength < packetOffset + 16)
+            {
+                RFIF &= ~(1<<4);
+                DMAARM |= (1<<DMA_CHANNEL_RADIO);
+                RFST = 2;
+                return;
+            }
+            
+            slaveAddress = rxPacket[packetOffset];
+            cmd = rxPacket[packetOffset + 6];
+            
+            // Check if slave address matches
+            if (slaveAddress != THIS_SLAVE_ADDRESS)
+            {
+                // Not for us
+                RFIF &= ~(1<<4);
+                DMAARM |= (1<<DMA_CHANNEL_RADIO);
+                RFST = 2;
+                return;
+            }
+            
+            // Extract position data
+            extractPositionData(packetOffset);
+            filterPosition();
+            
+            // Process command
+            switch(cmd)
+            {
+                case CMD_STOP:
+                    handleCmdStop();
+                    break;
+                    
+                case CMD_GO_TO:
+                    handleCmdGoTo(packetOffset);
+                    break;
+                    
+                case CMD_PREP:
+                    handleCmdPrep(packetOffset);
+                    break;
+                    
+                case CMD_RUN:
+                    handleCmdRun();
+                    break;
+                
+                case CMD_AUX:
+                    handleCmdAux(packetOffset);
+                    break;
+            }
+        }
+        
+        RFIF &= ~(1<<4);
+        DMAARM |= (1<<DMA_CHANNEL_RADIO);
+        RFST = 2;
+    }
+}
+
+
+/*
+ * Timeout handler: return to IDLE if no packet received
+ */
+void handlePacketTimeout()
+{
+    if ((uint16)(getMs() - lastPacketTime) > CONNECTION_TIMEOUT)
+    {
+        if (currentState != STATE_IDLE)
+        {
+            currentState = STATE_IDLE;
+            ledPurple = 0;
+            waypointCount = 0;
+        }
+    }
+}
+
+/* ================== PATH/GOAL CONTROL (PLACEHOLDER) ================== */
+
+/*
+ * Update HOME state (go-to operation with timeout)
+ * In MVP: just timeout after GO_TO_TIMEOUT
+ */
+
+void updateHomeState()
+{
+    uint32 now = getMs();  // Use uint32 to avoid wraparound
+    uint32 elapsedTime = now - (uint32)stateStartTime;
+    
+    // Timeout after 5 seconds
+    if (elapsedTime >= GO_TO_TIMEOUT)
+    {
+        currentState = STATE_IDLE;
+        ledPurple = 0;
+    }
+    // TODO: Replace with actual goal-reaching logic (distance threshold + obstacle avoidance)
+}
+
+/*
+ * Update RUN state (path following with timeout)
+ * In MVP: just timeout after PATH_FOLLOW_TIMEOUT
+ */
+void updateRunState()
+{
+    uint32 now = getMs();  // Use uint32 to avoid wraparound
+    uint32 elapsedTime = now - (uint32)stateStartTime;
+    
+    // Timeout after 10 seconds
+    if (elapsedTime >= PATH_FOLLOW_TIMEOUT)
+    {
+        currentState = STATE_IDLE;
+        ledPurple = 0;
+        waypointCount = 0;
+    }
+    // TODO: Replace with actual APF-based path following logic
+}
+
+/*
+ * Update state machine transitions
+ */
+void updateStateMachine()
+{
+    switch(currentState)
+    {
+        case STATE_IDLE:
+            // Nothing to do in IDLE
+            break;
+            
+        case STATE_HOME:
+            updateHomeState();
+            break;
+            
+        case STATE_RUN:
+            updateRunState();
+            break;
+    }
+}
+
+/* ================== MAIN FUNCTION ================== */
+
+void main()
+{
+    systemInit();
+    radioInit();
+    gpioInit();
+    timer3Init();
+    
+    lastPacketTime = (uint16)getMs();
+    lastLedFlashTime = (uint16)getMs();
+    
+    // === RGB LED Test Sequence ===
+    P1_1 = 0;  // Red on
+    delayMs(300);
+    
+    P1_2 = 0;  // Green on
+    P1_1 = 1;
+    delayMs(300);
+    
+    P1_7 = 0;  // Blue on
+    P1_2 = 1;
+    delayMs(300);
+    
+    P1_1 = 1;  // All off
+    P1_2 = 1;
+    P1_7 = 1;
+    delayMs(300);
+    
+    lastPacketTime = (uint16)getMs();
+    lastLedFlashTime = (uint16)getMs();
+    lastHeartbeatTime = (uint32)getMs();
+    
+    currentState = STATE_IDLE;
+    
+    // === Main Loop - NO BLOCKING DELAYS ===
+    while(1)
+    {
+        boardService();
+        
+        // Get current time ONCE per loop
+        now = (uint32)getMs();
+        
+        // Heartbeat: Toggle on-board YELLOW LED every 500ms
+        if ((uint32)(now - lastHeartbeatTime) >= 500)
+        {
+            LED_YELLOW_TOGGLE();
+            lastHeartbeatTime = now;
+        }
+        
+        // Process packets (NON-BLOCKING - no delayMs inside!)
+        receiveAndProcessPackets();
+        
+        // Pulse RED LED when packet received (100ms pulse)
+        if (lastPacketTime != lastPacketTimeCheck)
+        {
+            rxPulseActive = 1;
+            rxPulseStart = now;
+            lastPacketTimeCheck = lastPacketTime;
+        }
+        
+        if (rxPulseActive)
+        {
+            if ((uint32)(now - rxPulseStart) < 100)
+            {
+                LED_RED(1);
+            }
+            else
+            {
+                LED_RED(0);
+                rxPulseActive = 0;
+            }
+        }
+        
+        // State machine updates (all non-blocking)
+        handlePacketTimeout();
+        updateStateMachine();
+        updateRgbLeds();
+        updateMotor();
+        
+        // Continue loop - no blocking!
+    }
+}

@@ -1,0 +1,20 @@
+#install wiringPi library
+
+
+# Check the pin status of Raspberry Pi4
+gpio readall
+
+
+# Run cmake
+mkdir build && cd build
+cmake ..
+make
+
+
+# Add the permission
+chmod +x filename
+
+
+
+# Run the files
+./filenames

@@ -1,0 +1,54 @@
+# DotConnect Multi-Robot System Demo - Dependencies
+
+## Python Version
+Python 3.8 or higher
+
+## Required Packages
+1. PyQt5 (>=5.15.0)
+   - GUI framework for the application
+   - Includes QtWidgets, QtCore, QtGui, QtMultimedia
+
+2. numpy (>=1.19.0)
+   - Used for numerical operations in random solution generation
+
+
+## Additional Files Required
+- BGM folder with audio files (.mp3, .wav, .ogg, .flac)
+- temp.jpg (rickroll image for manual highscore entries)
+
+## Installation
+See requirements.txt for pip installation
+or just: pip install -r requirements.txt
+then run the code: python OpenDay_MRS.py
+
+## Project Structure
+Current_Folder/
+├── OpenDay_MRS.py          # Main application
+├── requirements.txt        # Python dependencies
+├── dependencies.txt        # This file - Detailed dependency info
+├── BGM/                   # Background music folder
+│   └── *.mp3, *.wav, etc.
+├── temp.jpg               # Rickroll image
+└── dotconnect_data/       # Auto-created on first run
+    ├── highscores.json
+    ├── custom_levels.json
+    ├── settings.json
+    ├── solution_cache.json
+    └── solutions/
+
+
+## Additional Setup
+
+1. Create BGM folder (if not exists):
+   mkdir BGM
+
+2. Add your music files to BGM folder:
+   - Supported formats: .mp3, .wav, .ogg, .flac
+   - Files will shuffle randomly on startup
+
+3. Add rickroll image:
+   - Place temp.jpg in the main directory
+   - Used for manual highscore entries
+
+## Running the Application
+python OpenDay_MRS.py

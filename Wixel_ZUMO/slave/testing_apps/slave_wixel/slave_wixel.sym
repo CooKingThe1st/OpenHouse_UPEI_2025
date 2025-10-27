@@ -1,0 +1,1697 @@
+ASxxxx Assembler V02.00 + NoICE + SDCC mods + Flat24  (Intel 8051), page 1.
+
+Symbol Table
+
+    .__.ABS.                                                    =  0000 G
+    A                                                              00E0 
+ 18 A$slave_wixel$1001                                             006F GR
+ 18 A$slave_wixel$1002                                             0072 GR
+ 18 A$slave_wixel$1003                                             0074 GR
+ 18 A$slave_wixel$1006                                             0075 GR
+ 18 A$slave_wixel$1007                                             0078 GR
+ 18 A$slave_wixel$1008                                             007A GR
+ 18 A$slave_wixel$1011                                             007B GR
+ 18 A$slave_wixel$1014                                             007E GR
+ 18 A$slave_wixel$1017                                             0081 GR
+ 18 A$slave_wixel$1030                                             0082 GR
+ 18 A$slave_wixel$1031                                             0084 GR
+ 18 A$slave_wixel$1032                                             0087 GR
+ 18 A$slave_wixel$1035                                             0089 GR
+ 18 A$slave_wixel$1038                                             008C GR
+ 18 A$slave_wixel$1039                                             008F GR
+ 18 A$slave_wixel$1042                                             0092 GR
+ 18 A$slave_wixel$1043                                             0094 GR
+ 18 A$slave_wixel$1044                                             0095 GR
+ 18 A$slave_wixel$1046                                             0096 GR
+ 18 A$slave_wixel$1047                                             0098 GR
+ 18 A$slave_wixel$1048                                             0099 GR
+ 18 A$slave_wixel$1050                                             009C GR
+ 18 A$slave_wixel$1053                                             009E GR
+ 18 A$slave_wixel$1056                                             00A1 GR
+ 18 A$slave_wixel$1059                                             00A4 GR
+ 18 A$slave_wixel$1062                                             00A7 GR
+ 18 A$slave_wixel$1063                                             00AA GR
+ 18 A$slave_wixel$1066                                             00AD GR
+ 18 A$slave_wixel$1067                                             00AF GR
+ 18 A$slave_wixel$1068                                             00B0 GR
+ 18 A$slave_wixel$1069                                             00B2 GR
+ 18 A$slave_wixel$1070                                             00B3 GR
+ 18 A$slave_wixel$1074                                             00B5 GR
+ 18 A$slave_wixel$1075                                             00B7 GR
+ 18 A$slave_wixel$1076                                             00BA GR
+ 18 A$slave_wixel$1079                                             00BC GR
+ 18 A$slave_wixel$1092                                             00BD GR
+ 18 A$slave_wixel$1095                                             00C0 GR
+ 18 A$slave_wixel$1098                                             00C3 GR
+ 18 A$slave_wixel$1101                                             00C6 GR
+ 18 A$slave_wixel$1104                                             00C9 GR
+ 18 A$slave_wixel$1107                                             00CC GR
+ 18 A$slave_wixel$1110                                             00CF GR
+ 18 A$slave_wixel$1113                                             00D2 GR
+ 18 A$slave_wixel$1116                                             00D5 GR
+ 18 A$slave_wixel$1119                                             00D8 GR
+ 18 A$slave_wixel$1122                                             00DB GR
+ 18 A$slave_wixel$1125                                             00DD GR
+ 18 A$slave_wixel$1128                                             00DF GR
+ 18 A$slave_wixel$1131                                             00E1 GR
+ 18 A$slave_wixel$1134                                             00E4 GR
+ 18 A$slave_wixel$1137                                             00E7 GR
+ 18 A$slave_wixel$1140                                             00E9 GR
+ 18 A$slave_wixel$1143                                             00EB GR
+ 18 A$slave_wixel$1156                                             00EC GR
+ 18 A$slave_wixel$1157                                             00EE GR
+ 18 A$slave_wixel$1158                                             00EF GR
+ 18 A$slave_wixel$1159                                             00F0 GR
+ 18 A$slave_wixel$1160                                             00F2 GR
+ 18 A$slave_wixel$1161                                             00F4 GR
+ 18 A$slave_wixel$1162                                             00F6 GR
+ 18 A$slave_wixel$1163                                             00F7 GR
+ 18 A$slave_wixel$1164                                             00F9 GR
+ 18 A$slave_wixel$1167                                             00FB GR
+ 18 A$slave_wixel$1168                                             00FD GR
+ 18 A$slave_wixel$1169                                             00FE GR
+ 18 A$slave_wixel$1170                                             00FF GR
+ 18 A$slave_wixel$1171                                             0101 GR
+ 18 A$slave_wixel$1172                                             0103 GR
+ 18 A$slave_wixel$1173                                             0105 GR
+ 18 A$slave_wixel$1174                                             0106 GR
+ 18 A$slave_wixel$1175                                             0108 GR
+ 18 A$slave_wixel$1178                                             010A GR
+ 18 A$slave_wixel$1179                                             010C GR
+ 18 A$slave_wixel$1180                                             010D GR
+ 18 A$slave_wixel$1181                                             010E GR
+ 18 A$slave_wixel$1182                                             0110 GR
+ 18 A$slave_wixel$1183                                             0112 GR
+ 18 A$slave_wixel$1184                                             0114 GR
+ 18 A$slave_wixel$1185                                             0115 GR
+ 18 A$slave_wixel$1186                                             0117 GR
+ 18 A$slave_wixel$1189                                             0119 GR
+ 18 A$slave_wixel$1202                                             011A GR
+ 18 A$slave_wixel$1203                                             011C GR
+ 18 A$slave_wixel$1204                                             011D GR
+ 18 A$slave_wixel$1205                                             011E GR
+ 18 A$slave_wixel$1206                                             0120 GR
+ 18 A$slave_wixel$1207                                             0122 GR
+ 18 A$slave_wixel$1208                                             0124 GR
+ 18 A$slave_wixel$1209                                             0126 GR
+ 18 A$slave_wixel$1212                                             0128 GR
+ 18 A$slave_wixel$1213                                             012A GR
+ 18 A$slave_wixel$1214                                             012B GR
+ 18 A$slave_wixel$1215                                             012C GR
+ 18 A$slave_wixel$1216                                             012E GR
+ 18 A$slave_wixel$1217                                             0130 GR
+ 18 A$slave_wixel$1218                                             0132 GR
+ 18 A$slave_wixel$1219                                             0134 GR
+ 18 A$slave_wixel$1222                                             0136 GR
+ 18 A$slave_wixel$1223                                             0138 GR
+ 18 A$slave_wixel$1224                                             0139 GR
+ 18 A$slave_wixel$1225                                             013A GR
+ 18 A$slave_wixel$1226                                             013C GR
+ 18 A$slave_wixel$1227                                             013E GR
+ 18 A$slave_wixel$1228                                             0140 GR
+ 18 A$slave_wixel$1229                                             0142 GR
+ 18 A$slave_wixel$1232                                             0144 GR
+ 18 A$slave_wixel$1233                                             0147 GR
+ 18 A$slave_wixel$1237                                             014A GR
+ 18 A$slave_wixel$1240                                             014C GR
+ 18 A$slave_wixel$1243                                             014E GR
+ 18 A$slave_wixel$1246                                             0151 GR
+ 18 A$slave_wixel$1247                                             0154 GR
+ 18 A$slave_wixel$1251                                             0156 GR
+ 18 A$slave_wixel$1254                                             0159 GR
+ 18 A$slave_wixel$1257                                             015B GR
+ 18 A$slave_wixel$1260                                             015D GR
+ 18 A$slave_wixel$1263                                             0160 GR
+ 18 A$slave_wixel$1264                                             0163 GR
+ 18 A$slave_wixel$1268                                             0165 GR
+ 18 A$slave_wixel$1271                                             0168 GR
+ 18 A$slave_wixel$1274                                             016B GR
+ 18 A$slave_wixel$1277                                             016D GR
+ 18 A$slave_wixel$1281                                             016F GR
+ 18 A$slave_wixel$1294                                             0170 GR
+ 18 A$slave_wixel$1295                                             0173 GR
+ 18 A$slave_wixel$1296                                             0175 GR
+ 18 A$slave_wixel$1299                                             0177 GR
+ 18 A$slave_wixel$1300                                             0179 GR
+ 18 A$slave_wixel$1301                                             017A GR
+ 18 A$slave_wixel$1302                                             017B GR
+ 18 A$slave_wixel$1303                                             017C GR
+ 18 A$slave_wixel$1304                                             017D GR
+ 18 A$slave_wixel$1305                                             017E GR
+ 18 A$slave_wixel$1306                                             017F GR
+ 18 A$slave_wixel$1307                                             0180 GR
+ 18 A$slave_wixel$1308                                             0181 GR
+ 18 A$slave_wixel$1309                                             0182 GR
+ 18 A$slave_wixel$1310                                             0183 GR
+ 18 A$slave_wixel$1311                                             0184 GR
+ 18 A$slave_wixel$1312                                             0185 GR
+ 18 A$slave_wixel$1313                                             0186 GR
+ 18 A$slave_wixel$1314                                             0187 GR
+ 18 A$slave_wixel$1315                                             0189 GR
+ 18 A$slave_wixel$1316                                             018A GR
+ 18 A$slave_wixel$1317                                             018C GR
+ 18 A$slave_wixel$1320                                             018E GR
+ 18 A$slave_wixel$1321                                             0190 GR
+ 18 A$slave_wixel$1324                                             0192 GR
+ 18 A$slave_wixel$1325                                             0195 GR
+ 18 A$slave_wixel$1329                                             0197 GR
+ 18 A$slave_wixel$1330                                             0199 GR
+ 18 A$slave_wixel$1331                                             019C GR
+ 18 A$slave_wixel$1335                                             019E GR
+ 18 A$slave_wixel$1338                                             01A1 GR
+ 18 A$slave_wixel$1339                                             01A3 GR
+ 18 A$slave_wixel$1340                                             01A4 GR
+ 18 A$slave_wixel$1341                                             01A5 GR
+ 18 A$slave_wixel$1342                                             01A6 GR
+ 18 A$slave_wixel$1343                                             01A7 GR
+ 18 A$slave_wixel$1344                                             01A8 GR
+ 18 A$slave_wixel$1345                                             01A9 GR
+ 18 A$slave_wixel$1346                                             01AA GR
+ 18 A$slave_wixel$1347                                             01AB GR
+ 18 A$slave_wixel$1348                                             01AC GR
+ 18 A$slave_wixel$1349                                             01AD GR
+ 18 A$slave_wixel$1350                                             01AE GR
+ 18 A$slave_wixel$1351                                             01AF GR
+ 18 A$slave_wixel$1352                                             01B0 GR
+ 18 A$slave_wixel$1353                                             01B1 GR
+ 18 A$slave_wixel$1354                                             01B3 GR
+ 18 A$slave_wixel$1355                                             01B4 GR
+ 18 A$slave_wixel$1356                                             01B6 GR
+ 18 A$slave_wixel$1359                                             01B8 GR
+ 18 A$slave_wixel$1360                                             01BB GR
+ 18 A$slave_wixel$1364                                             01BD GR
+ 18 A$slave_wixel$1365                                             01BF GR
+ 18 A$slave_wixel$1366                                             01C2 GR
+ 18 A$slave_wixel$1369                                             01C4 GR
+ 18 A$slave_wixel$1370                                             01C6 GR
+ 18 A$slave_wixel$1374                                             01C8 GR
+ 18 A$slave_wixel$1375                                             01CA GR
+ 18 A$slave_wixel$1376                                             01CD GR
+ 18 A$slave_wixel$1380                                             01CF GR
+ 18 A$slave_wixel$1393                                             01D0 GR
+ 18 A$slave_wixel$1394                                             01D2 GR
+ 18 A$slave_wixel$1397                                             01D5 GR
+ 18 A$slave_wixel$1398                                             01D8 GR
+ 18 A$slave_wixel$1401                                             01DA GR
+ 18 A$slave_wixel$1402                                             01DD GR
+ 18 A$slave_wixel$1403                                             01DE GR
+ 18 A$slave_wixel$1406                                             01DF GR
+ 18 A$slave_wixel$1407                                             01E2 GR
+ 18 A$slave_wixel$1408                                             01E3 GR
+ 18 A$slave_wixel$1411                                             01E4 GR
+ 18 A$slave_wixel$1412                                             01E7 GR
+ 18 A$slave_wixel$1413                                             01E8 GR
+ 18 A$slave_wixel$1416                                             01E9 GR
+ 18 A$slave_wixel$1417                                             01EC GR
+ 18 A$slave_wixel$1418                                             01ED GR
+ 18 A$slave_wixel$1421                                             01EE GR
+ 18 A$slave_wixel$1422                                             01F1 GR
+ 18 A$slave_wixel$1423                                             01F2 GR
+ 18 A$slave_wixel$1426                                             01F3 GR
+ 18 A$slave_wixel$1427                                             01F6 GR
+ 18 A$slave_wixel$1430                                             01F9 GR
+ 18 A$slave_wixel$1431                                             01FB GR
+ 18 A$slave_wixel$1432                                             01FC GR
+ 18 A$slave_wixel$1435                                             01FD GR
+ 18 A$slave_wixel$1436                                             01FF GR
+ 18 A$slave_wixel$1437                                             0200 GR
+ 18 A$slave_wixel$1440                                             0201 GR
+ 18 A$slave_wixel$1441                                             0203 GR
+ 18 A$slave_wixel$1442                                             0204 GR
+ 18 A$slave_wixel$1445                                             0205 GR
+ 18 A$slave_wixel$1446                                             0208 GR
+ 18 A$slave_wixel$1447                                             020A GR
+ 18 A$slave_wixel$1448                                             020C GR
+ 18 A$slave_wixel$1449                                             020E GR
+ 18 A$slave_wixel$1450                                             020F GR
+ 18 A$slave_wixel$1451                                             0210 GR
+ 18 A$slave_wixel$1452                                             0211 GR
+ 18 A$slave_wixel$1453                                             0212 GR
+ 18 A$slave_wixel$1456                                             0213 GR
+ 18 A$slave_wixel$1459                                             0215 GR
+ 18 A$slave_wixel$1460                                             0218 GR
+ 18 A$slave_wixel$1461                                             021A GR
+ 18 A$slave_wixel$1462                                             021C GR
+ 18 A$slave_wixel$1463                                             021E GR
+ 18 A$slave_wixel$1464                                             021F GR
+ 18 A$slave_wixel$1465                                             0221 GR
+ 18 A$slave_wixel$1466                                             0222 GR
+ 18 A$slave_wixel$1467                                             0223 GR
+ 18 A$slave_wixel$1468                                             0224 GR
+ 18 A$slave_wixel$1469                                             0225 GR
+ 18 A$slave_wixel$1473                                             0226 GR
+ 18 A$slave_wixel$1474                                             0228 GR
+ 18 A$slave_wixel$1475                                             022B GR
+ 18 A$slave_wixel$1478                                             022D GR
+ 18 A$slave_wixel$1481                                             0230 GR
+ 18 A$slave_wixel$1485                                             0233 GR
+ 18 A$slave_wixel$1500                                             0234 GR
+ 18 A$slave_wixel$1501                                             0237 GR
+ 18 A$slave_wixel$1502                                             023A GR
+ 18 A$slave_wixel$1503                                             023D GR
+ 18 A$slave_wixel$1504                                             0240 GR
+ 18 A$slave_wixel$1505                                             0242 GR
+ 18 A$slave_wixel$1506                                             0244 GR
+ 18 A$slave_wixel$1507                                             0245 GR
+ 18 A$slave_wixel$1508                                             0246 GR
+ 18 A$slave_wixel$1509                                             0247 GR
+ 18 A$slave_wixel$1510                                             0248 GR
+ 18 A$slave_wixel$1511                                             0249 GR
+ 18 A$slave_wixel$1512                                             024A GR
+ 18 A$slave_wixel$1513                                             024B GR
+ 18 A$slave_wixel$1514                                             024C GR
+ 18 A$slave_wixel$1515                                             024E GR
+ 18 A$slave_wixel$1516                                             024F GR
+ 18 A$slave_wixel$1517                                             0250 GR
+ 18 A$slave_wixel$1518                                             0251 GR
+ 18 A$slave_wixel$1519                                             0253 GR
+ 18 A$slave_wixel$1520                                             0254 GR
+ 18 A$slave_wixel$1521                                             0255 GR
+ 18 A$slave_wixel$1522                                             0257 GR
+ 18 A$slave_wixel$1523                                             0258 GR
+ 18 A$slave_wixel$1524                                             0259 GR
+ 18 A$slave_wixel$1525                                             025B GR
+ 18 A$slave_wixel$1526                                             025C GR
+ 18 A$slave_wixel$1527                                             025D GR
+ 18 A$slave_wixel$1528                                             025E GR
+ 18 A$slave_wixel$1529                                             0260 GR
+ 18 A$slave_wixel$1530                                             0261 GR
+ 18 A$slave_wixel$1531                                             0263 GR
+ 18 A$slave_wixel$1532                                             0264 GR
+ 18 A$slave_wixel$1535                                             0266 GR
+ 18 A$slave_wixel$1536                                             0268 GR
+ 18 A$slave_wixel$1537                                             0269 GR
+ 18 A$slave_wixel$1540                                             026A GR
+ 18 A$slave_wixel$1541                                             026C GR
+ 18 A$slave_wixel$1542                                             026D GR
+ 18 A$slave_wixel$1545                                             026E GR
+ 18 A$slave_wixel$1546                                             0270 GR
+ 18 A$slave_wixel$1547                                             0271 GR
+ 18 A$slave_wixel$1551                                             0272 GR
+ 18 A$slave_wixel$1564                                             0273 GR
+ 18 A$slave_wixel$1567                                             0276 GR
+ 18 A$slave_wixel$1570                                             0279 GR
+ 18 A$slave_wixel$1573                                             027C GR
+ 18 A$slave_wixel$1574                                             027F GR
+ 18 A$slave_wixel$1575                                             0281 GR
+ 18 A$slave_wixel$1576                                             0283 GR
+ 18 A$slave_wixel$1577                                             0285 GR
+ 18 A$slave_wixel$1578                                             0286 GR
+ 18 A$slave_wixel$1579                                             0287 GR
+ 18 A$slave_wixel$1580                                             0288 GR
+ 18 A$slave_wixel$1581                                             0289 GR
+ 18 A$slave_wixel$1584                                             028A GR
+ 18 A$slave_wixel$1587                                             028C GR
+ 18 A$slave_wixel$1590                                             028E GR
+ 18 A$slave_wixel$1593                                             0290 GR
+ 18 A$slave_wixel$1594                                             0293 GR
+ 18 A$slave_wixel$1597                                             0296 GR
+ 18 A$slave_wixel$1600                                             0298 GR
+ 18 A$slave_wixel$1603                                             029A GR
+ 18 A$slave_wixel$1606                                             029C GR
+ 18 A$slave_wixel$1607                                             029F GR
+ 18 A$slave_wixel$1610                                             02A2 GR
+ 18 A$slave_wixel$1613                                             02A4 GR
+ 18 A$slave_wixel$1616                                             02A6 GR
+ 18 A$slave_wixel$1619                                             02A8 GR
+ 18 A$slave_wixel$1620                                             02AB GR
+ 18 A$slave_wixel$1623                                             02AE GR
+ 18 A$slave_wixel$1626                                             02B0 GR
+ 18 A$slave_wixel$1629                                             02B2 GR
+ 18 A$slave_wixel$1632                                             02B4 GR
+ 18 A$slave_wixel$1633                                             02B7 GR
+ 18 A$slave_wixel$1636                                             02BA GR
+ 18 A$slave_wixel$1639                                             02BC GR
+ 18 A$slave_wixel$1642                                             02BE GR
+ 18 A$slave_wixel$1645                                             02C0 GR
+ 18 A$slave_wixel$1646                                             02C3 GR
+ 18 A$slave_wixel$1649                                             02C6 GR
+ 18 A$slave_wixel$1650                                             02C9 GR
+ 18 A$slave_wixel$1651                                             02CB GR
+ 18 A$slave_wixel$1652                                             02CD GR
+ 18 A$slave_wixel$1653                                             02CF GR
+ 18 A$slave_wixel$1654                                             02D0 GR
+ 18 A$slave_wixel$1655                                             02D1 GR
+ 18 A$slave_wixel$1656                                             02D2 GR
+ 18 A$slave_wixel$1657                                             02D3 GR
+ 18 A$slave_wixel$1660                                             02D4 GR
+ 18 A$slave_wixel$1666                                             02D7 GR
+ 18 A$slave_wixel$1669                                             02DA GR
+ 18 A$slave_wixel$1672                                             02DD GR
+ 18 A$slave_wixel$1675                                             02E0 GR
+ 18 A$slave_wixel$1678                                             02E3 GR
+ 18 A$slave_wixel$1681                                             02E6 GR
+ 18 A$slave_wixel$1682                                             02E9 GR
+ 18 A$slave_wixel$1685                                             02EB GR
+  F A$slave_wixel$787                                              0000 GR
+  F A$slave_wixel$788                                              0003 GR
+  F A$slave_wixel$790                                              000B GR
+  F A$slave_wixel$792                                              0013 GR
+  F A$slave_wixel$794                                              001B GR
+  F A$slave_wixel$796                                              0023 GR
+  F A$slave_wixel$798                                              002B GR
+  F A$slave_wixel$800                                              0033 GR
+  F A$slave_wixel$802                                              003B GR
+  F A$slave_wixel$804                                              0043 GR
+  F A$slave_wixel$806                                              004B GR
+  F A$slave_wixel$808                                              0053 GR
+  F A$slave_wixel$810                                              005B GR
+  F A$slave_wixel$812                                              0063 GR
+ 16 A$slave_wixel$829                                              0000 GR
+ 16 A$slave_wixel$833                                              0002 GR
+ 16 A$slave_wixel$834                                              0004 GR
+ 16 A$slave_wixel$835                                              0005 GR
+ 16 A$slave_wixel$839                                              0006 GR
+ 16 A$slave_wixel$840                                              0008 GR
+ 16 A$slave_wixel$841                                              0009 GR
+ 16 A$slave_wixel$845                                              000A GR
+ 16 A$slave_wixel$846                                              000C GR
+ 16 A$slave_wixel$847                                              000D GR
+ 16 A$slave_wixel$851                                              000E GR
+ 16 A$slave_wixel$852                                              0010 GR
+ 16 A$slave_wixel$853                                              0011 GR
+ 16 A$slave_wixel$854                                              0012 GR
+ 16 A$slave_wixel$855                                              0013 GR
+ 16 A$slave_wixel$859                                              0014 GR
+ 16 A$slave_wixel$860                                              0016 GR
+ 16 A$slave_wixel$861                                              0017 GR
+ 16 A$slave_wixel$862                                              0018 GR
+ 16 A$slave_wixel$863                                              0019 GR
+ 17 A$slave_wixel$865                                              0000 GR
+  F A$slave_wixel$872                                              0066 GR
+  F A$slave_wixel$874                                              0069 GR
+ 18 A$slave_wixel$899                                              0000 GR
+ 18 A$slave_wixel$902                                              0003 GR
+ 18 A$slave_wixel$903                                              0006 GR
+ 18 A$slave_wixel$906                                              0009 GR
+ 18 A$slave_wixel$907                                              000C GR
+ 18 A$slave_wixel$910                                              000F GR
+ 18 A$slave_wixel$911                                              0011 GR
+ 18 A$slave_wixel$912                                              0014 GR
+ 18 A$slave_wixel$915                                              0016 GR
+ 18 A$slave_wixel$918                                              0019 GR
+ 18 A$slave_wixel$931                                              001A GR
+ 18 A$slave_wixel$934                                              001D GR
+ 18 A$slave_wixel$935                                              0020 GR
+ 18 A$slave_wixel$936                                              0022 GR
+ 18 A$slave_wixel$939                                              0023 GR
+ 18 A$slave_wixel$940                                              0026 GR
+ 18 A$slave_wixel$941                                              0028 GR
+ 18 A$slave_wixel$944                                              0029 GR
+ 18 A$slave_wixel$945                                              002C GR
+ 18 A$slave_wixel$946                                              002E GR
+ 18 A$slave_wixel$949                                              002F GR
+ 18 A$slave_wixel$950                                              0032 GR
+ 18 A$slave_wixel$951                                              0033 GR
+ 18 A$slave_wixel$954                                              0034 GR
+ 18 A$slave_wixel$955                                              0037 GR
+ 18 A$slave_wixel$956                                              0039 GR
+ 18 A$slave_wixel$959                                              003A GR
+ 18 A$slave_wixel$960                                              003C GR
+ 18 A$slave_wixel$961                                              003E GR
+ 18 A$slave_wixel$962                                              0040 GR
+ 18 A$slave_wixel$963                                              0041 GR
+ 18 A$slave_wixel$964                                              0042 GR
+ 18 A$slave_wixel$965                                              0045 GR
+ 18 A$slave_wixel$966                                              0046 GR
+ 18 A$slave_wixel$969                                              0047 GR
+ 18 A$slave_wixel$970                                              0049 GR
+ 18 A$slave_wixel$971                                              004C GR
+ 18 A$slave_wixel$972                                              004D GR
+ 18 A$slave_wixel$975                                              004E GR
+ 18 A$slave_wixel$976                                              0050 GR
+ 18 A$slave_wixel$977                                              0052 GR
+ 18 A$slave_wixel$978                                              0054 GR
+ 18 A$slave_wixel$979                                              0057 GR
+ 18 A$slave_wixel$980                                              0058 GR
+ 18 A$slave_wixel$983                                              0059 GR
+ 18 A$slave_wixel$984                                              005B GR
+ 18 A$slave_wixel$985                                              005D GR
+ 18 A$slave_wixel$986                                              0060 GR
+ 18 A$slave_wixel$987                                              0061 GR
+ 18 A$slave_wixel$990                                              0062 GR
+ 18 A$slave_wixel$991                                              0065 GR
+ 18 A$slave_wixel$992                                              0066 GR
+ 18 A$slave_wixel$993                                              0067 GR
+ 18 A$slave_wixel$994                                              0068 GR
+ 18 A$slave_wixel$995                                              0069 GR
+ 18 A$slave_wixel$996                                              006A GR
+ 18 A$slave_wixel$997                                              006D GR
+ 18 A$slave_wixel$998                                              006E GR
+    A.0                                                            00E0 
+    A.1                                                            00E1 
+    A.2                                                            00E2 
+    A.3                                                            00E3 
+    A.4                                                            00E4 
+    A.5                                                            00E5 
+    A.6                                                            00E6 
+    A.7                                                            00E7 
+    AC                                                             00D6 
+    ACC                                                            00E0 
+    ACC.0                                                          00E0 
+    ACC.1                                                          00E1 
+    ACC.2                                                          00E2 
+    ACC.3                                                          00E3 
+    ACC.4                                                          00E4 
+    ACC.5                                                          00E5 
+    ACC.6                                                          00E6 
+    ACC.7                                                          00E7 
+    B                                                              00F0 
+    B.0                                                            00F0 
+    B.1                                                            00F1 
+    B.2                                                            00F2 
+    B.3                                                            00F3 
+    B.4                                                            00F4 
+    B.5                                                            00F5 
+    B.6                                                            00F6 
+    B.7                                                            00F7 
+ 18 C$slave_wixel.c$100$1$1                                     =  0034 GR
+ 18 C$slave_wixel.c$102$1$1                                     =  003A GR
+ 18 C$slave_wixel.c$103$1$1                                     =  0047 GR
+ 18 C$slave_wixel.c$104$1$1                                     =  004E GR
+ 18 C$slave_wixel.c$105$1$1                                     =  0059 GR
+ 18 C$slave_wixel.c$106$1$1                                     =  0062 GR
+ 18 C$slave_wixel.c$107$1$1                                     =  006F GR
+ 18 C$slave_wixel.c$108$1$1                                     =  0075 GR
+ 18 C$slave_wixel.c$110$1$1                                     =  007B GR
+ 18 C$slave_wixel.c$111$1$1                                     =  007E GR
+ 18 C$slave_wixel.c$112$1$1                                     =  0081 GR
+ 18 C$slave_wixel.c$120$1$1                                     =  0082 GR
+ 18 C$slave_wixel.c$123$2$2                                     =  0082 GR
+ 18 C$slave_wixel.c$124$2$3                                     =  0089 GR
+ 18 C$slave_wixel.c$126$1$1                                     =  008C GR
+ 18 C$slave_wixel.c$129$1$1                                     =  00AD GR
+ 18 C$slave_wixel.c$130$3$5                                     =  009E GR
+ 18 C$slave_wixel.c$131$2$4                                     =  00A1 GR
+ 18 C$slave_wixel.c$132$2$4                                     =  00A4 GR
+ 18 C$slave_wixel.c$133$2$4                                     =  00A7 GR
+ 18 C$slave_wixel.c$137$2$6                                     =  00B5 GR
+ 18 C$slave_wixel.c$138$2$6                                     =  00BC GR
+ 18 C$slave_wixel.c$140$2$6                                     =  00BD GR
+ 18 C$slave_wixel.c$142$1$1                                     =  00BD GR
+ 18 C$slave_wixel.c$144$1$1                                     =  00C0 GR
+ 18 C$slave_wixel.c$145$1$1                                     =  00C3 GR
+ 18 C$slave_wixel.c$146$1$1                                     =  00C6 GR
+ 18 C$slave_wixel.c$149$1$1                                     =  00C9 GR
+ 18 C$slave_wixel.c$150$1$1                                     =  00CC GR
+ 18 C$slave_wixel.c$151$1$1                                     =  00CF GR
+ 18 C$slave_wixel.c$154$1$1                                     =  00D2 GR
+ 18 C$slave_wixel.c$155$1$1                                     =  00D5 GR
+ 18 C$slave_wixel.c$158$1$1                                     =  00D8 GR
+ 18 C$slave_wixel.c$161$1$1                                     =  00DB GR
+ 18 C$slave_wixel.c$162$1$1                                     =  00DD GR
+ 18 C$slave_wixel.c$163$1$1                                     =  00DF GR
+ 18 C$slave_wixel.c$166$1$1                                     =  00E1 GR
+ 18 C$slave_wixel.c$167$1$1                                     =  00E4 GR
+ 18 C$slave_wixel.c$168$1$1                                     =  00E7 GR
+ 18 C$slave_wixel.c$169$1$1                                     =  00E9 GR
+ 18 C$slave_wixel.c$170$1$1                                     =  00EB GR
+ 18 C$slave_wixel.c$175$1$1                                     =  00EC GR
+ 18 C$slave_wixel.c$177$1$1                                     =  00EC GR
+ 18 C$slave_wixel.c$178$1$1                                     =  00FB GR
+ 18 C$slave_wixel.c$179$1$1                                     =  010A GR
+ 18 C$slave_wixel.c$180$1$1                                     =  0119 GR
+ 18 C$slave_wixel.c$188$1$1                                     =  011A GR
+ 18 C$slave_wixel.c$190$1$1                                     =  011A GR
+ 18 C$slave_wixel.c$191$1$1                                     =  0128 GR
+ 18 C$slave_wixel.c$192$1$1                                     =  0136 GR
+ 18 C$slave_wixel.c$194$1$1                                     =  0144 GR
+ 18 C$slave_wixel.c$197$2$2                                     =  014A GR
+ 18 C$slave_wixel.c$198$2$2                                     =  014C GR
+ 18 C$slave_wixel.c$199$2$2                                     =  014E GR
+ 18 C$slave_wixel.c$200$2$2                                     =  0151 GR
+ 18 C$slave_wixel.c$202$1$1                                     =  0156 GR
+ 18 C$slave_wixel.c$205$2$3                                     =  0159 GR
+ 18 C$slave_wixel.c$206$2$3                                     =  015B GR
+ 18 C$slave_wixel.c$207$2$3                                     =  015D GR
+ 18 C$slave_wixel.c$208$2$3                                     =  0160 GR
+ 18 C$slave_wixel.c$213$2$4                                     =  0165 GR
+ 18 C$slave_wixel.c$214$2$4                                     =  0168 GR
+ 18 C$slave_wixel.c$215$2$4                                     =  016B GR
+ 18 C$slave_wixel.c$216$2$4                                     =  016D GR
+ 18 C$slave_wixel.c$218$1$1                                     =  016F GR
+ 18 C$slave_wixel.c$223$1$1                                     =  0170 GR
+ 18 C$slave_wixel.c$225$1$1                                     =  0170 GR
+ 18 C$slave_wixel.c$226$1$1                                     =  0177 GR
+ 18 C$slave_wixel.c$229$1$1                                     =  018E GR
+ 18 C$slave_wixel.c$231$3$3                                     =  0192 GR
+ 18 C$slave_wixel.c$235$3$5                                     =  0197 GR
+ 18 C$slave_wixel.c$239$1$1                                     =  019E GR
+ 18 C$slave_wixel.c$241$2$6                                     =  01A1 GR
+ 18 C$slave_wixel.c$243$4$8                                     =  01B8 GR
+ 18 C$slave_wixel.c$247$4$10                                    =  01BD GR
+ 18 C$slave_wixel.c$248$3$9                                     =  01C4 GR
+ 18 C$slave_wixel.c$253$3$12                                    =  01C8 GR
+ 18 C$slave_wixel.c$255$1$1                                     =  01CF GR
+ 18 C$slave_wixel.c$260$1$1                                     =  01D0 GR
+ 18 C$slave_wixel.c$262$1$1                                     =  01D0 GR
+ 18 C$slave_wixel.c$264$2$2                                     =  01D5 GR
+ 18 C$slave_wixel.c$274$4$4                                     =  01DA GR
+ 18 C$slave_wixel.c$275$4$4                                     =  01DF GR
+ 18 C$slave_wixel.c$276$4$4                                     =  01E4 GR
+ 18 C$slave_wixel.c$277$4$4                                     =  01E9 GR
+ 18 C$slave_wixel.c$278$4$4                                     =  01EE GR
+ 18 C$slave_wixel.c$289$3$3                                     =  01F3 GR
+ 18 C$slave_wixel.c$291$4$6                                     =  01F9 GR
+ 18 C$slave_wixel.c$292$4$6                                     =  01FD GR
+ 18 C$slave_wixel.c$293$4$6                                     =  0201 GR
+ 18 C$slave_wixel.c$294$4$6                                     =  0205 GR
+ 18 C$slave_wixel.c$296$4$6                                     =  0213 GR
+ 18 C$slave_wixel.c$297$4$6                                     =  0215 GR
+ 18 C$slave_wixel.c$301$2$2                                     =  0226 GR
+ 18 C$slave_wixel.c$302$2$2                                     =  022D GR
+ 18 C$slave_wixel.c$303$2$2                                     =  0230 GR
+ 18 C$slave_wixel.c$305$2$1                                     =  0233 GR
+ 18 C$slave_wixel.c$310$2$1                                     =  0234 GR
+ 18 C$slave_wixel.c$312$1$1                                     =  0234 GR
+ 18 C$slave_wixel.c$314$2$2                                     =  0266 GR
+ 18 C$slave_wixel.c$315$2$2                                     =  026A GR
+ 18 C$slave_wixel.c$316$2$2                                     =  026E GR
+ 18 C$slave_wixel.c$318$2$1                                     =  0272 GR
+ 18 C$slave_wixel.c$323$2$1                                     =  0273 GR
+ 18 C$slave_wixel.c$325$1$1                                     =  0273 GR
+ 18 C$slave_wixel.c$326$1$1                                     =  0276 GR
+ 18 C$slave_wixel.c$327$1$1                                     =  0279 GR
+ 18 C$slave_wixel.c$329$1$1                                     =  027C GR
+ 18 C$slave_wixel.c$332$1$1                                     =  028A GR
+ 18 C$slave_wixel.c$333$1$1                                     =  028C GR
+ 18 C$slave_wixel.c$334$1$1                                     =  028E GR
+ 18 C$slave_wixel.c$335$1$1                                     =  0290 GR
+ 18 C$slave_wixel.c$337$1$1                                     =  0296 GR
+ 18 C$slave_wixel.c$338$1$1                                     =  0298 GR
+ 18 C$slave_wixel.c$339$1$1                                     =  029A GR
+ 18 C$slave_wixel.c$340$1$1                                     =  029C GR
+ 18 C$slave_wixel.c$342$1$1                                     =  02A2 GR
+ 18 C$slave_wixel.c$343$1$1                                     =  02A4 GR
+ 18 C$slave_wixel.c$344$1$1                                     =  02A6 GR
+ 18 C$slave_wixel.c$345$1$1                                     =  02A8 GR
+ 18 C$slave_wixel.c$347$1$1                                     =  02AE GR
+ 18 C$slave_wixel.c$348$1$1                                     =  02B0 GR
+ 18 C$slave_wixel.c$349$1$1                                     =  02B2 GR
+ 18 C$slave_wixel.c$350$1$1                                     =  02B4 GR
+ 18 C$slave_wixel.c$352$1$1                                     =  02BA GR
+ 18 C$slave_wixel.c$353$1$1                                     =  02BC GR
+ 18 C$slave_wixel.c$354$1$1                                     =  02BE GR
+ 18 C$slave_wixel.c$355$1$1                                     =  02C0 GR
+ 18 C$slave_wixel.c$357$1$1                                     =  02C6 GR
+ 18 C$slave_wixel.c$360$1$1                                     =  02D4 GR
+ 18 C$slave_wixel.c$362$1$1                                     =  02D7 GR
+ 18 C$slave_wixel.c$364$2$2                                     =  02D7 GR
+ 18 C$slave_wixel.c$365$2$2                                     =  02DA GR
+ 18 C$slave_wixel.c$366$2$2                                     =  02DD GR
+ 18 C$slave_wixel.c$367$2$2                                     =  02E0 GR
+ 18 C$slave_wixel.c$368$2$2                                     =  02E3 GR
+ 18 C$slave_wixel.c$369$2$2                                     =  02E6 GR
+ 18 C$slave_wixel.c$371$1$1                                     =  02EB GR
+ 16 C$slave_wixel.c$64$1$1                                      =  0002 GR
+ 16 C$slave_wixel.c$65$1$1                                      =  0006 GR
+ 16 C$slave_wixel.c$66$1$1                                      =  000A GR
+ 16 C$slave_wixel.c$69$1$1                                      =  000E GR
+ 16 C$slave_wixel.c$72$1$1                                      =  0000 GR
+ 16 C$slave_wixel.c$73$1$1                                      =  0014 GR
+ 18 C$slave_wixel.c$78$0$0                                      =  0000 GR
+ 18 C$slave_wixel.c$80$1$1                                      =  0000 GR
+ 18 C$slave_wixel.c$81$1$1                                      =  0003 GR
+ 18 C$slave_wixel.c$82$1$1                                      =  0009 GR
+ 18 C$slave_wixel.c$83$1$1                                      =  000F GR
+ 18 C$slave_wixel.c$84$1$1                                      =  0016 GR
+ 18 C$slave_wixel.c$85$1$1                                      =  0019 GR
+ 18 C$slave_wixel.c$90$1$1                                      =  001A GR
+ 18 C$slave_wixel.c$92$1$1                                      =  001A GR
+ 18 C$slave_wixel.c$94$1$1                                      =  001D GR
+ 18 C$slave_wixel.c$95$1$1                                      =  0023 GR
+ 18 C$slave_wixel.c$97$1$1                                      =  0029 GR
+ 18 C$slave_wixel.c$98$1$1                                      =  002F GR
+    CPRL2                                                          00C8 
+    CT2                                                            00C9 
+    CY                                                             00D7 
+    DPH                                                            0083 
+    DPL                                                            0082 
+    EA                                                             00AF 
+    ES                                                             00AC 
+    ET0                                                            00A9 
+    ET1                                                            00AB 
+    ET2                                                            00AD 
+    EX0                                                            00A8 
+    EX1                                                            00AA 
+    EXEN2                                                          00CB 
+    EXF2                                                           00CE 
+    F0                                                             00D5 
+    Fslave_wixel$AC$0$0                                         =  00D6 G
+    Fslave_wixel$ACC$0$0                                        =  00E0 G
+    Fslave_wixel$ACC_0$0$0                                      =  00E0 G
+    Fslave_wixel$ACC_1$0$0                                      =  00E1 G
+    Fslave_wixel$ACC_2$0$0                                      =  00E2 G
+    Fslave_wixel$ACC_3$0$0                                      =  00E3 G
+    Fslave_wixel$ACC_4$0$0                                      =  00E4 G
+    Fslave_wixel$ACC_5$0$0                                      =  00E5 G
+    Fslave_wixel$ACC_6$0$0                                      =  00E6 G
+    Fslave_wixel$ACC_7$0$0                                      =  00E7 G
+    Fslave_wixel$ADC$0$0                                        =  FFFFBBBA G
+    Fslave_wixel$ADCCFG$0$0                                     =  00F2 G
+    Fslave_wixel$ADCCON1$0$0                                    =  00B4 G
+    Fslave_wixel$ADCCON2$0$0                                    =  00B5 G
+    Fslave_wixel$ADCCON3$0$0                                    =  00B6 G
+    Fslave_wixel$ADCH$0$0                                       =  00BB G
+    Fslave_wixel$ADCIE$0$0                                      =  00A9 G
+    Fslave_wixel$ADCIF$0$0                                      =  008D G
+    Fslave_wixel$ADCL$0$0                                       =  00BA G
+    Fslave_wixel$ADDR$0$0                                       =  DF05 G
+    Fslave_wixel$AGCCTRL0$0$0                                   =  DF19 G
+    Fslave_wixel$AGCCTRL1$0$0                                   =  DF18 G
+    Fslave_wixel$AGCCTRL2$0$0                                   =  DF17 G
+    Fslave_wixel$B$0$0                                          =  00F0 G
+    Fslave_wixel$BSCFG$0$0                                      =  DF16 G
+    Fslave_wixel$B_0$0$0                                        =  00F0 G
+    Fslave_wixel$B_1$0$0                                        =  00F1 G
+    Fslave_wixel$B_2$0$0                                        =  00F2 G
+    Fslave_wixel$B_3$0$0                                        =  00F3 G
+    Fslave_wixel$B_4$0$0                                        =  00F4 G
+    Fslave_wixel$B_5$0$0                                        =  00F5 G
+    Fslave_wixel$B_6$0$0                                        =  00F6 G
+    Fslave_wixel$B_7$0$0                                        =  00F7 G
+    Fslave_wixel$CHANNR$0$0                                     =  DF06 G
+    Fslave_wixel$CLKCON$0$0                                     =  00C6 G
+    Fslave_wixel$CY$0$0                                         =  00D7 G
+    Fslave_wixel$DEVIATN$0$0                                    =  DF11 G
+    Fslave_wixel$DMA0CFG$0$0                                    =  FFFFD5D4 G
+    Fslave_wixel$DMA0CFGH$0$0                                   =  00D5 G
+    Fslave_wixel$DMA0CFGL$0$0                                   =  00D4 G
+    Fslave_wixel$DMA1CFG$0$0                                    =  FFFFD3D2 G
+    Fslave_wixel$DMA1CFGH$0$0                                   =  00D3 G
+    Fslave_wixel$DMA1CFGL$0$0                                   =  00D2 G
+    Fslave_wixel$DMAARM$0$0                                     =  00D6 G
+    Fslave_wixel$DMAIE$0$0                                      =  00B8 G
+    Fslave_wixel$DMAIF$0$0                                      =  00C0 G
+    Fslave_wixel$DMAIRQ$0$0                                     =  00D1 G
+    Fslave_wixel$DMAREQ$0$0                                     =  00D7 G
+    Fslave_wixel$DPH0$0$0                                       =  0083 G
+    Fslave_wixel$DPH1$0$0                                       =  0085 G
+    Fslave_wixel$DPL0$0$0                                       =  0082 G
+    Fslave_wixel$DPL1$0$0                                       =  0084 G
+    Fslave_wixel$DPS$0$0                                        =  0092 G
+    Fslave_wixel$EA$0$0                                         =  00AF G
+    Fslave_wixel$ENCCS$0$0                                      =  00B3 G
+    Fslave_wixel$ENCDI$0$0                                      =  00B1 G
+    Fslave_wixel$ENCDO$0$0                                      =  00B2 G
+    Fslave_wixel$ENCIE$0$0                                      =  00AC G
+    Fslave_wixel$ENCIF_0$0$0                                    =  0098 G
+    Fslave_wixel$ENCIF_1$0$0                                    =  0099 G
+    Fslave_wixel$ENDIAN$0$0                                     =  0095 G
+    Fslave_wixel$F0$0$0                                         =  00D5 G
+    Fslave_wixel$F1$0$0                                         =  00D1 G
+    Fslave_wixel$FADDR$0$0                                      =  FFFFADAC G
+    Fslave_wixel$FADDRH$0$0                                     =  00AD G
+    Fslave_wixel$FADDRL$0$0                                     =  00AC G
+    Fslave_wixel$FCTL$0$0                                       =  00AE G
+    Fslave_wixel$FOCCFG$0$0                                     =  DF15 G
+    Fslave_wixel$FREND0$0$0                                     =  DF1B G
+    Fslave_wixel$FREND1$0$0                                     =  DF1A G
+    Fslave_wixel$FREQ0$0$0                                      =  DF0B G
+    Fslave_wixel$FREQ1$0$0                                      =  DF0A G
+    Fslave_wixel$FREQ2$0$0                                      =  DF09 G
+    Fslave_wixel$FREQEST$0$0                                    =  DF38 G
+    Fslave_wixel$FSCAL0$0$0                                     =  DF1F G
+    Fslave_wixel$FSCAL1$0$0                                     =  DF1E G
+    Fslave_wixel$FSCAL2$0$0                                     =  DF1D G
+    Fslave_wixel$FSCAL3$0$0                                     =  DF1C G
+    Fslave_wixel$FSCTRL0$0$0                                    =  DF08 G
+    Fslave_wixel$FSCTRL1$0$0                                    =  DF07 G
+    Fslave_wixel$FWDATA$0$0                                     =  00AF G
+    Fslave_wixel$FWT$0$0                                        =  00AB G
+    Fslave_wixel$I2SCFG0$0$0                                    =  DF40 G
+    Fslave_wixel$I2SCFG1$0$0                                    =  DF41 G
+    Fslave_wixel$I2SCLKF0$0$0                                   =  DF46 G
+    Fslave_wixel$I2SCLKF1$0$0                                   =  DF47 G
+    Fslave_wixel$I2SCLKF2$0$0                                   =  DF48 G
+    Fslave_wixel$I2SDATH$0$0                                    =  DF43 G
+    Fslave_wixel$I2SDATL$0$0                                    =  DF42 G
+    Fslave_wixel$I2SSTAT$0$0                                    =  DF45 G
+    Fslave_wixel$I2SWCNT$0$0                                    =  DF44 G
+    Fslave_wixel$IEN0$0$0                                       =  00A8 G
+    Fslave_wixel$IEN1$0$0                                       =  00B8 G
+    Fslave_wixel$IEN2$0$0                                       =  009A G
+    Fslave_wixel$IOCFG0$0$0                                     =  DF31 G
+    Fslave_wixel$IOCFG1$0$0                                     =  DF30 G
+    Fslave_wixel$IOCFG2$0$0                                     =  DF2F G
+    Fslave_wixel$IP0$0$0                                        =  00A9 G
+    Fslave_wixel$IP1$0$0                                        =  00B9 G
+    Fslave_wixel$IRCON$0$0                                      =  00C0 G
+    Fslave_wixel$IRCON2$0$0                                     =  00E8 G
+    Fslave_wixel$LQI$0$0                                        =  DF39 G
+    Fslave_wixel$MARCSTATE$0$0                                  =  DF3B G
+    Fslave_wixel$MCSM0$0$0                                      =  DF14 G
+    Fslave_wixel$MCSM1$0$0                                      =  DF13 G
+    Fslave_wixel$MCSM2$0$0                                      =  DF12 G
+    Fslave_wixel$MDMCFG0$0$0                                    =  DF10 G
+    Fslave_wixel$MDMCFG1$0$0                                    =  DF0F G
+    Fslave_wixel$MDMCFG2$0$0                                    =  DF0E G
+    Fslave_wixel$MDMCFG3$0$0                                    =  DF0D G
+    Fslave_wixel$MDMCFG4$0$0                                    =  DF0C G
+    Fslave_wixel$MEMCTR$0$0                                     =  00C7 G
+    Fslave_wixel$MPAGE$0$0                                      =  0093 G
+    Fslave_wixel$OV$0$0                                         =  00D2 G
+    Fslave_wixel$OVFIM$0$0                                      =  00DE G
+    Fslave_wixel$P$0$0                                          =  00D0 G
+    Fslave_wixel$P0$0$0                                         =  0080 G
+    Fslave_wixel$P0DIR$0$0                                      =  00FD G
+    Fslave_wixel$P0IE$0$0                                       =  00BD G
+    Fslave_wixel$P0IF$0$0                                       =  00C5 G
+    Fslave_wixel$P0IFG$0$0                                      =  0089 G
+    Fslave_wixel$P0INP$0$0                                      =  008F G
+    Fslave_wixel$P0SEL$0$0                                      =  00F3 G
+    Fslave_wixel$P0_0$0$0                                       =  0080 G
+    Fslave_wixel$P0_1$0$0                                       =  0081 G
+    Fslave_wixel$P0_2$0$0                                       =  0082 G
+    Fslave_wixel$P0_3$0$0                                       =  0083 G
+    Fslave_wixel$P0_4$0$0                                       =  0084 G
+    Fslave_wixel$P0_5$0$0                                       =  0085 G
+    Fslave_wixel$P0_6$0$0                                       =  0086 G
+    Fslave_wixel$P0_7$0$0                                       =  0087 G
+    Fslave_wixel$P1$0$0                                         =  0090 G
+    Fslave_wixel$P1DIR$0$0                                      =  00FE G
+    Fslave_wixel$P1IEN$0$0                                      =  008D G
+    Fslave_wixel$P1IF$0$0                                       =  00EB G
+    Fslave_wixel$P1IFG$0$0                                      =  008A G
+    Fslave_wixel$P1INP$0$0                                      =  00F6 G
+    Fslave_wixel$P1SEL$0$0                                      =  00F4 G
+    Fslave_wixel$P1_0$0$0                                       =  0090 G
+    Fslave_wixel$P1_1$0$0                                       =  0091 G
+    Fslave_wixel$P1_2$0$0                                       =  0092 G
+    Fslave_wixel$P1_3$0$0                                       =  0093 G
+    Fslave_wixel$P1_4$0$0                                       =  0094 G
+    Fslave_wixel$P1_5$0$0                                       =  0095 G
+    Fslave_wixel$P1_6$0$0                                       =  0096 G
+    Fslave_wixel$P1_7$0$0                                       =  0097 G
+    Fslave_wixel$P2$0$0                                         =  00A0 G
+    Fslave_wixel$P2DIR$0$0                                      =  00FF G
+    Fslave_wixel$P2IF$0$0                                       =  00E8 G
+    Fslave_wixel$P2IFG$0$0                                      =  008B G
+    Fslave_wixel$P2INP$0$0                                      =  00F7 G
+    Fslave_wixel$P2SEL$0$0                                      =  00F5 G
+    Fslave_wixel$P2_0$0$0                                       =  00A0 G
+    Fslave_wixel$P2_1$0$0                                       =  00A1 G
+    Fslave_wixel$P2_2$0$0                                       =  00A2 G
+    Fslave_wixel$P2_3$0$0                                       =  00A3 G
+    Fslave_wixel$P2_4$0$0                                       =  00A4 G
+    Fslave_wixel$P2_5$0$0                                       =  00A5 G
+    Fslave_wixel$P2_6$0$0                                       =  00A6 G
+    Fslave_wixel$P2_7$0$0                                       =  00A7 G
+    Fslave_wixel$PARTNUM$0$0                                    =  DF36 G
+    Fslave_wixel$PA_TABLE0$0$0                                  =  DF2E G
+    Fslave_wixel$PCON$0$0                                       =  0087 G
+    Fslave_wixel$PERCFG$0$0                                     =  00F1 G
+    Fslave_wixel$PICTL$0$0                                      =  008C G
+    Fslave_wixel$PKTCTRL0$0$0                                   =  DF04 G
+    Fslave_wixel$PKTCTRL1$0$0                                   =  DF03 G
+    Fslave_wixel$PKTLEN$0$0                                     =  DF02 G
+    Fslave_wixel$PKTSTATUS$0$0                                  =  DF3C G
+    Fslave_wixel$PSW$0$0                                        =  00D0 G
+    Fslave_wixel$RFD$0$0                                        =  00D9 G
+    Fslave_wixel$RFIF$0$0                                       =  00E9 G
+    Fslave_wixel$RFIM$0$0                                       =  0091 G
+    Fslave_wixel$RFST$0$0                                       =  00E1 G
+    Fslave_wixel$RFTXRXIE$0$0                                   =  00A8 G
+    Fslave_wixel$RFTXRXIF$0$0                                   =  0089 G
+    Fslave_wixel$RNDH$0$0                                       =  00BD G
+    Fslave_wixel$RNDL$0$0                                       =  00BC G
+    Fslave_wixel$RS0$0$0                                        =  00D3 G
+    Fslave_wixel$RS1$0$0                                        =  00D4 G
+    Fslave_wixel$RSSI$0$0                                       =  DF3A G
+    Fslave_wixel$S0CON$0$0                                      =  0098 G
+    Fslave_wixel$S1CON$0$0                                      =  009B G
+    Fslave_wixel$SLEEP$0$0                                      =  00BE G
+    Fslave_wixel$SP$0$0                                         =  0081 G
+    Fslave_wixel$STIE$0$0                                       =  00AD G
+    Fslave_wixel$STIF$0$0                                       =  00C7 G
+    Fslave_wixel$SYNC0$0$0                                      =  DF01 G
+    Fslave_wixel$SYNC1$0$0                                      =  DF00 G
+    Fslave_wixel$T1CC0$0$0                                      =  FFFFDBDA G
+    Fslave_wixel$T1CC0H$0$0                                     =  00DB G
+    Fslave_wixel$T1CC0L$0$0                                     =  00DA G
+    Fslave_wixel$T1CC1$0$0                                      =  FFFFDDDC G
+    Fslave_wixel$T1CC1H$0$0                                     =  00DD G
+    Fslave_wixel$T1CC1L$0$0                                     =  00DC G
+    Fslave_wixel$T1CC2$0$0                                      =  FFFFDFDE G
+    Fslave_wixel$T1CC2H$0$0                                     =  00DF G
+    Fslave_wixel$T1CC2L$0$0                                     =  00DE G
+    Fslave_wixel$T1CCTL0$0$0                                    =  00E5 G
+    Fslave_wixel$T1CCTL1$0$0                                    =  00E6 G
+    Fslave_wixel$T1CCTL2$0$0                                    =  00E7 G
+    Fslave_wixel$T1CNTH$0$0                                     =  00E3 G
+    Fslave_wixel$T1CNTL$0$0                                     =  00E2 G
+    Fslave_wixel$T1CTL$0$0                                      =  00E4 G
+    Fslave_wixel$T1IE$0$0                                       =  00B9 G
+    Fslave_wixel$T1IF$0$0                                       =  00C1 G
+    Fslave_wixel$T2CT$0$0                                       =  009C G
+    Fslave_wixel$T2CTL$0$0                                      =  009E G
+    Fslave_wixel$T2IE$0$0                                       =  00BA G
+    Fslave_wixel$T2IF$0$0                                       =  00C2 G
+    Fslave_wixel$T2PR$0$0                                       =  009D G
+    Fslave_wixel$T3CC0$0$0                                      =  00CD G
+    Fslave_wixel$T3CC1$0$0                                      =  00CF G
+    Fslave_wixel$T3CCTL0$0$0                                    =  00CC G
+    Fslave_wixel$T3CCTL1$0$0                                    =  00CE G
+    Fslave_wixel$T3CH0IF$0$0                                    =  00D9 G
+    Fslave_wixel$T3CH1IF$0$0                                    =  00DA G
+    Fslave_wixel$T3CNT$0$0                                      =  00CA G
+    Fslave_wixel$T3CTL$0$0                                      =  00CB G
+    Fslave_wixel$T3IE$0$0                                       =  00BB G
+    Fslave_wixel$T3IF$0$0                                       =  00C3 G
+    Fslave_wixel$T3OVFIF$0$0                                    =  00D8 G
+    Fslave_wixel$T4CC0$0$0                                      =  00ED G
+    Fslave_wixel$T4CC1$0$0                                      =  00EF G
+    Fslave_wixel$T4CCTL0$0$0                                    =  00EC G
+    Fslave_wixel$T4CCTL1$0$0                                    =  00EE G
+    Fslave_wixel$T4CH0IF$0$0                                    =  00DC G
+    Fslave_wixel$T4CH1IF$0$0                                    =  00DD G
+    Fslave_wixel$T4CNT$0$0                                      =  00EA G
+    Fslave_wixel$T4CTL$0$0                                      =  00EB G
+    Fslave_wixel$T4IE$0$0                                       =  00BC G
+    Fslave_wixel$T4IF$0$0                                       =  00C4 G
+    Fslave_wixel$T4OVFIF$0$0                                    =  00DB G
+    Fslave_wixel$TCON$0$0                                       =  0088 G
+    Fslave_wixel$TEST0$0$0                                      =  DF25 G
+    Fslave_wixel$TEST1$0$0                                      =  DF24 G
+    Fslave_wixel$TEST2$0$0                                      =  DF23 G
+    Fslave_wixel$TIMIF$0$0                                      =  00D8 G
+    Fslave_wixel$U0BAUD$0$0                                     =  00C2 G
+    Fslave_wixel$U0CSR$0$0                                      =  0086 G
+    Fslave_wixel$U0DBUF$0$0                                     =  00C1 G
+    Fslave_wixel$U0GCR$0$0                                      =  00C5 G
+    Fslave_wixel$U0UCR$0$0                                      =  00C4 G
+    Fslave_wixel$U1ACTIVE$0$0                                   =  00F8 G
+    Fslave_wixel$U1BAUD$0$0                                     =  00FA G
+    Fslave_wixel$U1CSR$0$0                                      =  00F8 G
+    Fslave_wixel$U1DBUF$0$0                                     =  00F9 G
+    Fslave_wixel$U1ERR$0$0                                      =  00FB G
+    Fslave_wixel$U1FE$0$0                                       =  00FC G
+    Fslave_wixel$U1GCR$0$0                                      =  00FC G
+    Fslave_wixel$U1MODE$0$0                                     =  00FF G
+    Fslave_wixel$U1RE$0$0                                       =  00FE G
+    Fslave_wixel$U1RX_BYTE$0$0                                  =  00FA G
+    Fslave_wixel$U1SLAVE$0$0                                    =  00FD G
+    Fslave_wixel$U1TX_BYTE$0$0                                  =  00F9 G
+    Fslave_wixel$U1UCR$0$0                                      =  00FB G
+    Fslave_wixel$URX0IE$0$0                                     =  00AA G
+    Fslave_wixel$URX0IF$0$0                                     =  008B G
+    Fslave_wixel$URX1IE$0$0                                     =  00AB G
+    Fslave_wixel$URX1IF$0$0                                     =  008F G
+    Fslave_wixel$USBADDR$0$0                                    =  DE00 G
+    Fslave_wixel$USBCIE$0$0                                     =  DE0B G
+    Fslave_wixel$USBCIF$0$0                                     =  DE06 G
+    Fslave_wixel$USBCNTH$0$0                                    =  DE17 G
+    Fslave_wixel$USBCNTL$0$0                                    =  DE16 G
+    Fslave_wixel$USBCSIH$0$0                                    =  DE12 G
+    Fslave_wixel$USBCSIL$0$0                                    =  DE11 G
+    Fslave_wixel$USBCSOH$0$0                                    =  DE15 G
+    Fslave_wixel$USBCSOL$0$0                                    =  DE14 G
+    Fslave_wixel$USBF0$0$0                                      =  DE20 G
+    Fslave_wixel$USBF1$0$0                                      =  DE22 G
+    Fslave_wixel$USBF2$0$0                                      =  DE24 G
+    Fslave_wixel$USBF3$0$0                                      =  DE26 G
+    Fslave_wixel$USBF4$0$0                                      =  DE28 G
+    Fslave_wixel$USBF5$0$0                                      =  DE2A G
+    Fslave_wixel$USBFRMH$0$0                                    =  DE0D G
+    Fslave_wixel$USBFRML$0$0                                    =  DE0C G
+    Fslave_wixel$USBIIE$0$0                                     =  DE07 G
+    Fslave_wixel$USBIIF$0$0                                     =  DE02 G
+    Fslave_wixel$USBINDEX$0$0                                   =  DE0E G
+    Fslave_wixel$USBMAXI$0$0                                    =  DE10 G
+    Fslave_wixel$USBMAXO$0$0                                    =  DE13 G
+    Fslave_wixel$USBOIE$0$0                                     =  DE09 G
+    Fslave_wixel$USBOIF$0$0                                     =  DE04 G
+    Fslave_wixel$USBPOW$0$0                                     =  DE01 G
+    Fslave_wixel$UTX0IF$0$0                                     =  00E9 G
+    Fslave_wixel$UTX1IF$0$0                                     =  00EA G
+    Fslave_wixel$VCO_VC_DAC$0$0                                 =  DF3D G
+    Fslave_wixel$VERSION$0$0                                    =  DF37 G
+    Fslave_wixel$WDCTL$0$0                                      =  00C9 G
+    Fslave_wixel$WDTIF$0$0                                      =  00EC G
+    Fslave_wixel$WORCTRL$0$0                                    =  00A2 G
+    Fslave_wixel$WOREVT0$0$0                                    =  00A3 G
+    Fslave_wixel$WOREVT1$0$0                                    =  00A4 G
+    Fslave_wixel$WORIRQ$0$0                                     =  00A1 G
+    Fslave_wixel$WORTIME0$0$0                                   =  00A5 G
+    Fslave_wixel$WORTIME1$0$0                                   =  00A6 G
+    Fslave_wixel$_IEN06$0$0                                     =  00AE G
+    Fslave_wixel$_IEN16$0$0                                     =  00BE G
+    Fslave_wixel$_IEN17$0$0                                     =  00BF G
+    Fslave_wixel$_IRCON25$0$0                                   =  00ED G
+    Fslave_wixel$_IRCON26$0$0                                   =  00EE G
+    Fslave_wixel$_IRCON27$0$0                                   =  00EF G
+    Fslave_wixel$_IRCON6$0$0                                    =  00C6 G
+    Fslave_wixel$_SOCON2$0$0                                    =  009A G
+    Fslave_wixel$_SOCON3$0$0                                    =  009B G
+    Fslave_wixel$_SOCON4$0$0                                    =  009C G
+    Fslave_wixel$_SOCON5$0$0                                    =  009D G
+    Fslave_wixel$_SOCON6$0$0                                    =  009E G
+    Fslave_wixel$_SOCON7$0$0                                    =  009F G
+    Fslave_wixel$_TCON_0$0$0                                    =  0088 G
+    Fslave_wixel$_TCON_2$0$0                                    =  008A G
+    Fslave_wixel$_TCON_4$0$0                                    =  008C G
+    Fslave_wixel$_TCON_6$0$0                                    =  008E G
+    Fslave_wixel$_TIMIF7$0$0                                    =  00DF G
+  C Fslave_wixel$rxPacket$0$0                                   =  0000 GR
+  B G$__fsi__$0$0                                               =  0007 GR
+  A G$dataReceivedFlag$0$0                                      =  0000 GR
+  B G$dataReceivedTime$0$0                                      =  0005 GR
+ 18 G$failSafeBootloader$0$0                                    =  0082 GR
+ 18 G$gpioInit$0$0                                              =  00BD GR
+ 18 G$handlePacketTimeout$0$0                                   =  0234 GR
+  B G$lastPacketTime$0$0                                        =  0003 GR
+  B G$ledBlue$0$0                                               =  0002 GR
+  B G$ledGreen$0$0                                              =  0001 GR
+  B G$ledRed$0$0                                                =  0000 GR
+ 18 G$main$0$0                                                  =  0273 GR
+ 18 G$radioInit$0$0                                             =  001A GR
+ 18 G$receiveAndProcessPackets$0$0                              =  01D0 GR
+ 18 G$timer3Init$0$0                                            =  0000 GR
+ 18 G$updateMotor$0$0                                           =  011A GR
+ 18 G$updateRgbLeds$0$0                                         =  00EC GR
+ 18 G$updateStatusLeds$0$0                                      =  0170 GR
+    IE                                                             00A8 
+    IE.0                                                           00A8 
+    IE.1                                                           00A9 
+    IE.2                                                           00AA 
+    IE.3                                                           00AB 
+    IE.4                                                           00AC 
+    IE.5                                                           00AD 
+    IE.7                                                           00AF 
+    IE0                                                            0089 
+    IE1                                                            008B 
+    INT0                                                           00B2 
+    INT1                                                           00B3 
+    IP                                                             00B8 
+    IP.0                                                           00B8 
+    IP.1                                                           00B9 
+    IP.2                                                           00BA 
+    IP.3                                                           00BB 
+    IP.4                                                           00BC 
+    IP.5                                                           00BD 
+    IT0                                                            0088 
+    IT1                                                            008A 
+  5 Lslave_wixel.handlePacketTimeout$sloc0$1$0                  =  0000 GR
+  A Lslave_wixel.updateMotor$isBlue$1$1                         =  0003 GR
+  A Lslave_wixel.updateMotor$isGreen$1$1                        =  0002 GR
+  A Lslave_wixel.updateMotor$isRed$1$1                          =  0004 GR
+  A Lslave_wixel.updateMotor$sloc0$1$0                          =  0005 GR
+  A Lslave_wixel.updateRgbLeds$sloc0$1$0                        =  0001 GR
+  A Lslave_wixel.updateStatusLeds$isConnected$1$1               =  0006 GR
+  A Lslave_wixel.updateStatusLeds$sloc0$1$0                     =  0007 GR
+    OV                                                             00D2 
+    P                                                              00D0 
+    P0                                                             0080 
+    P0.0                                                           0080 
+    P0.1                                                           0081 
+    P0.2                                                           0082 
+    P0.3                                                           0083 
+    P0.4                                                           0084 
+    P0.5                                                           0085 
+    P0.6                                                           0086 
+    P0.7                                                           0087 
+    P1                                                             0090 
+    P1.0                                                           0090 
+    P1.1                                                           0091 
+    P1.2                                                           0092 
+    P1.3                                                           0093 
+    P1.4                                                           0094 
+    P1.5                                                           0095 
+    P1.6                                                           0096 
+    P1.7                                                           0097 
+    P2                                                             00A0 
+    P2.0                                                           00A0 
+    P2.1                                                           00A1 
+    P2.2                                                           00A2 
+    P2.3                                                           00A3 
+    P2.4                                                           00A4 
+    P2.5                                                           00A5 
+    P2.6                                                           00A6 
+    P2.7                                                           00A7 
+    P3                                                             00B0 
+    P3.0                                                           00B0 
+    P3.1                                                           00B1 
+    P3.2                                                           00B2 
+    P3.3                                                           00B3 
+    P3.4                                                           00B4 
+    P3.5                                                           00B5 
+    P3.6                                                           00B6 
+    P3.7                                                           00B7 
+    PCON                                                           0087 
+    PS                                                             00BC 
+    PSW                                                            00D0 
+    PSW.0                                                          00D0 
+    PSW.1                                                          00D1 
+    PSW.2                                                          00D2 
+    PSW.3                                                          00D3 
+    PSW.4                                                          00D4 
+    PSW.5                                                          00D5 
+    PSW.6                                                          00D6 
+    PSW.7                                                          00D7 
+    PT0                                                            00B9 
+    PT1                                                            00BB 
+    PT2                                                            00BD 
+    PX0                                                            00B8 
+    PX1                                                            00BA 
+    RB8                                                            009A 
+    RCAP2H                                                         00CB 
+    RCAP2L                                                         00CA 
+    RCLK                                                           00CD 
+    REN                                                            009C 
+    RI                                                             0098 
+    RS0                                                            00D3 
+    RS1                                                            00D4 
+    RXD                                                            00B0 
+    SBUF                                                           0099 
+    SCON                                                           0098 
+    SCON.0                                                         0098 
+    SCON.1                                                         0099 
+    SCON.2                                                         009A 
+    SCON.3                                                         009B 
+    SCON.4                                                         009C 
+    SCON.5                                                         009D 
+    SCON.6                                                         009E 
+    SCON.7                                                         009F 
+    SM0                                                            009F 
+    SM1                                                            009E 
+    SM2                                                            009D 
+    SP                                                             0081 
+    T2CON                                                          00C8 
+    T2CON.0                                                        00C8 
+    T2CON.1                                                        00C9 
+    T2CON.2                                                        00CA 
+    T2CON.3                                                        00CB 
+    T2CON.4                                                        00CC 
+    T2CON.5                                                        00CD 
+    T2CON.6                                                        00CE 
+    T2CON.7                                                        00CF 
+    TB8                                                            009B 
+    TCLK                                                           00CC 
+    TCON                                                           0088 
+    TCON.0                                                         0088 
+    TCON.1                                                         0089 
+    TCON.2                                                         008A 
+    TCON.3                                                         008B 
+    TCON.4                                                         008C 
+    TCON.5                                                         008D 
+    TCON.6                                                         008E 
+    TCON.7                                                         008F 
+    TF0                                                            008D 
+    TF1                                                            008F 
+    TF2                                                            00CF 
+    TH0                                                            008C 
+    TH1                                                            008D 
+    TH2                                                            00CD 
+    TI                                                             0099 
+    TL0                                                            008A 
+    TL1                                                            008B 
+    TL2                                                            00CC 
+    TMOD                                                           0089 
+    TR0                                                            008C 
+    TR1                                                            008E 
+    TR2                                                            00CA 
+    TXD                                                            00B1 
+ 18 XG$failSafeBootloader$0$0                                   =  00BC GR
+ 18 XG$gpioInit$0$0                                             =  00EB GR
+ 18 XG$handlePacketTimeout$0$0                                  =  0272 GR
+ 18 XG$main$0$0                                                 =  02EB GR
+ 18 XG$radioInit$0$0                                            =  0081 GR
+ 18 XG$receiveAndProcessPackets$0$0                             =  0233 GR
+ 18 XG$timer3Init$0$0                                           =  0019 GR
+ 18 XG$updateMotor$0$0                                          =  016F GR
+ 18 XG$updateRgbLeds$0$0                                        =  0119 GR
+ 18 XG$updateStatusLeds$0$0                                     =  01CF GR
+    _AC                                                         =  00D6 
+    _ACC                                                        =  00E0 
+    _ACC_0                                                      =  00E0 
+    _ACC_1                                                      =  00E1 
+    _ACC_2                                                      =  00E2 
+    _ACC_3                                                      =  00E3 
+    _ACC_4                                                      =  00E4 
+    _ACC_5                                                      =  00E5 
+    _ACC_6                                                      =  00E6 
+    _ACC_7                                                      =  00E7 
+    _ADC                                                        =  FFFFBBBA 
+    _ADCCFG                                                     =  00F2 
+    _ADCCON1                                                    =  00B4 
+    _ADCCON2                                                    =  00B5 
+    _ADCCON3                                                    =  00B6 
+    _ADCH                                                       =  00BB 
+    _ADCIE                                                      =  00A9 
+    _ADCIF                                                      =  008D 
+    _ADCL                                                       =  00BA 
+    _ADDR                                                       =  DF05 
+    _AGCCTRL0                                                   =  DF19 
+    _AGCCTRL1                                                   =  DF18 
+    _AGCCTRL2                                                   =  DF17 
+    _B                                                          =  00F0 
+    _BSCFG                                                      =  DF16 
+    _B_0                                                        =  00F0 
+    _B_1                                                        =  00F1 
+    _B_2                                                        =  00F2 
+    _B_3                                                        =  00F3 
+    _B_4                                                        =  00F4 
+    _B_5                                                        =  00F5 
+    _B_6                                                        =  00F6 
+    _B_7                                                        =  00F7 
+    _CHANNR                                                     =  DF06 
+    _CLKCON                                                     =  00C6 
+    _CY                                                         =  00D7 
+    _DEVIATN                                                    =  DF11 
+    _DMA0CFG                                                    =  FFFFD5D4 
+    _DMA0CFGH                                                   =  00D5 
+    _DMA0CFGL                                                   =  00D4 
+    _DMA1CFG                                                    =  FFFFD3D2 
+    _DMA1CFGH                                                   =  00D3 
+    _DMA1CFGL                                                   =  00D2 
+    _DMAARM                                                     =  00D6 
+    _DMAIE                                                      =  00B8 
+    _DMAIF                                                      =  00C0 
+    _DMAIRQ                                                     =  00D1 
+    _DMAREQ                                                     =  00D7 
+    _DPH0                                                       =  0083 
+    _DPH1                                                       =  0085 
+    _DPL0                                                       =  0082 
+    _DPL1                                                       =  0084 
+    _DPS                                                        =  0092 
+    _EA                                                         =  00AF 
+    _ENCCS                                                      =  00B3 
+    _ENCDI                                                      =  00B1 
+    _ENCDO                                                      =  00B2 
+    _ENCIE                                                      =  00AC 
+    _ENCIF_0                                                    =  0098 
+    _ENCIF_1                                                    =  0099 
+    _ENDIAN                                                     =  0095 
+    _F0                                                         =  00D5 
+    _F1                                                         =  00D1 
+    _FADDR                                                      =  FFFFADAC 
+    _FADDRH                                                     =  00AD 
+    _FADDRL                                                     =  00AC 
+    _FCTL                                                       =  00AE 
+    _FOCCFG                                                     =  DF15 
+    _FREND0                                                     =  DF1B 
+    _FREND1                                                     =  DF1A 
+    _FREQ0                                                      =  DF0B 
+    _FREQ1                                                      =  DF0A 
+    _FREQ2                                                      =  DF09 
+    _FREQEST                                                    =  DF38 
+    _FSCAL0                                                     =  DF1F 
+    _FSCAL1                                                     =  DF1E 
+    _FSCAL2                                                     =  DF1D 
+    _FSCAL3                                                     =  DF1C 
+    _FSCTRL0                                                    =  DF08 
+    _FSCTRL1                                                    =  DF07 
+    _FWDATA                                                     =  00AF 
+    _FWT                                                        =  00AB 
+    _I2SCFG0                                                    =  DF40 
+    _I2SCFG1                                                    =  DF41 
+    _I2SCLKF0                                                   =  DF46 
+    _I2SCLKF1                                                   =  DF47 
+    _I2SCLKF2                                                   =  DF48 
+    _I2SDATH                                                    =  DF43 
+    _I2SDATL                                                    =  DF42 
+    _I2SSTAT                                                    =  DF45 
+    _I2SWCNT                                                    =  DF44 
+    _IEN0                                                       =  00A8 
+    _IEN1                                                       =  00B8 
+    _IEN2                                                       =  009A 
+    _IOCFG0                                                     =  DF31 
+    _IOCFG1                                                     =  DF30 
+    _IOCFG2                                                     =  DF2F 
+    _IP0                                                        =  00A9 
+    _IP1                                                        =  00B9 
+    _IRCON                                                      =  00C0 
+    _IRCON2                                                     =  00E8 
+    _ISR_T4                                                        **** GX
+    _LQI                                                        =  DF39 
+    _MARCSTATE                                                  =  DF3B 
+    _MCSM0                                                      =  DF14 
+    _MCSM1                                                      =  DF13 
+    _MCSM2                                                      =  DF12 
+    _MDMCFG0                                                    =  DF10 
+    _MDMCFG1                                                    =  DF0F 
+    _MDMCFG2                                                    =  DF0E 
+    _MDMCFG3                                                    =  DF0D 
+    _MDMCFG4                                                    =  DF0C 
+    _MEMCTR                                                     =  00C7 
+    _MPAGE                                                      =  0093 
+    _OV                                                         =  00D2 
+    _OVFIM                                                      =  00DE 
+    _P                                                          =  00D0 
+    _P0                                                         =  0080 
+    _P0DIR                                                      =  00FD 
+    _P0IE                                                       =  00BD 
+    _P0IF                                                       =  00C5 
+    _P0IFG                                                      =  0089 
+    _P0INP                                                      =  008F 
+    _P0SEL                                                      =  00F3 
+    _P0_0                                                       =  0080 
+    _P0_1                                                       =  0081 
+    _P0_2                                                       =  0082 
+    _P0_3                                                       =  0083 
+    _P0_4                                                       =  0084 
+    _P0_5                                                       =  0085 
+    _P0_6                                                       =  0086 
+    _P0_7                                                       =  0087 
+    _P1                                                         =  0090 
+    _P1DIR                                                      =  00FE 
+    _P1IEN                                                      =  008D 
+    _P1IF                                                       =  00EB 
+    _P1IFG                                                      =  008A 
+    _P1INP                                                      =  00F6 
+    _P1SEL                                                      =  00F4 
+    _P1_0                                                       =  0090 
+    _P1_1                                                       =  0091 
+    _P1_2                                                       =  0092 
+    _P1_3                                                       =  0093 
+    _P1_4                                                       =  0094 
+    _P1_5                                                       =  0095 
+    _P1_6                                                       =  0096 
+    _P1_7                                                       =  0097 
+    _P2                                                         =  00A0 
+    _P2DIR                                                      =  00FF 
+    _P2IF                                                       =  00E8 
+    _P2IFG                                                      =  008B 
+    _P2INP                                                      =  00F7 
+    _P2SEL                                                      =  00F5 
+    _P2_0                                                       =  00A0 
+    _P2_1                                                       =  00A1 
+    _P2_2                                                       =  00A2 
+    _P2_3                                                       =  00A3 
+    _P2_4                                                       =  00A4 
+    _P2_5                                                       =  00A5 
+    _P2_6                                                       =  00A6 
+    _P2_7                                                       =  00A7 
+    _PARTNUM                                                    =  DF36 
+    _PA_TABLE0                                                  =  DF2E 
+    _PCON                                                       =  0087 
+    _PERCFG                                                     =  00F1 
+    _PICTL                                                      =  008C 
+    _PKTCTRL0                                                   =  DF04 
+    _PKTCTRL1                                                   =  DF03 
+    _PKTLEN                                                     =  DF02 
+    _PKTSTATUS                                                  =  DF3C 
+    _PSW                                                        =  00D0 
+    _RFD                                                        =  00D9 
+    _RFIF                                                       =  00E9 
+    _RFIM                                                       =  0091 
+    _RFST                                                       =  00E1 
+    _RFTXRXIE                                                   =  00A8 
+    _RFTXRXIF                                                   =  0089 
+    _RNDH                                                       =  00BD 
+    _RNDL                                                       =  00BC 
+    _RS0                                                        =  00D3 
+    _RS1                                                        =  00D4 
+    _RSSI                                                       =  DF3A 
+    _S0CON                                                      =  0098 
+    _S1CON                                                      =  009B 
+    _SLEEP                                                      =  00BE 
+    _SP                                                         =  0081 
+    _STIE                                                       =  00AD 
+    _STIF                                                       =  00C7 
+    _SYNC0                                                      =  DF01 
+    _SYNC1                                                      =  DF00 
+    _T1CC0                                                      =  FFFFDBDA 
+    _T1CC0H                                                     =  00DB 
+    _T1CC0L                                                     =  00DA 
+    _T1CC1                                                      =  FFFFDDDC 
+    _T1CC1H                                                     =  00DD 
+    _T1CC1L                                                     =  00DC 
+    _T1CC2                                                      =  FFFFDFDE 
+    _T1CC2H                                                     =  00DF 
+    _T1CC2L                                                     =  00DE 
+    _T1CCTL0                                                    =  00E5 
+    _T1CCTL1                                                    =  00E6 
+    _T1CCTL2                                                    =  00E7 
+    _T1CNTH                                                     =  00E3 
+    _T1CNTL                                                     =  00E2 
+    _T1CTL                                                      =  00E4 
+    _T1IE                                                       =  00B9 
+    _T1IF                                                       =  00C1 
+    _T2CT                                                       =  009C 
+    _T2CTL                                                      =  009E 
+    _T2IE                                                       =  00BA 
+    _T2IF                                                       =  00C2 
+    _T2PR                                                       =  009D 
+    _T3CC0                                                      =  00CD 
+    _T3CC1                                                      =  00CF 
+    _T3CCTL0                                                    =  00CC 
+    _T3CCTL1                                                    =  00CE 
+    _T3CH0IF                                                    =  00D9 
+    _T3CH1IF                                                    =  00DA 
+    _T3CNT                                                      =  00CA 
+    _T3CTL                                                      =  00CB 
+    _T3IE                                                       =  00BB 
+    _T3IF                                                       =  00C3 
+    _T3OVFIF                                                    =  00D8 
+    _T4CC0                                                      =  00ED 
+    _T4CC1                                                      =  00EF 
+    _T4CCTL0                                                    =  00EC 
+    _T4CCTL1                                                    =  00EE 
+    _T4CH0IF                                                    =  00DC 
+    _T4CH1IF                                                    =  00DD 
+    _T4CNT                                                      =  00EA 
+    _T4CTL                                                      =  00EB 
+    _T4IE                                                       =  00BC 
+    _T4IF                                                       =  00C4 
+    _T4OVFIF                                                    =  00DB 
+    _TCON                                                       =  0088 
+    _TEST0                                                      =  DF25 
+    _TEST1                                                      =  DF24 
+    _TEST2                                                      =  DF23 
+    _TIMIF                                                      =  00D8 
+    _U0BAUD                                                     =  00C2 
+    _U0CSR                                                      =  0086 
+    _U0DBUF                                                     =  00C1 
+    _U0GCR                                                      =  00C5 
+    _U0UCR                                                      =  00C4 
+    _U1ACTIVE                                                   =  00F8 
+    _U1BAUD                                                     =  00FA 
+    _U1CSR                                                      =  00F8 
+    _U1DBUF                                                     =  00F9 
+    _U1ERR                                                      =  00FB 
+    _U1FE                                                       =  00FC 
+    _U1GCR                                                      =  00FC 
+    _U1MODE                                                     =  00FF 
+    _U1RE                                                       =  00FE 
+    _U1RX_BYTE                                                  =  00FA 
+    _U1SLAVE                                                    =  00FD 
+    _U1TX_BYTE                                                  =  00F9 
+    _U1UCR                                                      =  00FB 
+    _URX0IE                                                     =  00AA 
+    _URX0IF                                                     =  008B 
+    _URX1IE                                                     =  00AB 
+    _URX1IF                                                     =  008F 
+    _USBADDR                                                    =  DE00 
+    _USBCIE                                                     =  DE0B 
+    _USBCIF                                                     =  DE06 
+    _USBCNTH                                                    =  DE17 
+    _USBCNTL                                                    =  DE16 
+    _USBCSIH                                                    =  DE12 
+    _USBCSIL                                                    =  DE11 
+    _USBCSOH                                                    =  DE15 
+    _USBCSOL                                                    =  DE14 
+    _USBF0                                                      =  DE20 
+    _USBF1                                                      =  DE22 
+    _USBF2                                                      =  DE24 
+    _USBF3                                                      =  DE26 
+    _USBF4                                                      =  DE28 
+    _USBF5                                                      =  DE2A 
+    _USBFRMH                                                    =  DE0D 
+    _USBFRML                                                    =  DE0C 
+    _USBIIE                                                     =  DE07 
+    _USBIIF                                                     =  DE02 
+    _USBINDEX                                                   =  DE0E 
+    _USBMAXI                                                    =  DE10 
+    _USBMAXO                                                    =  DE13 
+    _USBOIE                                                     =  DE09 
+    _USBOIF                                                     =  DE04 
+    _USBPOW                                                     =  DE01 
+    _UTX0IF                                                     =  00E9 
+    _UTX1IF                                                     =  00EA 
+    _VCO_VC_DAC                                                 =  DF3D 
+    _VERSION                                                    =  DF37 
+    _WDCTL                                                      =  00C9 
+    _WDTIF                                                      =  00EC 
+    _WORCTRL                                                    =  00A2 
+    _WOREVT0                                                    =  00A3 
+    _WOREVT1                                                    =  00A4 
+    _WORIRQ                                                     =  00A1 
+    _WORTIME0                                                   =  00A5 
+    _WORTIME1                                                   =  00A6 
+    __IEN06                                                     =  00AE 
+    __IEN16                                                     =  00BE 
+    __IEN17                                                     =  00BF 
+    __IRCON25                                                   =  00ED 
+    __IRCON26                                                   =  00EE 
+    __IRCON27                                                   =  00EF 
+    __IRCON6                                                    =  00C6 
+    __SOCON2                                                    =  009A 
+    __SOCON3                                                    =  009B 
+    __SOCON4                                                    =  009C 
+    __SOCON5                                                    =  009D 
+    __SOCON6                                                    =  009E 
+    __SOCON7                                                    =  009F 
+    __TCON_0                                                    =  0088 
+    __TCON_2                                                    =  008A 
+    __TCON_4                                                    =  008C 
+    __TCON_6                                                    =  008E 
+    __TIMIF7                                                    =  00DF 
+  B ___fsi__                                                       0007 GR
+  F __interrupt_vect                                               0000 R
+    __mcs51_genRAMCLEAR                                            **** GX
+    __mcs51_genXINIT                                               **** GX
+    __mcs51_genXRAMCLEAR                                           **** GX
+    __sdcc_gsinit_startup                                          **** GX
+  F __sdcc_program_startup                                         0066 GR
+  7 __start__stack                                                 0000 GR
+    _boardService                                                  **** GX
+  A _dataReceivedFlag                                              0000 GR
+  B _dataReceivedTime                                              0005 GR
+    _delayMs                                                       **** GX
+    _dmaConfig                                                     **** GX
+ 18 _failSafeBootloader                                            0082 GR
+    _getMs                                                         **** GX
+ 18 _gpioInit                                                      00BD GR
+ 18 _handlePacketTimeout                                           0234 GR
+  5 _handlePacketTimeout_sloc0_1_0                                 0000 R
+  B _lastPacketTime                                                0003 GR
+  B _ledBlue                                                       0002 GR
+  B _ledGreen                                                      0001 GR
+  B _ledRed                                                        0000 GR
+ 18 _main                                                          0273 GR
+    _radioCrcPassed                                                **** GX
+ 18 _radioInit                                                     001A GR
+    _radioRegistersInit                                            **** GX
+ 18 _receiveAndProcessPackets                                      01D0 GR
+  C _rxPacket                                                      0000 R
+    _systemInit                                                    **** GX
+ 18 _timer3Init                                                    0000 GR
+ 18 _updateMotor                                                   011A GR
+  A _updateMotor_isBlue_1_1                                        0003 R
+  A _updateMotor_isGreen_1_1                                       0002 R
+  A _updateMotor_isRed_1_1                                         0004 R
+  A _updateMotor_sloc0_1_0                                         0005 R
+ 18 _updateRgbLeds                                                 00EC GR
+  A _updateRgbLeds_sloc0_1_0                                       0001 R
+ 18 _updateStatusLeds                                              0170 GR
+  A _updateStatusLeds_isConnected_1_1                              0006 R
+  A _updateStatusLeds_sloc0_1_0                                    0007 R
+    _usbComService                                                 **** GX
+    a                                                              00E0 
+    a.0                                                            00E0 
+    a.1                                                            00E1 
+    a.2                                                            00E2 
+    a.3                                                            00E3 
+    a.4                                                            00E4 
+    a.5                                                            00E5 
+    a.6                                                            00E6 
+    a.7                                                            00E7 
+    ac                                                             00D6 
+    acc                                                            00E0 
+    acc.0                                                          00E0 
+    acc.1                                                          00E1 
+    acc.2                                                          00E2 
+    acc.3                                                          00E3 
+    acc.4                                                          00E4 
+    acc.5                                                          00E5 
+    acc.6                                                          00E6 
+    acc.7                                                          00E7 
+    ar0                                                         =  0000 
+    ar1                                                         =  0001 
+    ar2                                                         =  0002 
+    ar3                                                         =  0003 
+    ar4                                                         =  0004 
+    ar5                                                         =  0005 
+    ar6                                                         =  0006 
+    ar7                                                         =  0007 
+    b                                                              00F0 
+    b.0                                                            00F0 
+    b.1                                                            00F1 
+    b.2                                                            00F2 
+    b.3                                                            00F3 
+    b.4                                                            00F4 
+    b.5                                                            00F5 
+    b.6                                                            00F6 
+    b.7                                                            00F7 
+    cprl2                                                          00C8 
+    ct2                                                            00C9 
+    cy                                                             00D7 
+    dph                                                            0083 
+    dpl                                                            0082 
+    ea                                                             00AF 
+    es                                                             00AC 
+    et0                                                            00A9 
+    et1                                                            00AB 
+    et2                                                            00AD 
+    ex0                                                            00A8 
+    ex1                                                            00AA 
+    exen2                                                          00CB 
+    exf2                                                           00CE 
+    f0                                                             00D5 
+    ie                                                             00A8 
+    ie.0                                                           00A8 
+    ie.1                                                           00A9 
+    ie.2                                                           00AA 
+    ie.3                                                           00AB 
+    ie.4                                                           00AC 
+    ie.5                                                           00AD 
+    ie.7                                                           00AF 
+    ie0                                                            0089 
+    ie1                                                            008B 
+    int0                                                           00B2 
+    int1                                                           00B3 
+    ip                                                             00B8 
+    ip.0                                                           00B8 
+    ip.1                                                           00B9 
+    ip.2                                                           00BA 
+    ip.3                                                           00BB 
+    ip.4                                                           00BC 
+    ip.5                                                           00BD 
+    it0                                                            0088 
+    it1                                                            008A 
+    ov                                                             00D2 
+    p                                                              00D0 
+    p0                                                             0080 
+    p0.0                                                           0080 
+    p0.1                                                           0081 
+    p0.2                                                           0082 
+    p0.3                                                           0083 
+    p0.4                                                           0084 
+    p0.5                                                           0085 
+    p0.6                                                           0086 
+    p0.7                                                           0087 
+    p1                                                             0090 
+    p1.0                                                           0090 
+    p1.1                                                           0091 
+    p1.2                                                           0092 
+    p1.3                                                           0093 
+    p1.4                                                           0094 
+    p1.5                                                           0095 
+    p1.6                                                           0096 
+    p1.7                                                           0097 
+    p2                                                             00A0 
+    p2.0                                                           00A0 
+    p2.1                                                           00A1 
+    p2.2                                                           00A2 
+    p2.3                                                           00A3 
+    p2.4                                                           00A4 
+    p2.5                                                           00A5 
+    p2.6                                                           00A6 
+    p2.7                                                           00A7 
+    p3                                                             00B0 
+    p3.0                                                           00B0 
+    p3.1                                                           00B1 
+    p3.2                                                           00B2 
+    p3.3                                                           00B3 
+    p3.4                                                           00B4 
+    p3.5                                                           00B5 
+    p3.6                                                           00B6 
+    p3.7                                                           00B7 
+    pcon                                                           0087 
+    ps                                                             00BC 
+    psw                                                            00D0 
+    psw.0                                                          00D0 
+    psw.1                                                          00D1 
+    psw.2                                                          00D2 
+    psw.3                                                          00D3 
+    psw.4                                                          00D4 
+    psw.5                                                          00D5 
+    psw.6                                                          00D6 
+    psw.7                                                          00D7 
+    pt0                                                            00B9 
+    pt1                                                            00BB 
+    pt2                                                            00BD 
+    px0                                                            00B8 
+    px1                                                            00BA 
+    rb8                                                            009A 
+    rcap2h                                                         00CB 
+    rcap2l                                                         00CA 
+    rclk                                                           00CD 
+    ren                                                            009C 
+    ri                                                             0098 
+    rs0                                                            00D3 
+    rs1                                                            00D4 
+    rxd                                                            00B0 
+    sbuf                                                           0099 
+    scon                                                           0098 
+    scon.0                                                         0098 
+    scon.1                                                         0099 
+    scon.2                                                         009A 
+    scon.3                                                         009B 
+    scon.4                                                         009C 
+    scon.5                                                         009D 
+    scon.6                                                         009E 
+    scon.7                                                         009F 
+    sm0                                                            009F 
+    sm1                                                            009E 
+    sm2                                                            009D 
+    sp                                                             0081 
+    t2con                                                          00C8 
+    t2con.0                                                        00C8 
+    t2con.1                                                        00C9 
+    t2con.2                                                        00CA 
+    t2con.3                                                        00CB 
+    t2con.4                                                        00CC 
+    t2con.5                                                        00CD 
+    t2con.6                                                        00CE 
+    t2con.7                                                        00CF 
+    tb8                                                            009B 
+    tclk                                                           00CC 
+    tcon                                                           0088 
+    tcon.0                                                         0088 
+    tcon.1                                                         0089 
+    tcon.2                                                         008A 
+    tcon.3                                                         008B 
+    tcon.4                                                         008C 
+    tcon.5                                                         008D 
+    tcon.6                                                         008E 
+    tcon.7                                                         008F 
+    tf0                                                            008D 
+    tf1                                                            008F 
+    tf2                                                            00CF 
+    th0                                                            008C 
+    th1                                                            008D 
+    th2                                                            00CD 
+    ti                                                             0099 
+    tl0                                                            008A 
+    tl1                                                            008B 
+    tl2                                                            00CC 
+    tmod                                                           0089 
+    tr0                                                            008C 
+    tr1                                                            008E 
+    tr2                                                            00CA 
+    txd                                                            00B1 
+
+ASxxxx Assembler V02.00 + NoICE + SDCC mods + Flat24  (Intel 8051), page 2.
+
+Area Table
+
+   0 _CODE                                      size    0   flags 0
+   1 RSEG                                       size    0   flags 8
+   2 RSEG0                                      size    0   flags 8
+   3 RSEG1                                      size    0   flags 8
+   4 REG_BANK_0                                 size    8   flags 4
+   5 DSEG                                       size    4   flags 0
+   6 OSEG                                       size    0   flags 4
+   7 SSEG                                       size    1   flags 0
+   8 ISEG                                       size    0   flags 0
+   9 IABS                                       size    0   flags 8
+   A BSEG                                       size    8   flags 80
+   B PSEG                                       size    8   flags 50
+   C XSEG                                       size   13   flags 40
+   D XABS                                       size    0   flags 48
+   E XISEG                                      size    0   flags 40
+   F HOME                                       size   6B   flags 20
+  10 GSINIT0                                    size    0   flags 20
+  11 GSINIT1                                    size    0   flags 20
+  12 GSINIT2                                    size    0   flags 20
+  13 GSINIT3                                    size    0   flags 20
+  14 GSINIT4                                    size    0   flags 20
+  15 GSINIT5                                    size    0   flags 20
+  16 GSINIT                                     size   1A   flags 20
+  17 GSFINAL                                    size    3   flags 20
+  18 CSEG                                       size  2EC   flags 20
+  19 CONST                                      size    0   flags 20
+  1A XINIT                                      size    0   flags 20
+  1B CABS                                       size    0   flags 28

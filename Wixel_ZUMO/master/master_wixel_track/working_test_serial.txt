@@ -1,0 +1,851 @@
+"""
+================= PYTHON TEST CODE WITH OPTITRACK INTEGRATION =================
+
+MINIMAL INTEGRATION:
+- Added OptiTrack client (receives positions in background)
+- Replace generate_random_position() with optitrack.get_position()
+- Everything else IDENTICAL to working code
+
+=====================================================================
+"""
+
+import serial
+import time
+import random
+import struct
+import sys
+import threading
+import socket
+from datetime import datetime
+
+# Workaround: ensure SerialException is defined
+try:
+    SerialException = serial.SerialException
+except Exception:
+    try:
+        from serial.serialutil import SerialException
+    except Exception:
+        SerialException = Exception
+
+# ==================== CONFIGURATION ====================
+
+SERIAL_PORT = "COM9"
+BAUD_RATE = 9600
+SERIAL_TIMEOUT = 1.0
+
+# OptiTrack
+OPTITRACK_SERVER_IP = "192.168.0.100"
+OPTITRACK_PORT = 5400
+OPTITRACK_BUFFER_SIZE = 8192
+
+# Log files
+SENT_LOG_FILE = "sent_packets.log"
+RECEIVED_LOG_FILE = "received_packets.log"
+
+# Command definitions
+CMD_STOP = 0x10
+CMD_GO_TO = 0x11
+CMD_PREP = 0x12
+CMD_RUN = 0x13
+CMD_AUX = 0x14
+
+# Protocol definitions
+MESSAGE_DELIMITER = 0xFF
+BYTES_PER_SLAVE = 16
+
+# Position bounds and resolution
+POS_MIN = -3.0
+POS_MAX = 3.0
+POS_RESOLUTION = 0.01
+
+# Waypoint generation
+MAX_WAYPOINTS = 20
+
+# PREP loop timing
+PREP_LOOP_DURATION = 5.0
+PREP_PACKETS_PER_LOOP = 7
+
+# Background AUX thread
+AUX_SEND_INTERVAL = 0.2
+AUX_THREAD_RUNNING = True
+
+# ==================== LOGGING FUNCTIONS ====================
+
+def log_sent_packet(packet_data, label=""):
+    """Log sent packet to file with hex dump"""
+    try:
+        with open(SENT_LOG_FILE, 'a') as f:
+            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+            f.write(f"\n{'='*70}\n")
+            f.write(f"[{timestamp}] {label}\n")
+            f.write(f"Length: {len(packet_data)} bytes\n")
+            
+            # Hex dump (16 bytes per line)
+            for i in range(0, len(packet_data), 16):
+                hex_part = ' '.join(f'{b:02X}' for b in packet_data[i:i+16])
+                ascii_part = ''.join(chr(b) if 32 <= b < 127 else '.' for b in packet_data[i:i+16])
+                f.write(f"{i:04X}: {hex_part:<48} {ascii_part}\n")
+            
+            # Decode per-slave packets
+            num_slaves = len(packet_data) // BYTES_PER_SLAVE
+            for slave_idx in range(num_slaves):
+                offset = slave_idx * BYTES_PER_SLAVE
+                slave_data = packet_data[offset:offset+BYTES_PER_SLAVE]
+                
+                addr = slave_data[0]
+                x = (slave_data[1] << 8) | slave_data[2]
+                y = (slave_data[3] << 8) | slave_data[4]
+                theta = slave_data[5]
+                cmd = slave_data[6]
+                
+                # Convert to signed int16
+                if x > 32767:
+                    x -= 65536
+                if y > 32767:
+                    y -= 65536
+                
+                cmd_name = {0x10: "STOP", 0x11: "GO_TO", 0x12: "PREP", 0x13: "RUN", 0x14: "AUX"}.get(cmd, f"UNKNOWN(0x{cmd:02X})")
+                f.write(f"  Slave {slave_idx+1} (ADD=0x{addr:02X}): Pos=({x/1000:.2f}, {y/1000:.2f}, {theta}°) CMD={cmd_name}\n")
+            f.flush()
+    except Exception as e:
+        print(f"[LOG ERROR] Failed to write sent log: {e}")
+
+def log_received_data(data, label=""):
+    """Log received data to file"""
+    try:
+        with open(RECEIVED_LOG_FILE, 'a') as f:
+            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+            f.write(f"[{timestamp}] {label}\n")
+            f.write(f"{data}\n")
+            f.flush()
+    except Exception as e:
+        print(f"[LOG ERROR] Failed to write received log: {e}")
+
+def initialize_log_files():
+    """Clear log files at startup"""
+    try:
+        with open(SENT_LOG_FILE, 'w') as f:
+            f.write(f"SENT PACKETS LOG - Started at {datetime.now()}\n")
+            f.write("="*70 + "\n")
+        
+        with open(RECEIVED_LOG_FILE, 'w') as f:
+            f.write(f"RECEIVED DATA LOG - Started at {datetime.now()}\n")
+            f.write("="*70 + "\n")
+        
+        print(f"✓ Log files initialized: {SENT_LOG_FILE}, {RECEIVED_LOG_FILE}")
+    except Exception as e:
+        print(f"✗ Failed to initialize log files: {e}")
+
+# ==================== OPTITRACK CLIENT ====================
+
+class OptiTrackClient:
+    """Connect to OptiTrack server and get real-time position data"""
+    
+    def __init__(self, server_ip, port):
+        self.server_ip = server_ip
+        self.port = port
+        self.sock = None
+        self.connected = False
+        self.robot_positions = {}
+        self.position_lock = threading.Lock()
+    
+    def connect(self):
+        """Connect to OptiTrack server"""
+        try:
+            print(f"[OptiTrack] Connecting to {self.server_ip}:{self.port}...")
+            self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.sock.settimeout(5.0)
+            self.sock.connect((self.server_ip, self.port))
+            self.sock.settimeout(0.5)
+            self.connected = True
+            print(f"✓ Connected to OptiTrack server!")
+            return True
+        except Exception as e:
+            print(f"✗ OptiTrack connection failed: {e}")
+            return False
+    
+    def disconnect(self):
+        """Disconnect from OptiTrack"""
+        if self.sock:
+            try:
+                self.sock.close()
+            except:
+                pass
+        self.connected = False
+    
+    def parse_robot_data(self, raw_data):
+        """Parse OptiTrack format: id,x,y,z,rotation;..."""
+        if not raw_data or len(raw_data) < 5:
+            return []
+        
+        try:
+            parts = raw_data.split(';')
+            robots = []
+            seen_robot_ids = set()
+            
+            for part in parts:
+                part = part.strip()
+                if not part:
+                    continue
+                
+                values = [v.strip() for v in part.split(',')]
+                
+                try:
+                    if len(values) == 5:
+                        robot_id = int(values[0])
+                        x = float(values[1])
+                        y = float(values[2])
+                        z = float(values[3])
+                        rotation = float(values[4])
+                        
+                        if robot_id in seen_robot_ids:
+                            continue
+                        
+                        if any(v != v for v in [x, y, z, rotation]):
+                            continue
+                        
+                        seen_robot_ids.add(robot_id)
+                        
+                        robot = {
+                            'id': robot_id,
+                            'x': x,
+                            'y': y,
+                            'z': z,
+                            'rotation': rotation
+                        }
+                        robots.append(robot)
+                
+                except (ValueError, IndexError):
+                    continue
+            
+            robots.sort(key=lambda r: r['id'])
+            return robots
+        
+        except Exception as e:
+            return []
+    
+
+    def print_robots(self, robots, raw_data=""):
+        """Print robot positions in a clean format"""
+        current_time = time.time()
+       
+        # Print at most once every 0.1 seconds (10 Hz) to avoid flooding terminal
+        if current_time - self.last_print_time < 0.1:
+            return
+       
+        self.last_print_time = current_time
+       
+        # Clear previous lines (for cleaner output)
+        # Note: This works on most terminals but might not work on all
+        if self.frame_count > 1 and not self.debug:
+            # Move cursor up by number of robots + 3 header lines (+ 2 if debug)
+            lines_to_clear = len(robots) + 3
+            if self.debug and raw_data:
+                lines_to_clear += 2  # Raw data takes 2 lines
+            sys.stdout.write(f"\033[{lines_to_clear}A")
+       
+        # Calculate FPS
+        elapsed = current_time - self.start_time
+        fps = self.frame_count / elapsed if elapsed > 0 else 0
+       
+        # Print header
+        timestamp = datetime.now().strftime("%H:%M:%S.%f")[:-3]
+        print(f"[{timestamp}] Frame: {self.frame_count:6d} | FPS: {fps:6.2f} | Robots: {len(robots)}")
+        print("-" * 80)
+       
+        # Debug: Show raw data
+        if self.debug and raw_data:
+            print(f"RAW: {raw_data[:200]}{'...' if len(raw_data) > 200 else ''}")
+            print("-" * 80)
+       
+        if not robots:
+            print("No robots detected ")
+        else:
+            # Print each robot
+            for robot in robots:
+                print(f"Robot {robot['id']:2d} | "
+                      f"X: {robot['x']:8.4f} | "
+                      f"Y: {robot['y']:8.4f} | "
+                      f"Z: {robot['z']:8.4f} | "
+                      f"Rot: {robot['rotation']:8.2f}°")
+       
+        print("-" * 80)
+        sys.stdout.flush()
+
+    def receive_positions(self):
+        """Background thread: receive position updates"""
+        print("[OptiTrack Thread] Started - receiving position data...")
+        
+        while self.connected and AUX_THREAD_RUNNING:
+            try:
+                data = self.sock.recv(OPTITRACK_BUFFER_SIZE)
+                
+                if not data:
+                    print("[OptiTrack] Server disconnected")
+                    self.connected = False
+                    break
+                
+                decoded = data.decode('utf-8', errors='ignore')
+                cleaned = decoded.replace('\x00', '').strip()
+                
+                robots = self.parse_robot_data(cleaned)
+
+                # self.print_robots(robots, cleaned if self.debug else "")
+
+                with self.position_lock:
+                    self.robot_positions = {r['id']: r for r in robots}
+            
+            except socket.timeout:
+                continue
+            except Exception as e:
+                print(f"[OptiTrack ERROR] {e}")
+                self.connected = False
+                break
+    
+    def get_position(self, robot_id):
+        """Get latest position for a robot (thread-safe)"""
+        with self.position_lock:
+            if robot_id in self.robot_positions:
+                pos = self.robot_positions[robot_id]
+                return pos['x'], pos['y'], int(pos['rotation'])
+        return 0.0, 0.0, 0
+
+# ==================== GLOBAL STATE ====================
+
+class SlaveState:
+    def __init__(self, slave_id):
+        self.slave_id = slave_id
+        self.current_cmd = CMD_STOP  # DEFAULT: STOP for all slaves
+        self.data = [0] * 14  # Data0-Data13
+        self.position_x = 0.0
+        self.position_y = 0.0
+        self.position_theta = 0
+        # Manual override support
+        self.manual_override = False
+        self.manual_x = 0.0
+        self.manual_y = 0.0
+        self.manual_theta = 0
+
+
+    
+    def get_packet(self):
+        """
+        Get 16-byte packet for this slave
+        Format: [ADD] [X_high] [X_low] [Y_high] [Y_low] [Theta] [Cmd] [Data3..Data13] [Delimiter]
+                [0]   [1]      [2]     [3]      [4]     [5]     [6]   [7..13]        [15]
+        """
+        packet = bytearray(BYTES_PER_SLAVE)
+        
+        x_mm = int(self.position_x * 1000)
+        y_mm = int(self.position_y * 1000)
+        
+        packet[0] = self.slave_id                          # ADD
+        packet[1] = (x_mm >> 8) & 0xFF                     # X high byte
+        packet[2] = x_mm & 0xFF                            # X low byte
+        packet[3] = (y_mm >> 8) & 0xFF                     # Y high byte
+        packet[4] = y_mm & 0xFF                            # Y low byte
+        packet[5] = self.position_theta & 0xFF             # Theta
+        packet[6] = self.current_cmd                       # Cmd
+        
+        # Data3-Data13 (indices 7-14 in packet, indices 0-7 in self.data array)
+        for i in range(8):
+            packet[7 + i] = self.data[i] if i < len(self.data) else 0
+        
+        packet[15] = MESSAGE_DELIMITER                     # Delimiter
+        
+        return packet
+
+def get_effective_position(slave_index):
+    """Return position for a slave (manual override > optitrack > fallback)"""
+    slave = slaves[slave_index]
+    if slave.manual_override:
+        return slave.manual_x, slave.manual_y, slave.manual_theta
+    else:
+        return optitrack.get_position(slave_index + 1)
+
+# Global slave states
+num_slaves = 4
+slaves = [SlaveState(i+1) for i in range(4)]
+current_r_id = 0
+
+optitrack = None
+ser = None
+serial_lock = threading.Lock()
+
+# ==================== SERIAL FUNCTIONS ====================
+
+def open_serial_connection():
+    """Open and verify serial connection"""
+    global ser
+    try:
+        ser = serial.Serial(SERIAL_PORT, BAUD_RATE, timeout=SERIAL_TIMEOUT)
+        time.sleep(2)
+        print(f"✓ Connected to {SERIAL_PORT} at {BAUD_RATE} baud")
+        return True
+    except SerialException as e:
+        print(f"✗ Failed to open serial port {SERIAL_PORT}: {e}")
+        return False
+
+def send_packet_to_master(packet_data, label=""):
+    """Send complete packet to master Wixel (thread-safe)"""
+    try:
+        with serial_lock:
+            if ser and ser.is_open:
+                ser.write(packet_data)
+                log_sent_packet(packet_data, label)
+                if label:
+                    print(f"✓ [{label}] Sent {len(packet_data)} bytes to master")
+                return True
+    except SerialException as e:
+        print(f"✗ Failed to send packet: {e}")
+        return False
+
+def read_serial_response():
+    """Read any response from master Wixel"""
+    try:
+        with serial_lock:
+            if ser and ser.is_open and ser.in_waiting > 0:
+                response = ser.read(ser.in_waiting).decode('utf-8', errors='ignore')
+                if response.strip():
+                    print(f"[Master] {response.strip()}")
+                    log_received_data(response.strip(), "Master Response")
+    except:
+        pass
+
+# ==================== POSITION/WAYPOINT GENERATION ====================
+
+def generate_random_position():
+    """Generate random position and orientation (fallback if OptiTrack unavailable)"""
+    x = round(random.uniform(POS_MIN, POS_MAX), 2)
+    y = round(random.uniform(POS_MIN, POS_MAX), 2)
+    theta = random.randint(0, 359)
+    return x, y, theta
+
+def generate_waypoint():
+    """Generate single random waypoint"""
+    x = round(random.uniform(POS_MIN, POS_MAX), 2)
+    y = round(random.uniform(POS_MIN, POS_MAX), 2)
+    return x, y
+
+def waypoint_to_bytes(order, x, y):
+    """Convert waypoint to 5 bytes: order, x_high, x_low, y_high, y_low"""
+    x_mm = int(x * 1000)
+    y_mm = int(y * 1000)
+    return [order, (x_mm >> 8) & 0xFF, x_mm & 0xFF, (y_mm >> 8) & 0xFF, y_mm & 0xFF]
+
+# ==================== COMMAND HANDLERS ====================
+
+def cmd_stop():
+    """Press 'a': STOP current robot, increment r_id"""
+    global current_r_id
+    
+    slaves[current_r_id].current_cmd = CMD_STOP
+    slaves[current_r_id].data = [0] * 14
+    
+    # Build and send complete packet
+    complete_packet = bytearray()
+    for i in range(num_slaves):
+        # Use OptiTrack if available, otherwise random
+        slaves[i].position_x, slaves[i].position_y, slaves[i].position_theta = get_effective_position(i)
+        complete_packet.extend(slaves[i].get_packet())
+    
+    print(f"\n[CMD_STOP] Robot {current_r_id + 1} STOP")
+    send_packet_to_master(complete_packet, f"CMD_STOP (Robot {current_r_id + 1})")
+    
+    # current_r_id = (current_r_id + 1) % num_slaves
+    # print(f"[Next Target] Robot {current_r_id + 1}")
+
+def cmd_select_next_robot():
+    """Press 's': Select next robot"""
+    global current_r_id
+    current_r_id = (current_r_id + 1) % num_slaves
+    print(f"\n[SELECT] Current target: Robot {current_r_id + 1}")
+
+def cmd_go_to_origin():
+    """Press 'f': GO_TO origin (0, 0)"""
+    #  right now it is -2.23 1.19 that is the origin
+    global current_r_id
+    
+    target_x = 0.0
+    target_y = 0.0
+    
+    x_mm = int(target_x * 1000)
+    y_mm = int(target_y * 1000)
+    
+    slaves[current_r_id].current_cmd = CMD_GO_TO
+    slaves[current_r_id].data[0] = (x_mm >> 8) & 0xFF
+    slaves[current_r_id].data[1] = x_mm & 0xFF
+    slaves[current_r_id].data[2] = (y_mm >> 8) & 0xFF
+    slaves[current_r_id].data[3] = y_mm & 0xFF
+    
+    complete_packet = bytearray()
+    for i in range(num_slaves):
+        # Use OptiTrack if available, otherwise random
+        slaves[i].position_x, slaves[i].position_y, slaves[i].position_theta = get_effective_position(i)
+        complete_packet.extend(slaves[i].get_packet())
+    
+    print(f"\n[CMD_GO_TO] Robot {current_r_id + 1} -> Origin (0.00, 0.00)")
+    print(f"\n Current robot position x: {slaves[current_r_id].position_x}, y: {slaves[current_r_id].position_y}")
+    send_packet_to_master(complete_packet, f"CMD_GO_TO_ORIGIN (Robot {current_r_id + 1})")
+
+def cmd_prep():
+    """Press 'j': PREP mode - send 20 waypoints over 5 seconds"""
+    global current_r_id
+    
+    waypoints = []
+    for i in range(MAX_WAYPOINTS):
+        x, y = generate_waypoint()
+        waypoints.append((i, x, y))
+    
+    print(f"\n[CMD_PREP] Robot {current_r_id + 1} - Preparing 20 waypoints for 5 seconds...")
+    
+    start_time = time.time()
+    packet_count = 0
+    
+    while (time.time() - start_time) < PREP_LOOP_DURATION:
+        for packet_idx in range(PREP_PACKETS_PER_LOOP):
+            waypoints_in_packet = 3 if packet_idx < 6 else 2
+            
+            waypoint_data = []
+            for wp_idx in range(waypoints_in_packet):
+                global_wp_idx = (packet_idx * 3 + wp_idx) % MAX_WAYPOINTS
+                order, x, y = waypoints[global_wp_idx]
+                waypoint_data.extend(waypoint_to_bytes(order, x, y))
+            
+            while len(waypoint_data) < 10:
+                waypoint_data.append(0)
+            
+            slaves[current_r_id].current_cmd = CMD_PREP
+            slaves[current_r_id].data = waypoint_data[:10]
+            slaves[current_r_id].data.append(0)
+            slaves[current_r_id].data.extend([0] * 3)
+            
+            complete_packet = bytearray()
+            for i in range(num_slaves):
+                # Use OptiTrack if available, otherwise random
+                slaves[i].position_x, slaves[i].position_y, slaves[i].position_theta = get_effective_position(i)
+                complete_packet.extend(slaves[i].get_packet())
+            
+            send_packet_to_master(complete_packet, f"CMD_PREP packet {packet_count+1}")
+            packet_count += 1
+            
+            time.sleep(0.1)
+            
+            if (time.time() - start_time) >= PREP_LOOP_DURATION:
+                break
+    
+    print(f"[PREP Complete] Sent {packet_count} packets with waypoints")
+
+def cmd_run():
+    """Press '9': RUN operation"""
+    global current_r_id
+    
+    slaves[current_r_id].current_cmd = CMD_RUN
+    slaves[current_r_id].data = [0] * 14
+    
+    complete_packet = bytearray()
+    for i in range(num_slaves):
+        # Use OptiTrack if available, otherwise random
+        slaves[i].position_x, slaves[i].position_y, slaves[i].position_theta = get_effective_position(i)
+        complete_packet.extend(slaves[i].get_packet())
+    
+    print(f"\n[CMD_RUN] Robot {current_r_id + 1} START execution")
+    send_packet_to_master(complete_packet, f"CMD_RUN (Robot {current_r_id + 1})")
+
+
+def cmd_manual_update(x, y, theta=None):
+    """Manual override: persistently override current robot position"""
+    global current_r_id
+
+    s = slaves[current_r_id]
+    s.manual_override = True
+    s.manual_x = x
+    s.manual_y = y
+    if theta is not None:
+        s.manual_theta = int(theta)
+
+    print(f"\n[MANUAL OVERRIDE] Robot {current_r_id + 1} → ({x:.2f}, {y:.2f}) "
+          f"{'(θ='+str(s.manual_theta)+'°)' if theta is not None else ''}")
+    print("This override will persist and affect all future AUX/command packets.")
+
+    # Immediately send updated packet
+    complete_packet = bytearray()
+    for i in range(num_slaves):
+        slaves[i].position_x, slaves[i].position_y, slaves[i].position_theta = get_effective_position(i)
+        complete_packet.extend(slaves[i].get_packet())
+
+    send_packet_to_master(complete_packet, f"MANUAL_OVERRIDE (Robot {current_r_id + 1})")
+
+def cmd_aux_manual_pwm(pwm_left, pwm_right):
+    """Send AUX 0x1F: Manual PWM for 2 seconds"""
+    global current_r_id
+    
+    # Clamp values to valid range
+    pwm_left = max(-255, min(255, pwm_left))
+    pwm_right = max(-255, min(255, pwm_right))
+    
+    # Convert to signed int16 bytes
+    pwm_left_bytes = pwm_left.to_bytes(2, byteorder='big', signed=True)
+    pwm_right_bytes = pwm_right.to_bytes(2, byteorder='big', signed=True)
+    
+    slaves[current_r_id].current_cmd = CMD_AUX
+    slaves[current_r_id].data = [0] * 14
+    slaves[current_r_id].data[0] = 0x1F  # Sub-command
+    slaves[current_r_id].data[1] = pwm_left_bytes[0]   # PWM_left high
+    slaves[current_r_id].data[2] = pwm_left_bytes[1]   # PWM_left low
+    slaves[current_r_id].data[3] = pwm_right_bytes[0]  # PWM_right high
+    slaves[current_r_id].data[4] = pwm_right_bytes[1]  # PWM_right low
+    
+    complete_packet = bytearray()
+    for i in range(num_slaves):
+        slaves[i].position_x, slaves[i].position_y, slaves[i].position_theta = get_effective_position(i)
+        complete_packet.extend(slaves[i].get_packet())
+    
+    print(f"\n[AUX 0x1F] Robot {current_r_id + 1} Manual PWM: L={pwm_left}, R={pwm_right} (2 sec)")
+    print("→ Watch for YELLOW LED on robot (ON=running, OFF=done)")
+    send_packet_to_master(complete_packet, f"AUX_MANUAL_PWM (Robot {current_r_id + 1})")
+
+    # ✓ CRITICAL: Clear data immediately to prevent background thread repetition
+    slaves[current_r_id].data = [0] * 14
+    print("→ Command sent once, cleared from buffer")
+
+
+def cmd_aux_set_offset(offset_x_m, offset_y_m):
+    """Send AUX 0x0F: Set position offset"""
+    global current_r_id
+    
+    # Convert meters to millimeters
+    offset_x_mm = int(offset_x_m * 1000)
+    offset_y_mm = int(offset_y_m * 1000)
+    
+    slaves[current_r_id].current_cmd = CMD_AUX
+    slaves[current_r_id].data = [0] * 14
+    slaves[current_r_id].data[0] = 0x0F  # Sub-command
+    slaves[current_r_id].data[1] = (offset_x_mm >> 8) & 0xFF   # Offset X high
+    slaves[current_r_id].data[2] = offset_x_mm & 0xFF          # Offset X low
+    slaves[current_r_id].data[3] = (offset_y_mm >> 8) & 0xFF   # Offset Y high
+    slaves[current_r_id].data[4] = offset_y_mm & 0xFF          # Offset Y low
+    
+    complete_packet = bytearray()
+    for i in range(num_slaves):
+        slaves[i].position_x, slaves[i].position_y, slaves[i].position_theta = get_effective_position(i)
+        complete_packet.extend(slaves[i].get_packet())
+    
+    print(f"\n[AUX 0x0F] Robot {current_r_id + 1} Offset: X={offset_x_m:.3f}m, Y={offset_y_m:.3f}m")
+    print("→ This offset will be applied to ALL future GO_TO and PREP commands")
+    print("→ Offset persists until robot reboot")
+    send_packet_to_master(complete_packet, f"AUX_SET_OFFSET (Robot {current_r_id + 1})")
+
+    # ✓ CRITICAL: Clear data immediately to prevent background thread repetition
+    slaves[current_r_id].data = [0] * 14
+    print("→ Command sent once, cleared from buffer")
+
+def cmd_aux_backdoor():
+    return
+    """Press '5': Send AUX command with Data3=5 (backdoor forward test)"""
+    global current_r_id
+    
+    slaves[current_r_id].current_cmd = CMD_AUX
+    slaves[current_r_id].data = [0] * 14
+    slaves[current_r_id].data[0] = 5
+    
+    complete_packet = bytearray()
+    for i in range(num_slaves):
+        # Use OptiTrack if available, otherwise random
+        slaves[i].position_x, slaves[i].position_y, slaves[i].position_theta = get_effective_position(i)
+        complete_packet.extend(slaves[i].get_packet())
+    
+    print(f"\n[CMD_AUX] Robot {current_r_id + 1} BACKDOOR (Data3=5)")
+    send_packet_to_master(complete_packet, f"CMD_AUX_BACKDOOR (Robot {current_r_id + 1})")
+
+
+# ==================== BACKGROUND AUX THREAD ====================
+# ==================== BACKGROUND AUX THREAD ====================
+def background_aux_thread():
+    """Background thread: Send AUX commands every ~1 second"""
+    global AUX_THREAD_RUNNING
+    
+    print("\n[AUX THREAD] Started - Sending position updates (0x9F) every 1 second")
+    
+    while AUX_THREAD_RUNNING:
+        try:
+            complete_packet = bytearray()
+            
+            for i in range(num_slaves):
+                # Use OptiTrack if available, otherwise random
+                slaves[i].position_x, slaves[i].position_y, slaves[i].position_theta = get_effective_position(i)
+                
+                # === KEY FIX: Only keep GO_TO/RUN/PREP for ONE cycle, then revert to AUX ===
+                if slaves[i].current_cmd in [CMD_GO_TO, CMD_RUN]:
+                    # Send it once, then convert to AUX
+                    complete_packet.extend(slaves[i].get_packet())
+                    slaves[i].current_cmd = CMD_AUX
+                    slaves[i].data = [0] * 14
+                    slaves[i].data[0] = 0x9F  # <-- MODIFICATION: Set sub-cmd for standard AUX
+                elif slaves[i].current_cmd == CMD_PREP:
+                    # PREP stays until explicitly changed
+                    complete_packet.extend(slaves[i].get_packet())
+                else:
+                    # Normal AUX updates (handles CMD_STOP, CMD_AUX)
+                    slaves[i].current_cmd = CMD_AUX
+                    slaves[i].data = [0] * 14
+                    slaves[i].data[0] = 0x9F  # <-- MODIFICATION: Set sub-cmd for standard AUX
+                    # this also clear the special AUX commands like manual pwm and offset
+                    complete_packet.extend(slaves[i].get_packet())
+            
+            send_packet_to_master(complete_packet, "AUX (Background 0x9F)")
+            
+            time.sleep(AUX_SEND_INTERVAL)
+        
+        except Exception as e:
+            print(f"[AUX THREAD ERROR] {e}")
+            time.sleep(AUX_SEND_INTERVAL)
+
+# ==================== MAIN LOOP ====================
+
+def print_menu():
+    """Print command menu"""
+    print("\n" + "="*60)
+    print("MASTER WIXEL + OPTITRACK (MINIMAL INTEGRATION)")
+    print("="*60)
+    print(f"Current Mode: {num_slaves} slaves | Target Robot: {current_r_id + 1}")
+    print(f"OptiTrack: {OPTITRACK_SERVER_IP}:{OPTITRACK_PORT}")
+    print(f"Logs: {SENT_LOG_FILE}, {RECEIVED_LOG_FILE}")
+    print("\nKeyboard Commands:")
+    print("  'a' : STOP current robot")
+    print("  's' : Select next robot")
+    print("  'f' : GO_TO origin (0, 0)")
+    print("  'j' : PREP mode (5 seconds, 20 waypoints)")
+    print("  '9' : RUN operation")
+    # print("  '5' : AUX command with Data3=5 (backdoor forward)")
+    print("  'p <L> <R>' : Manual PWM command (e.g., 'p 100 100')")
+    print("  'o <X> <Y>' : Set position offset in meters (e.g., 'o 0.5 -0.3')")
+    print("  'q' : Quit")
+    print("\n[Background] AUX thread sends updates every 200ms")
+    print("[OptiTrack] Real positions integrated (or fallback to random)")
+    print("="*60 + "\n")
+
+def main():
+    """Main function"""
+    global num_slaves, current_r_id, AUX_THREAD_RUNNING, optitrack
+    
+    # Initialize log files
+    initialize_log_files()
+    
+    # Connect to OptiTrack
+    optitrack = OptiTrackClient(OPTITRACK_SERVER_IP, OPTITRACK_PORT)
+    if not optitrack.connect():
+        print("[WARNING] OptiTrack connection failed - will use fallback positions")
+    
+    # Start OptiTrack receiver thread
+    optitrack_thread = threading.Thread(target=optitrack.receive_positions, daemon=True)
+    optitrack_thread.start()
+    time.sleep(1)
+    
+    # Open serial connection
+    if not open_serial_connection():
+        sys.exit(1)
+    
+    print_menu()
+    
+    # Start background AUX thread
+    aux_thread = threading.Thread(target=background_aux_thread, daemon=True)
+    aux_thread.start()
+    
+    try:
+        while True:
+            read_serial_response()
+            
+            try:
+                cmd = input("Enter command (a/s/f/j/9/5/m/q): ").strip().lower()
+
+                if cmd == 'a':
+                    cmd_stop()
+                elif cmd == 's':
+                    cmd_select_next_robot()
+                elif cmd == 'f':
+                    cmd_go_to_origin()
+                elif cmd == 'j':
+                    cmd_prep()
+                elif cmd == '9':
+                    cmd_run()
+                elif cmd == '5':
+                    cmd_aux_backdoor()
+                elif cmd.startswith('p '):
+                    parts = cmd.split()
+                    try:
+                        if len(parts) == 3:
+                            pwm_l, pwm_r = int(parts[1]), int(parts[2])
+                            cmd_aux_manual_pwm(pwm_l, pwm_r)
+                        else:
+                            print("✗ Usage: p <pwm_left> <pwm_right>")
+                            print("  Example: p 100 100")
+                    except ValueError:
+                        print("✗ Invalid numbers. Usage: p <pwm_left> <pwm_right>")
+
+# Manual PWM (p command):
+
+# Only use when robot has clear space (2 seconds of movement)
+# Start with low values (40-60) and work up
+# Watch for YELLOW LED: ON=running, OFF=safe
+
+
+# Offset (o command):
+
+# Small adjustments first (±0.1m)
+# Test with GO_TO before running full paths
+# Remember: offset affects ALL robots' commands (not just current one if you switch targets)
+
+
+
+                elif cmd.startswith('o '):
+                    parts = cmd.split()
+                    try:
+                        if len(parts) == 3:
+                            offset_x, offset_y = float(parts[1]), float(parts[2])
+                            cmd_aux_set_offset(offset_x, offset_y)
+                        else:
+                            print("✗ Usage: o <offset_x_m> <offset_y_m>")
+                            print("  Example: o 0.5 -0.3")
+                    except ValueError:
+                        print("✗ Invalid numbers. Usage: o <offset_x_m> <offset_y_m>")
+
+                elif cmd.startswith('m '):
+                    parts = cmd.split()
+                    try:
+                        if len(parts) == 3:
+                            x, y = float(parts[1]), float(parts[2])
+                            cmd_manual_update(x, y)
+                        elif len(parts) == 4:
+                            x, y, theta = float(parts[1]), float(parts[2]), float(parts[3])
+                            cmd_manual_update(x, y, theta)
+                        else:
+                            print("✗ Usage: m <x> <y> [theta]")
+                    except ValueError:
+                        print("✗ Invalid numbers. Usage: m <x> <y> [theta]")
+                elif cmd == 'q':
+                    print("\n✓ Exiting...")
+                    break
+                else:
+                    print("✗ Invalid command. Try again.")
+
+            
+            except KeyboardInterrupt:
+                print("\n✓ Interrupted by user")
+                break
+    
+    finally:
+        AUX_THREAD_RUNNING = False
+        time.sleep(0.5)
+        
+        if optitrack:
+            optitrack.disconnect()
+        
+        if ser:
+            ser.close()
+            print("✓ Serial connection closed")
+        
+        print(f"\n✓ Check logs: {SENT_LOG_FILE}, {RECEIVED_LOG_FILE}")
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,1091 @@
+/*
+ * ================= SLAVE WIXEL WITH STATE MACHINE + APF =================
+ *
+ * State Machine: IDLE -> HOME -> IDLE
+ * Commands: CMD_STOP, CMD_GO_TO, CMD_PREP, CMD_RUN, CMD_AUX
+ * LED States: RED (IDLE), BLUE (HOME), GREEN (RUN), PURPLE (PREP)
+ *
+ * Features:
+ * - State machine with RGB LED flashing
+ * - Position localization from OptiTrack (Data0=X, Data1=Y, Data2=θ)
+ * - Artificial Potential Field (APF) with attraction force only
+ * - Waypoint collection for path following
+ * - CMD_AUX support (position updates without state changes)
+ * - Connection timeout handling
+ * - One-way communication (RX only)
+ * ============================================================
+ */
+
+#include <wixel.h>
+#include <usb.h>
+#include <radio_registers.h>
+
+
+/* ================== CONFIGURATION CONSTANTS ================== */
+
+// --- Slave Configuration ---
+#define THIS_SLAVE_ADDRESS      0x01
+
+// --- Command Definitions ---
+#define CMD_STOP                0x10
+#define CMD_GO_TO               0x11
+#define CMD_PREP                0x12
+#define CMD_RUN                 0x13
+#define CMD_AUX                 0x14
+
+// --- Protocol Definitions ---
+#define MESSAGE_DELIMITER       0xFF
+#define BYTES_PER_SLAVE         16
+#define RADIO_PACKET_SIZE       64      // 4 slaves * 16 bytes
+
+// --- GPIO Pin Definitions (RGB Control) ---
+#define LED_RED_PIN             2   // P1_2 = RGB Red
+#define LED_GREEN_PIN           1   // P1_1 = RGB Green
+#define LED_BLUE_PIN            7   // P1_7 = RGB Blue
+
+// --- Motor Control Pins ---
+#define R_PWM_PIN               3
+#define R_DIR_PIN               5
+#define L_PWM_PIN               4
+#define L_DIR_PIN               6
+
+// Zumo v1.2 speed calibration
+// At PWM=150 on both wheels: ~1000 mm/s (1 meter per second)
+#define ZUMO_MAX_PWM            255
+#define ZUMO_MAX_VELOCITY_PWM   150    // PWM for max speed estimate (1000 mm/s)
+#define ZUMO_MAX_VELOCITY_MMS   700   // mm/s at PWM=150
+
+/* Motor control constants */
+#define WHEELBASE_MM            100     // Distance between left and right wheels (mm)
+#define STEERING_GAIN           2       // Proportional steering gain
+
+// Motor control limits
+#define MIN_PWM                 40      // Minimum PWM (no movement)
+#define MAX_PWM                 120    // Maximum PWM
+#define PWM_DEADZONE            30     // Dead zone to overcome static friction
+
+
+// --- Timing Constants ---
+#define CONNECTION_TIMEOUT      3000   // 3 seconds without packet
+#define LED_FLASH_DUTY          250    // On-time within period (ms)
+#define GO_TO_TIMEOUT           10000  // 10 seconds timeout for HOME state (for the real test, adjust to 10 seconds)
+#define PATH_FOLLOW_TIMEOUT     5000  // 5 seconds timeout for RUN state (for the real test, adjust to 60 seconds)
+
+// --- APF Constants (Attraction Force Only) ---
+#define APF_ATTRACTIVE_GAIN     1.0    // Gain for attractive force (m/s^2 per meter)
+#define APF_MAX_VELOCITY        500    // Max velocity (mm/s) - 50 cm/s
+#define APF_GOAL_THRESHOLD      500    // Goal reached threshold (mm) - 50 cm for testing, 10 cm for real
+#define APF_UPDATE_RATE         100    // Update rate (ms)
+
+// --- Waypoint Configuration ---
+#define MAX_WAYPOINTS           20
+
+// --- Position Filtering ---
+#define POSITION_JUMP_THRESHOLD 500    // mm - threshold for detecting errors
+#define FILTER_ALPHA_HIGH       0.9    // High alpha for small changes
+#define FILTER_ALPHA_LOW        0.2    // Low alpha for large jumps
+
+/* ================== STATE MACHINE DEFINITIONS ================== */
+
+#define STATE_IDLE              0
+#define STATE_HOME              1
+#define STATE_RUN               2
+
+/* ================== GLOBAL VARIABLES ================== */
+
+// Radio RX packet buffer
+static volatile XDATA uint8 rxPacket[1 + RADIO_PACKET_SIZE + 2];
+
+// State machine
+uint8 currentState = STATE_IDLE;
+
+// RGB LED control
+uint8 ledPurple = 0;
+
+// LED timing
+uint16 lastLedFlashTime = 0;
+uint32 lastHeartbeatTime = 0;
+uint32 now = 0;
+uint32 rxPulseStart = 1; // just a counter for RED LED pulse, always beep once at boot
+uint16 lastPacketTimeCheck = 0;
+uint16 lastPacketTime = 0;
+uint16 counter_loop = 0;
+
+// Position data (from OptiTrack) - mm
+int16 posX = 0;
+int16 posY = 0;
+int8 posTheta = 0;
+
+
+
+// Filtered position - mm
+int16 filteredX = 0;
+int16 filteredY = 0;
+int8 filteredTheta = 0;
+
+// Target location (for GO_TO) - mm
+int16 targetX = 0;
+int16 lastTargetX = 0;
+int16 targetY = 0;
+int16 lastTargetY = 0;
+
+// Offset from AUX
+int16 offsetX = 0;
+int16 offsetY = 0;
+
+// Waypoint buffer
+typedef struct
+{
+    uint8 order;
+    int16 x;
+    int16 y;
+} Waypoint;
+
+Waypoint waypoints[MAX_WAYPOINTS];
+uint8 waypointCount = 0;
+uint8 waypointInputIndex = 0;
+uint8 currentWaypointIndex = 0;
+
+// State timeout tracking
+uint32 stateStartTime = 0;
+
+// APF state
+int16 apfVelX = 0;     // Current desired velocity (mm/s)
+int16 apfVelY = 0;
+int32 lastApfUpdateTime = 0;
+int16 pwm_left, pwm_right;
+int16 manualPwmLeft, manualPwmRight;
+// Misc
+uint8 fsi;
+uint8 i;
+/* ================== HELPER FUNCTIONS ================== */
+
+/*
+ * Simple integer square root (for distance calculation if needed)
+  */
+int16 isqrt(int32 n)
+{
+    int32 x = n;
+    int32 y = (x + 1) >> 1;
+    while (y < x)
+    {
+        x = y;
+        y = (x + n / x) >> 1;
+    }
+    return (int16)x;
+}
+
+/*
+ * Get absolute value of int16
+ */
+int16 abs16(int16 val)
+{
+    return (val < 0) ? -val : val;
+}
+
+/*
+ * Check if position is within threshold using simple delta comparison
+ * Returns 1 if within threshold, 0 otherwise
+ */
+uint8 isWithinThreshold(int16 currentX, int16 currentY, int16 targetX, int16 targetY, int16 threshold)
+{
+    int16 dx = abs16(targetX - currentX);
+    int16 dy = abs16(targetY - currentY);
+    
+    // Goal reached if both dx and dy are within threshold
+    return (dx < threshold && dy < threshold);
+}
+
+/*
+ * Filter position data (threshold-based jump detection)
+ */
+void filterPosition()
+{
+    int16 dx, dy;
+    int32 distSquared;
+    int16 alpha_num, alpha_den;
+    
+    dx = posX - filteredX;
+    dy = posY - filteredY;
+    distSquared = (int32)dx * dx + (int32)dy * dy;
+    
+    // If change is large (jump detected), use low alpha; otherwise high alpha
+    if (distSquared > (int32)POSITION_JUMP_THRESHOLD * POSITION_JUMP_THRESHOLD)
+    {
+        // Use low alpha (0.2): filteredX = 0.2 * posX + 0.8 * filteredX
+        alpha_num = 1;
+        alpha_den = 5;
+    }
+    else
+    {
+        // Use high alpha (0.9): filteredX = 0.9 * posX + 0.1 * filteredX
+        alpha_num = 9;
+        alpha_den = 10;
+    }
+    
+    filteredX = (int16)((alpha_num * posX + (alpha_den - alpha_num) * filteredX) / alpha_den);
+    filteredY = (int16)((alpha_num * posY + (alpha_den - alpha_num) * filteredY) / alpha_den);
+    filteredTheta = (int8)((alpha_num * posTheta + (alpha_den - alpha_num) * filteredTheta) / alpha_den);
+}
+
+
+
+/*
+ * Initialize Timer3 for PWM output
+ */
+void timer3Init()
+{
+    T3CTL = 0b01110000;      // Prescaler 1:8, frequency = 11.7 kHz (matches alpha.c)
+    T3CC0 = T3CC1 = 0;       // Set duty cycles to zero
+    T3CCTL0 = T3CCTL1 = 0b00100100;    // Compare mode
+    PERCFG &= ~(1<<5);       // Alternate location (matches alpha.c)
+    P1SEL |= (1<<R_PWM_PIN) | (1<<L_PWM_PIN);  // P1_3 and P1_4 as PWM
+}
+
+/*
+ * Initialize the radio for direct reception
+ */
+void radioInit()
+{
+    radioRegistersInit();
+    
+    CHANNR = 128;
+    PKTLEN = RADIO_PACKET_SIZE;     // HARDCODED: 64 bytes for 4 slaves
+    
+    MCSM0 = 0x14;
+    MCSM1 = 0x00;
+    
+    dmaConfig.radio.DC6 = 19;
+    dmaConfig.radio.SRCADDRH = XDATA_SFR_ADDRESS(RFD) >> 8;
+    dmaConfig.radio.SRCADDRL = XDATA_SFR_ADDRESS(RFD);
+    dmaConfig.radio.DESTADDRH = (unsigned int)rxPacket >> 8;
+    dmaConfig.radio.DESTADDRL = (unsigned int)rxPacket;
+    dmaConfig.radio.LENL = 1 + RADIO_PACKET_SIZE + 2;
+    dmaConfig.radio.VLEN_LENH = 0b10000000;
+    dmaConfig.radio.DC7 = 0x10;
+    
+    DMAARM |= (1<<DMA_CHANNEL_RADIO);
+    RFST = 2;
+}
+
+/*
+ * Initialize GPIO pins
+ */
+void gpioInit()
+{
+    P1SEL = 0x00;
+    P1DIR = 0x00;
+    P1 = 0x00;
+    
+    T1CTL = 0x00;
+    T3CTL = 0x00;
+    T4CTL = 0x00;
+    
+    P1DIR |= (1 << LED_RED_PIN) | (1 << LED_GREEN_PIN) | (1 << LED_BLUE_PIN);
+    P1DIR |= (1 << R_DIR_PIN) | (1 << L_DIR_PIN);
+    
+    P1SEL = 0x00;
+    
+    P1_1 = 1;
+    P1_2 = 1;
+    P1_7 = 1;
+    
+    T3CC0 = 0;
+    T3CC1 = 0;
+    P1_5 = 0;
+    P1_6 = 0;
+}
+
+/* ================== LED CONTROL ================== */
+
+/*
+ * Update RGB LEDs based on current state (flashing pattern)
+ */
+void updateRgbLeds()
+{
+    switch(currentState)
+    {
+        case STATE_IDLE:
+            P1_2 = 0;  // RED on
+            P1_1 = 1;
+            P1_7 = (ledPurple) ? 0 : 1;  // Add BLUE if purple mode
+            break;
+            
+        case STATE_HOME:
+            P1_2 = 1;  // BLUE on
+            P1_1 = 1;
+            P1_7 = 0;
+            break;
+            
+        case STATE_RUN:
+            P1_2 = 1;  // GREEN on
+            P1_1 = 0;
+            P1_7 = 1;
+            break;
+    }
+}
+
+/*
+ * Convert APF velocity (apfVelX, apfVelY in mm/s) to motor commands
+ * 
+ * Robot kinematics (differential drive):
+ * - Left wheel velocity = (forward velocity - angular velocity * wheelbase/2)
+ * - Right wheel velocity = (forward velocity + angular velocity * wheelbase/2)
+ * 
+ * - velocity_forward = magnitude of (apfVelX, apfVelY)
+ * - heading_desired = atan2(apfVelY, apfVelX)
+ * - heading_current = posTheta
+ * - steering = (heading_desired - heading_current)
+ */
+void apf2motor()
+{
+    uint32 velMagSquared;
+    int32 absX, absY;
+    int16 velMag;
+    int16 heading_desired;
+    int16 steering_error;
+    int16 vel_left, vel_right;
+    
+    
+    // Calculate magnitude of desired velocity (forward velocity)
+    velMagSquared = ((int32)apfVelX * apfVelX) + ((int32)apfVelY * apfVelY);
+    
+    if (velMagSquared > 2147483647) 
+    {
+        // We are at max range, just use the sqrt of INT32_MAX
+        velMag = 46340; // isqrt(2147483647)
+    }
+    else
+    {
+        velMag = isqrt((int32)velMagSquared);
+    }
+
+    if (velMag == 0)
+    {
+        // Stop motors
+        T3CC0 = 0;
+        T3CC1 = 0;
+        P1_5 = 0;  // Right direction
+        P1_6 = 0;  // Left direction
+        return;
+    }
+    
+    // Calculate desired heading using approximation
+    // heading_desired ≈ atan2(apfVelY, apfVelX) in degrees
+    // For small angles: atan2(y, x) ≈ (y / x) * 57.3 (radians to degrees)
+    // Simplified: heading_desired = (apfVelY / apfVelX) * K
+    if (apfVelX == 0)
+    {
+        heading_desired = (apfVelY > 0) ? 90 : -90;
+    }
+    else
+    {
+        // Calculate angle using approximation
+        // atan(y/x) ≈ (y/x) * (45 - abs(y/x) * (45 - 57.3))
+        // Simplified for embedded: use lookup or quadrant-based approach
+        
+        // Simple quadrant approach:
+        absX = (apfVelX > 0) ? apfVelX : -apfVelX;
+        absY = (apfVelY > 0) ? apfVelY : -apfVelY;
+        
+        if (absX > absY)
+        {
+            // More horizontal than vertical
+            // angle ≈ (y / x) * 45
+            heading_desired = (int16)((apfVelY * 45) / apfVelX);
+        }
+        else
+        {
+            // More vertical than horizontal
+            // angle ≈ 90 - (x / y) * 45
+            if (apfVelY > 0)
+                heading_desired = 90 - (int16)((apfVelX * 45) / apfVelY);
+            else
+                heading_desired = -90 - (int16)((apfVelX * 45) / apfVelY);
+        }
+    }
+    
+    // Calculate steering error (desired heading - current heading)
+    steering_error = heading_desired - (int16)filteredTheta;
+    
+    // Normalize steering error to [-180, 180]
+    if (steering_error > 180)
+        steering_error -= 360;
+    if (steering_error < -180)
+        steering_error += 360;
+    
+    // Differential drive kinematics
+    // vel_left = forward_velocity - (steering_error * wheelbase / 2)
+    // vel_right = forward_velocity + (steering_error * wheelbase / 2)
+    vel_left = velMag - ((steering_error * WHEELBASE_MM * STEERING_GAIN) / 200);
+    vel_right = velMag + ((steering_error * WHEELBASE_MM * STEERING_GAIN) / 200);
+    
+    // Clamp velocities to valid range
+    if (vel_left > ZUMO_MAX_VELOCITY_MMS)
+        vel_left = ZUMO_MAX_VELOCITY_MMS;
+    if (vel_left < -ZUMO_MAX_VELOCITY_MMS)
+        vel_left = -ZUMO_MAX_VELOCITY_MMS;
+    if (vel_right > ZUMO_MAX_VELOCITY_MMS)
+        vel_right = ZUMO_MAX_VELOCITY_MMS;
+    if (vel_right < -ZUMO_MAX_VELOCITY_MMS)
+        vel_right = -ZUMO_MAX_VELOCITY_MMS;
+    
+    // Convert velocities to PWM
+    pwm_left = velocityToPWM(vel_left);
+    pwm_right = velocityToPWM(vel_right);
+}
+
+void setMotorsPWM(){
+    // Set left motor (P1_4 = PWM (T3CC1), P1_6 = direction)
+    if (pwm_left >= 0)
+    {
+        T3CC1 = pwm_left;
+        P1_6 = 0;  // Forward
+    }
+    else
+    {
+        T3CC1 = -pwm_left;
+        P1_6 = 1;  // Backward
+    }
+    
+    // Set right motor (P1_3 = PWM (T3CC0), P1_5 = direction)
+    if (pwm_right >= 0)
+    {
+        T3CC0 = pwm_right;
+        P1_5 = 0;  // Forward
+    }
+    else
+    {
+        T3CC0 = -pwm_right;
+        P1_5 = 1;  // Backward
+    }
+}
+
+/*
+ * Stop motors immediately
+ */
+void stopMotors()
+{
+    T3CC0 = 0;
+    T3CC1 = 0;
+    P1_5 = 0;
+    P1_6 = 0;
+}
+
+
+// 1. You send AUX 0x1F (pwm_left=100, pwm_right=100)
+// 2. Robot blocks for 2 seconds, drives straight
+// 3. Your OptiTrack monitoring code:
+//    - Records position at t=0
+//    - Records position at t=2s
+//    - Calculates: actual_velocity = distance / 2.0
+//    - Calculates: orientation_drift = end_theta - start_theta
+// 4. You analyze multiple PWM values, build calibration table
+// 5. Later: send corrections via AUX 0x2F (if needed)
+
+
+void executeManualPwm()
+{
+    // Flash LED to indicate manual mode start
+    LED_YELLOW(1);
+    delayMs(100);
+    LED_YELLOW(0);
+    
+    // Set motors directly (bypass normal control)
+    pwm_left = manualPwmLeft;
+    pwm_right = manualPwmRight;
+    setMotorsPWM();
+    
+    // Block for 2 seconds
+    delayMs(2000);
+    
+    // Stop motors
+    stopMotors();
+    manualPwmLeft = 0;
+    manualPwmRight = 0;
+    
+    // Flash LED to indicate completion
+    LED_YELLOW(1);
+    delayMs(100);
+    LED_YELLOW(0);
+    pwm_left = 0;
+    pwm_right = 0;
+    currentState = STATE_IDLE;
+}
+
+
+/* ================== APF (ATTRACTION ONLY) ================== */
+
+/*
+ * Compute attractive force toward goal (simple potential field)
+ * F = k * (Goal - Current)
+ * 
+ * Input: current position (mm), target position (mm)
+ * Output: desired velocity (mm/s) stored in apfVelX, apfVelY
+ */
+void computeAttractiveForcesGoTo()
+{
+    int32 dx, dy;
+    int32 distSquared;
+    int16 dist;
+    int16 velMag;
+    
+    // Vector from current to goal
+    dx = (int32)targetX - (int32)filteredX;
+    dy = (int32)targetY - (int32)filteredY;
+    
+    distSquared = dx*dx + dy*dy;
+    
+    // Check if goal reached using simple threshold check
+    if (isWithinThreshold(filteredX, filteredY, targetX, targetY, APF_GOAL_THRESHOLD))
+    {
+        apfVelX = 0;
+        apfVelY = 0;
+        return;
+    }
+    
+    // Calculate distance
+    dist = isqrt(distSquared);
+    
+    if (dist > 0)
+    {
+        // Desired velocity magnitude (proportional to distance, capped at APF_MAX_VELOCITY)
+        // prolly cast error here NOTE
+        velMag = (dist > APF_MAX_VELOCITY) ? APF_MAX_VELOCITY : dist;
+
+        // Desired velocity direction (normalized)
+        apfVelX = (int16)((dx * (int32)velMag) / (int32)dist);
+        apfVelY = (int16)((dy * (int32)velMag) / (int32)dist);
+    }
+    else
+    {
+        apfVelX = 0;
+        apfVelY = 0;
+    }
+}
+
+/*
+ * ================== OBSTACLE AVOIDANCE (REPULSIVE FORCES) ==================
+ * 
+ * TODO: Implement repulsive forces
+ * 
+ * Potential repulsive force model:
+ * - Define obstacle regions (could be from sonar, IR sensors, or pre-mapped)
+ * - For each obstacle at position (obs_x, obs_y):
+ *   - distance_to_obs = sqrt((current_x - obs_x)^2 + (current_y - obs_y)^2)
+ *   - if distance_to_obs < OBSTACLE_INFLUENCE_DISTANCE:
+ *     - repulsive_force = k_rep / (distance_to_obs + epsilon)
+ *     - direction = normalize(current - obstacle)
+ *     - force_vector = repulsive_force * direction
+ * 
+ * Integration:
+ * - Sum attractive + repulsive forces
+ * - Clamp to max velocity
+ * 
+ * Current implementation: No obstacles (attraction only)
+ */
+void computeRepulsiveForcesAvoidance()
+{
+    // TODO: Add obstacle detection and repulsive forces
+    // For now: no repulsive forces
+}
+
+/* ================== PACKET RECEPTION ================== */
+
+/*
+ * Extract position data from packet
+ */
+void extractPositionData(uint8 offset)
+{
+    posX = (int16)((rxPacket[offset + 1] << 8) | rxPacket[offset + 2]);
+    posY = (int16)((rxPacket[offset + 3] << 8) | rxPacket[offset + 4]);
+    posTheta = (int8)rxPacket[offset + 5];
+}
+
+/*
+ * Process CMD_STOP command
+ */
+void handleCmdStop()
+{
+    currentState = STATE_IDLE;
+    ledPurple = 0;
+    waypointCount = 0;
+    currentWaypointIndex = 0;
+    apfVelX = 0;
+    apfVelY = 0;
+    pwm_left = 0;
+    pwm_right = 0;
+    stopMotors();  // Immediately stop motors
+}
+
+/*
+ * Process CMD_GO_TO command
+ * Extract target position from data bytes
+ */
+void handleCmdGoTo(uint8 offset)
+{
+    if (currentState == STATE_RUN)
+    {
+        // Ignore GO_TO if in RUN state
+        return;
+    }
+
+    // Target X: Data[0:1] (bytes at offset+7:8)
+    // Target Y: Data[2:3] (bytes at offset+9:10)
+    targetX = (int16)((rxPacket[offset + 7] << 8) | rxPacket[offset + 8]);
+    targetY = (int16)((rxPacket[offset + 9] << 8) | rxPacket[offset + 10]);
+    
+
+    // Only ignore GO_TO if we are already in HOME and the target hasn't changed.
+    if (currentState == STATE_HOME && targetX == lastTargetX && targetY == lastTargetY)
+    {
+        return;  // Already navigating to this target; no change
+    }
+    
+    if (currentState == STATE_HOME)
+    {
+        // Restart GO_TO only if target changes
+        if (targetX != lastTargetX || targetY != lastTargetY)
+        {
+            stateStartTime = (uint32)getMs();
+            lastTargetX = targetX;
+            lastTargetY = targetY;
+        }
+    }
+    else
+    {
+        // Entering HOME state from IDLE
+        stateStartTime = (uint32)getMs();
+        lastTargetX = targetX;
+        lastTargetY = targetY;
+    }
+
+    currentState = STATE_HOME;
+    ledPurple = 0;
+    waypointCount = 0;
+    waypointInputIndex = 0;
+    currentWaypointIndex = 0;
+    apfVelX = 0;
+    apfVelY = 0;
+}
+
+/*
+ * Process CMD_PREP command
+ */
+void handleCmdPrep(uint8 offset)
+{
+    if (currentState != STATE_IDLE)
+    {
+        // Only accept PREP from IDLE state
+        return;
+    }
+
+    if (!ledPurple)
+    {
+        waypointCount = 0;
+        ledPurple = 1;
+    }
+    
+    // each packet can contain up to 2 waypoints
+    // run is fully updated when waypointCount >= MAX_WAYPOINTS
+    for (i = 0; i < 2; i++)
+    {
+        uint8 dataOffset = offset + 7 + (i * 5);
+        waypointInputIndex = rxPacket[dataOffset + 0];
+        
+        waypoints[waypointInputIndex].x = (int16)((rxPacket[dataOffset + 1] << 8) | rxPacket[dataOffset + 2]);
+        waypoints[waypointInputIndex].y = (int16)((rxPacket[dataOffset + 3] << 8) | rxPacket[dataOffset + 4]);
+        
+        waypointCount++;
+    }
+}
+
+/*
+ * Process CMD_RUN command
+ */
+void handleCmdRun()
+{
+    if (currentState != STATE_IDLE)
+    {
+        // Only accept RUN from IDLE state
+        return;
+    }
+    // if RUN command received, but is currently in RUN state, then ignore
+    if (waypointCount >= MAX_WAYPOINTS)
+    {
+        currentState = STATE_RUN;
+        ledPurple = 0;
+        currentWaypointIndex = 0;
+        stateStartTime = (uint32)getMs();
+        lastApfUpdateTime = (uint32)getMs();
+    }
+}
+
+/*
+ * Process CMD_AUX command (for auxiliary functions)
+ */
+void handleCmdAux(uint8 offset)
+{
+    uint8 auxSubCmd = rxPacket[offset + 7];
+    
+    switch(auxSubCmd)
+    {
+        case 0x9F: // Default update position from background
+            break;
+
+        case 0x0F:  // Position offset
+            offsetX = (int16)((rxPacket[offset + 8] << 8) | rxPacket[offset + 9]);
+            offsetY = (int16)((rxPacket[offset + 10] << 8) | rxPacket[offset + 11]);
+            // LED confirmation (optional): flash GREEN 2x
+            break;
+            
+        case 0x1F:  // Manual PWM - BLOCKING
+            currentState = STATE_IDLE; // Ensure we are in IDLE
+            manualPwmLeft = (int16)((rxPacket[offset + 8] << 8) | rxPacket[offset + 9]);
+            manualPwmRight = (int16)((rxPacket[offset + 10] << 8) | rxPacket[offset + 11]);
+            
+            // BLOCKING execution
+            executeManualPwm();
+            break;
+            
+        case 0x2F:  // Future: calibration data from analysis
+            // Placeholder - implement when you know what data you need
+            break;
+            
+        default:
+            // Unknown AUX command - ignore
+            break;
+    }
+}
+
+
+/*
+ * Main packet reception handler
+ */
+void receiveAndProcessPackets()
+{
+    uint8 slaveAddress;
+    uint8 cmd;
+    uint8 packetOffset;
+    if (RFIF & (1<<4))
+    {
+        if (radioCrcPassed())
+        {
+            lastPacketTime = (uint16)getMs();
+            // Update RED LED pulse
+            if (lastPacketTime != lastPacketTimeCheck)
+            {
+                rxPulseStart = 1; // reset the counter
+                lastPacketTimeCheck = lastPacketTime;
+            }
+
+            // Determine slave offset
+            if (THIS_SLAVE_ADDRESS == 0x01)
+                packetOffset = 1;
+            else if (THIS_SLAVE_ADDRESS == 0x02)
+                packetOffset = 17;
+            else if (THIS_SLAVE_ADDRESS == 0x03)
+                packetOffset = 33;
+            else if (THIS_SLAVE_ADDRESS == 0x04)
+                packetOffset = 49;
+            else
+            {
+                // NOTE we do not handle more than 4 slaves
+                RFIF &= ~(1<<4);
+                DMAARM |= (1<<DMA_CHANNEL_RADIO);
+                RFST = 2;
+                return;
+            }
+
+            
+            slaveAddress = rxPacket[packetOffset + 0];
+            cmd = rxPacket[packetOffset + 6];
+            
+            if (slaveAddress != THIS_SLAVE_ADDRESS)
+            {
+                // Whole message is maybe wrong
+                RFIF &= ~(1<<4);
+                DMAARM |= (1<<DMA_CHANNEL_RADIO);
+                RFST = 2;
+                return;
+            }
+            
+            // Extract and filter position for this address
+            extractPositionData(packetOffset);
+            filterPosition();
+
+            // TODO, also extract and update the position of the other slaves
+
+            
+            // Process command
+            switch(cmd)
+            {
+                case CMD_STOP:
+                    handleCmdStop();
+                    break;
+                case CMD_GO_TO:
+                    handleCmdGoTo(packetOffset);
+                    break;
+                case CMD_PREP:
+                    handleCmdPrep(packetOffset);
+                    break;
+                case CMD_RUN:
+                    handleCmdRun();
+                    break;
+                case CMD_AUX:
+                    handleCmdAux(packetOffset);
+                    break;
+            }
+        }
+        
+        RFIF &= ~(1<<4);
+        DMAARM |= (1<<DMA_CHANNEL_RADIO);
+        RFST = 2;
+    }
+}
+
+/*
+ * Handle connection timeout
+ */
+void handlePacketTimeout()
+{
+    if ((uint16)(getMs() - lastPacketTime) > CONNECTION_TIMEOUT)
+    {
+        currentState = STATE_IDLE;
+        ledPurple = 0;
+        waypointCount = 0;
+        apfVelX = 0;
+        apfVelY = 0;
+        pwm_left = 0;
+        pwm_right = 0;
+        stopMotors();  // Immediately stop motors
+    }
+}
+
+
+/*
+ * Update HOME state (GO_TO with APF)
+ */
+void updateHomeState()
+{
+    uint32 elapsedTime = now - stateStartTime;
+    int16 dx, dy;
+    
+    // Timeout after GO_TO_TIMEOUT
+    if (elapsedTime >= GO_TO_TIMEOUT)
+    {
+        currentState = STATE_IDLE;
+        apfVelX = 0;
+        apfVelY = 0;
+        pwm_left = 0;
+        pwm_right = 0;
+        stopMotors();
+
+        lastTargetX = 0;
+        lastTargetY = 0;  // Reset last target
+        return;
+    }
+    
+    // Calculate delta position
+    dx = targetX - filteredX;
+    dy = targetY - filteredY;
+    
+    // Motor control from APF velocities (implemented in updateMotor())
+
+    // Check if goal reached using simple threshold
+    if (isWithinThreshold(filteredX, filteredY, targetX, targetY, APF_GOAL_THRESHOLD))
+    {
+        pwm_left = 0;
+        pwm_right = 0;
+        apfVelX = 0;
+        apfVelY = 0;
+        currentState = STATE_IDLE;
+        stopMotors();
+    }
+    else
+    {
+        // For testing: simple spin in place
+        pwm_left = -80;
+        pwm_right = 80;
+
+    // STILL TESTING , APF DISABLED FOR NOW
+    // 1. Calculate APF velocities based on goal
+    //    (This updates global apfVelX, apfVelY)
+    // computeAttractiveForcesGoTo();
+
+    // // 2. Convert APF velocities to motor commands
+    // //    (This function needs to be fixed to update global pwm_left/pwm_right)
+    // apf2motor();
+    }
+}
+
+
+/*
+ * ================== PATH FOLLOWING (RUN STATE) ==================
+ * 
+ * TODO: Implement waypoint-based path following
+ * 
+ * Algorithm:
+ * 1. Get current waypoint: target = waypoints[currentWaypointIndex]
+ * 2. Calculate attractive force toward waypoint
+ * 3. Add repulsive forces (obstacles)
+ * 4. When reached waypoint (within threshold):
+ *    - Increment currentWaypointIndex
+ *    - If currentWaypointIndex >= waypointCount: return to IDLE (path complete)
+ * 5. Timeout: if elapsed > PATH_FOLLOW_TIMEOUT: return to IDLE
+ * 
+ * Current implementation: Placeholder only
+ */
+void updateRunState()
+{
+    uint32 elapsedTime = now - stateStartTime;
+    
+    if (elapsedTime >= PATH_FOLLOW_TIMEOUT) 
+    // auto reset
+    {
+        currentState = STATE_IDLE;
+        ledPurple = 0;
+        waypointCount = 0;
+        apfVelX = 0;
+        apfVelY = 0;
+        pwm_left = 0;
+        pwm_right = 0;
+        stopMotors();
+        return;
+    }
+    
+    // TODO: Implement full path following
+    // For now: set first waypoint as target and follow it
+    if (currentWaypointIndex < waypointCount)
+    {
+        // Set target to current waypoint
+        targetX = waypoints[currentWaypointIndex].x;
+        targetY = waypoints[currentWaypointIndex].y;
+        
+        // Update APF
+        // TODO dont care bout update rate for now
+        // computeAttractiveForcesGoTo();
+        computeRepulsiveForcesAvoidance();
+        // lastApfUpdateTime = now;
+        
+        // Check if reached current waypoint
+        if (isWithinThreshold(filteredX, filteredY, targetX, targetY, APF_GOAL_THRESHOLD))
+        {
+            // Waypoint reached, move to next
+            currentWaypointIndex++;
+            
+            if (currentWaypointIndex >= waypointCount)
+            {
+                // All waypoints reached, return to IDLE
+                currentState = STATE_IDLE;
+                ledPurple = 0;
+                apfVelX = 0;
+                apfVelY = 0;
+                pwm_left = 0;
+                pwm_right = 0;
+                stopMotors();
+            }
+        }
+    }
+    // No more waypoints, actually dont need to do anything, coz already set to IDLE
+}
+
+/*
+ * Update state machine
+ */
+void updateStateMachine()
+{
+    switch(currentState)
+    {
+        case STATE_IDLE:
+            // Ensure motors are stopped in IDLE
+            stopMotors();
+            break;
+        case STATE_HOME:
+            updateHomeState();
+            break;
+        case STATE_RUN:
+            updateRunState();
+            break;
+    }
+}
+
+/* ================== MAIN FUNCTION ================== */
+
+void main()
+{
+    systemInit();
+    // usbInit();
+    gpioInit();
+    timer3Init();
+    radioInit();
+    
+    lastPacketTime = (uint16)getMs();
+    lastLedFlashTime = (uint16)getMs();
+    lastHeartbeatTime = (uint32)getMs();
+    
+    // RGB LED Test Sequence
+    P1_2 = 0;  // RED on
+    P1_1 = 1;
+    P1_7 = 1;
+    delayMs(500);
+    
+    P1_2 = 1;  // GREEN on
+    P1_1 = 0;
+    P1_7 = 1;
+    delayMs(500);
+    
+    P1_2 = 1;  // BLUE on
+    P1_1 = 1;
+    P1_7 = 0;
+    delayMs(500);
+    
+    P1_2 = 1;  // All OFF
+    P1_1 = 1;
+    P1_7 = 1;
+    delayMs(500);
+    
+    lastPacketTime = (uint16)getMs();
+    lastLedFlashTime = (uint16)getMs();
+    lastHeartbeatTime = (uint32)getMs();
+    
+    // For testing, start in HOME state
+    currentState = STATE_HOME;
+
+    
+    // === Main Loop ===
+    while(1)
+    {
+        boardService();
+        
+        now = (uint32)getMs();
+        
+        // Heartbeat: YELLOW LED toggled every once a while. this ensure the led is blinking even in case of heavy processing load
+        counter_loop ++;
+        counter_loop %= 5001;
+        if (counter_loop % 500 == 0)
+            LED_YELLOW_TOGGLE();
+
+        
+        // Process packets
+        receiveAndProcessPackets();
+        
+        // RED LED pulse on packet
+        
+        if (rxPulseStart < 600)
+        {
+            LED_RED(1);
+            rxPulseStart += 1;
+        }
+        else
+        {
+            LED_RED(0);
+        }
+        
+        // State machine and control
+        handlePacketTimeout();
+        updateStateMachine();
+        updateRgbLeds();
+        setMotorsPWM();
+    }
+}

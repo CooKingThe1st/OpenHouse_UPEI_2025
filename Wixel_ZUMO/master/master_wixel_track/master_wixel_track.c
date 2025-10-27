@@ -1,0 +1,407 @@
+/*
+ * ================= MASTER WIXEL CODE (HARDCODED 4 SLAVES) =================
+ *
+ * SIMPLIFIED VERSION - ALWAYS 4 SLAVES, NO DYNAMIC CONFIGURATION
+ * 
+ * Receives 64-byte packets from Python (4 slaves * 16 bytes)
+ * Forwards complete packet to all slaves via radio
+ *
+ * LED Indicators:
+ * - RED: Pulses when serial data received
+ * - GREEN: Pulses when radio packet sent
+ * - YELLOW: Heartbeat (toggles every 500ms)
+ *
+ * ============================================================
+ */
+
+#include <wixel.h>
+#include <radio_registers.h>
+#include <usb.h>
+#include <usb_com.h>
+#include <stdio.h>
+
+/* ================== CONFIGURATION ================== */
+
+// HARDCODED FOR 4 SLAVES
+#define NUM_SLAVES          4
+#define BYTES_PER_SLAVE     16
+#define RADIO_PACKET_SIZE   64      // 4 * 16 = 64 bytes
+
+// Slave Addresses
+#define SLAVE_1_ADDRESS     0x01
+#define SLAVE_2_ADDRESS     0x02
+#define SLAVE_3_ADDRESS     0x03
+#define SLAVE_4_ADDRESS     0x04
+
+// Protocol
+#define MESSAGE_DELIMITER   0xFF
+
+// Commands
+#define CMD_STOP            0x10
+#define CMD_GO_TO           0x11
+#define CMD_PREP            0x12
+#define CMD_RUN             0x13
+#define CMD_AUX             0x14
+#define CMD_CALIBRATE       0x15
+
+// Timing
+#define SERIAL_RX_TIMEOUT   60000
+#define SERIAL_RX_PULSE     100
+#define RADIO_TX_PULSE      100
+#define HEARTBEAT_PERIOD    500
+
+/* ================== GLOBALS ================== */
+
+// Radio TX buffer (1 byte length + 64 bytes data)
+static volatile XDATA uint8 txPacket[1 + RADIO_PACKET_SIZE];
+
+// Serial RX buffer
+static XDATA uint8 serialBuffer[100];
+uint8 serialBufferIndex = 0;
+
+// Response buffer
+static XDATA uint8 serialResponse[64];
+
+// Slave addresses
+uint8 slaveAddresses[NUM_SLAVES] = {SLAVE_1_ADDRESS, SLAVE_2_ADDRESS, SLAVE_3_ADDRESS, SLAVE_4_ADDRESS};
+
+// Timing
+uint32 lastSerialRxTime = 0;
+uint32 lastRadioTxTime = 0;
+uint32 lastHeartbeatTime = 0;
+
+// LED pulses
+BIT serialRxPulseActive = 0;
+uint16 serialRxPulseStart = 0;
+BIT radioTxPulseActive = 0;
+uint16 radioTxPulseStart = 0;
+
+// Response length
+uint8 responseLength;
+
+// Loop counter
+uint8 fsi;
+
+int16 posX = 0;
+int16 posY = 0;
+int8 theta = 0;
+/* ================== INITIALIZATION ================== */
+
+void failSafeBootloader()
+{
+    LED_YELLOW(0);
+    LED_YELLOW_TOGGLE();
+    delayMs(200);
+    
+    for(fsi = 0; fsi < 20; fsi++)
+    {
+        LED_YELLOW_TOGGLE();
+        boardService();
+        delayMs(100);
+    }
+    
+    LED_YELLOW(0);
+}
+
+void radioInit()
+{
+    radioRegistersInit();
+    
+    CHANNR = 128;
+    PKTLEN = RADIO_PACKET_SIZE;     // HARDCODED: 64 bytes for 4 slaves
+    
+    MCSM0 = 0x14;
+    MCSM1 = 0x00;
+    IOCFG2 = 0b011011;
+    
+    // DMA config
+    dmaConfig.radio.DC6 = 19;
+    dmaConfig.radio.SRCADDRH = (unsigned int)txPacket >> 8;
+    dmaConfig.radio.SRCADDRL = (unsigned int)txPacket;
+    dmaConfig.radio.DESTADDRH = XDATA_SFR_ADDRESS(RFD) >> 8;
+    dmaConfig.radio.DESTADDRL = XDATA_SFR_ADDRESS(RFD);
+    dmaConfig.radio.LENL = 1 + RADIO_PACKET_SIZE;
+    dmaConfig.radio.VLEN_LENH = 0b00100000;
+    dmaConfig.radio.DC7 = 0x40;
+    
+    txPacket[0] = RADIO_PACKET_SIZE;
+    
+    RFST = 4;
+}
+
+/* ================== RADIO TX ================== */
+
+void sendRadioPacket()
+{
+    if (MARCSTATE == 1)
+    {
+        RFIF &= ~(1<<4);
+        DMAARM |= (1<<DMA_CHANNEL_RADIO);
+        RFST = 3;
+        
+        radioTxPulseActive = 1;
+        radioTxPulseStart = (uint16)getMs();
+        
+        lastRadioTxTime = getMs();
+    }
+}
+
+/* ================== LED CONTROL ================== */
+
+void updateLeds()
+{
+    uint16 now = (uint16)getMs();
+    
+    // RED LED: Serial RX pulse
+    if (serialRxPulseActive)
+    {
+        if ((uint16)(now - serialRxPulseStart) < SERIAL_RX_PULSE)
+        {
+            LED_RED(1);
+        }
+        else
+        {
+            LED_RED(0);
+            serialRxPulseActive = 0;
+        }
+    }
+    else
+    {
+        LED_RED(0);
+    }
+    
+    // GREEN LED: Radio TX pulse
+    if (radioTxPulseActive)
+    {
+        if ((uint16)(now - radioTxPulseStart) < RADIO_TX_PULSE)
+        {
+            LED_GREEN(1);
+        }
+        else
+        {
+            LED_GREEN(0);
+            radioTxPulseActive = 0;
+        }
+    }
+    else
+    {
+        LED_GREEN(0);
+    }
+    
+    // YELLOW LED: Heartbeat
+    if ((uint16)(now - lastHeartbeatTime) >= HEARTBEAT_PERIOD)
+    {
+        LED_YELLOW_TOGGLE();
+        lastHeartbeatTime = now;
+    }
+}
+
+/* ================== PACKET PROCESSING ================== */
+void processSerialPacket()
+{
+    /* --- C89: All variables MUST be declared at the top --- */
+    uint8 slaveIndex;
+    uint8 i;
+    uint8 cmd;
+    int16 data3, data4;
+    int16 posX, posY; /* For Slave 1 data */
+    char cmdStr[16];
+    
+    /* * All the float-math variables are no longer needed:
+     * long temp_x, frac_x, int_x, temp_y, frac_y, int_y;
+     * char sign_x, sign_y;
+     */
+    
+    responseLength = 0;
+    
+    // Validate packet size (must be exactly 64 bytes for 4 slaves)
+    if (serialBufferIndex != RADIO_PACKET_SIZE)
+    {
+        responseLength = sprintf((char*)serialResponse, "ERROR: Expected 64 bytes, got %d\r\n", serialBufferIndex);
+        usbComTxSend(serialResponse, responseLength);
+        return;
+    }
+    
+    // Validate delimiters for all 4 slaves
+    for (slaveIndex = 0; slaveIndex < NUM_SLAVES; slaveIndex++)
+    {
+        uint8 serialOffset = slaveIndex * BYTES_PER_SLAVE;
+        
+        if (serialBuffer[serialOffset + BYTES_PER_SLAVE - 1] != MESSAGE_DELIMITER)
+        {
+            responseLength = sprintf((char*)serialResponse, "ERROR: Invalid delimiter for slave %d\r\n", slaveIndex + 1);
+            usbComTxSend(serialResponse, responseLength);
+            return;
+        }
+    }
+    
+    // Copy all 64 bytes to radio TX buffer
+    for (i = 0; i < RADIO_PACKET_SIZE; i++)
+    {
+        txPacket[1 + i] = serialBuffer[i];
+    }
+    
+    // Send radio packet
+    sendRadioPacket();
+    
+    // Trigger red LED pulse
+    serialRxPulseActive = 1;
+    serialRxPulseStart = (uint16)getMs();
+    
+    lastSerialRxTime = getMs();
+    
+    // === NEW: Send detailed packet log ===
+    
+    // Get Slave 1's position data (used in both logs)
+    posX = (int16)((serialBuffer[1] << 8) | serialBuffer[2]);
+    posY = (int16)((serialBuffer[3] << 8) | serialBuffer[4]);
+    theta = (int8)(serialBuffer[5]);
+
+    // Only for non-AUX to reduce spam
+    if (serialBuffer[6] != CMD_AUX)
+    {
+        cmd = serialBuffer[6];
+        data3 = (int16)((serialBuffer[7] << 8) | serialBuffer[8]);
+        data4 = (int16)((serialBuffer[9] << 8) | serialBuffer[10]);
+        
+        // Convert command to string
+        switch(cmd)
+        {
+            case CMD_STOP:
+                sprintf(cmdStr, "STOP");
+                break;
+            case CMD_GO_TO:
+                sprintf(cmdStr, "GO_TO");
+                break;
+            case CMD_PREP:
+                sprintf(cmdStr, "PREP");
+                break;
+            case CMD_RUN:
+                sprintf(cmdStr, "RUN");
+                break;
+            case CMD_AUX:
+                sprintf(cmdStr, "AUX");
+                break;
+            case CMD_CALIBRATE:
+                sprintf(cmdStr, "CALIBRATE");
+                break;
+            default:
+                sprintf(cmdStr, "UNKNOWN");
+        }
+        
+        /* --- FIXED: Print raw integers with %d --- */
+        responseLength = sprintf((char*)serialResponse, 
+                "Slave 1 Pos: (%d, %d, %d) CMD %s %d, %d, etc\r\n",
+                posX,
+                posY,
+                theta,
+                cmdStr,
+                data3, data4);
+        usbComTxSend(serialResponse, responseLength);
+    }
+    else
+    {
+        /* --- FIXED: Print raw integers with %d --- */
+        /* All the float-math logic is removed */
+        
+        responseLength = sprintf((char*)serialResponse, 
+                "AUX: Slave 1 Pos: (%d, %d, %d)\r\n",
+                posX,
+                posY,
+                theta);
+        usbComTxSend(serialResponse, responseLength);
+    }
+}
+
+
+void handleSerialTimeout()
+{
+    uint32 timeSinceLastRx = getMs() - lastSerialRxTime;
+    
+    if (timeSinceLastRx >= SERIAL_RX_TIMEOUT)
+    {
+        uint8 slaveIndex;
+        uint8 txOffset;
+        uint8 i;
+        
+        // Send STOP to all 4 slaves
+        for (slaveIndex = 0; slaveIndex < NUM_SLAVES; slaveIndex++)
+        {
+            txOffset = 1 + (slaveIndex * BYTES_PER_SLAVE);
+            
+            txPacket[txOffset + 0] = slaveAddresses[slaveIndex];  // ADD
+            txPacket[txOffset + 1] = 0x00;  // X high
+            txPacket[txOffset + 2] = 0x00;  // X low
+            txPacket[txOffset + 3] = 0x00;  // Y high
+            txPacket[txOffset + 4] = 0x00;  // Y low
+            txPacket[txOffset + 5] = 0x00;  // Theta
+            txPacket[txOffset + 6] = CMD_STOP;  // Command
+            
+            for (i = 7; i < 15; i++)
+            {
+                txPacket[txOffset + i] = 0x00;  // Data3-Data13
+            }
+            
+            txPacket[txOffset + 15] = MESSAGE_DELIMITER;
+        }
+        
+        sendRadioPacket();
+        
+        responseLength = sprintf((char*)serialResponse, "[TIMEOUT] No serial data for 60s, sent STOP to all slaves\r\n");
+        usbComTxSend(serialResponse, responseLength);
+        
+        lastSerialRxTime = getMs();
+    }
+}
+
+void processBytesFromUsb()
+{
+    uint8 byteReceived;
+    
+    while (usbComRxAvailable() && serialBufferIndex < 100)
+    {
+        byteReceived = usbComRxReceiveByte();
+        
+        serialBuffer[serialBufferIndex] = byteReceived;
+        serialBufferIndex++;
+        
+        // Process if complete packet received (64 bytes for 4 slaves)
+        if (serialBufferIndex >= RADIO_PACKET_SIZE)
+        {
+            processSerialPacket();
+            serialBufferIndex = 0;
+        }
+    }
+}
+
+/* ================== MAIN ================== */
+
+void initSystems()
+{
+    failSafeBootloader();
+    systemInit();
+    usbInit();
+    radioInit();
+    
+    lastSerialRxTime = getMs();
+    lastRadioTxTime = getMs();
+    lastHeartbeatTime = getMs();
+    
+    responseLength = sprintf((char*)serialResponse, "Master Wixel Ready - 4 SLAVES HARDCODED (PKTLEN=%d)\r\n", PKTLEN);
+    usbComTxSend(serialResponse, responseLength);
+}
+
+void main()
+{
+    initSystems();
+    
+    while(1)
+    {
+        boardService();
+        usbComService();
+        
+        processBytesFromUsb();
+        handleSerialTimeout();
+        updateLeds();
+    }
+}

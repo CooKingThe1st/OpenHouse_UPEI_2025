@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="420" viewBox="0 0 800 420">
+  <style>text{font-family:Arial,Helvetica,sans-serif;font-size:14px}</style>
+  <rect x="10" y="10" width="780" height="400" rx="8" fill="#f8f9fa" stroke="#ddd"/>
+  <text x="30" y="36" font-weight="bold">Robot design (component layout)</text>
+
+  <!-- Battery -->
+  <rect x="40" y="70" width="140" height="60" rx="6" fill="#fff3cd" stroke="#f0ad4e"/>
+  <text x="50" y="98">2S LiPo (7.4V)</text>
+  <text x="50" y="116" font-size="12">SUNPADOW 900mAh</text>
+
+  <!-- Regulator -->
+  <rect x="220" y="70" width="120" height="60" rx="6" fill="#e2f0cb" stroke="#7fb77e"/>
+  <text x="235" y="98">Regulator</text>
+  <text x="235" y="116" font-size="12">5V -> Raspberry Pi</text>
+
+  <!-- Raspberry Pi -->
+  <rect x="380" y="60" width="180" height="80" rx="6" fill="#dbe9ff" stroke="#5b9bd5"/>
+  <text x="400" y="86" font-weight="bold">Raspberry Pi 3</text>
+  <text x="400" y="106" font-size="12">Camera (CSI) + USB / UART to Arduino</text>
+
+  <!-- OptiTrack marker head -->
+  <circle cx="580" cy="120" r="16" fill="#ffd1dc" stroke="#ff6b81"/>
+  <text x="605" y="124">OptiTrack marker head</text>
+
+  <!-- Zumo -->
+  <rect x="140" y="220" width="250" height="120" rx="8" fill="#fff" stroke="#9b9b9b"/>
+  <text x="150" y="248" font-weight="bold">Zumo Board + Motor Driver</text>
+  <text x="150" y="266" font-size="12">4x NiMH (motor battery pack) -> motors</text>
+  <text x="150" y="286" font-size="12">On/off switch required</text>
+
+  <!-- Arduino -->
+  <rect x="420" y="240" width="120" height="70" rx="6" fill="#f1f1f1" stroke="#b3b3b3"/>
+  <text x="435" y="272">Arduino (interface)</text>
+  <text x="435" y="290" font-size="12">Serial -> Pi</text>
+
+  <!-- Connections -->
+  <line x1="180" y1="100" x2="220" y2="100" stroke="#333" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="340" y1="100" x2="380" y2="100" stroke="#333" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="460" y1="140" x2="584" y2="136" stroke="#333" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="320" y1="260" x2="140" y2="260" stroke="#333" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="300" y1="295" x2="420" y2="295" stroke="#333" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 z" fill="#333" />
+    </marker>
+  </defs>
+
+  <text x="30" y="380" font-size="12" fill="#666">Notes: the orange LiPo feeds the regulator which powers the Pi and camera; motor batteries are separate and require the Zumo switch to be ON.</text>
+</svg>

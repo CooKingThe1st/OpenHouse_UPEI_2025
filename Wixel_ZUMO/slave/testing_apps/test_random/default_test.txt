@@ -1,0 +1,97 @@
+
+#include <wixel.h>
+#include <usb.h>
+#include <usb_com.h>
+#include <time.h>       // For getMs()
+
+// ================== CONFIG ==================
+#define R_PWM_PIN   3   // P1_3 (Right motor PWM)
+#define R_DIR_PIN   5   // P1_5 (Right motor direction)
+#define MOTOR_SPEED 150 // 0–255 duty cycle
+
+void main()
+{
+    systemInit();
+    usbInit();
+
+    delayMs(200);
+    // If bootloader was requested, we never get past usbComService
+    //  give bootloader 1second to take over
+    uint32 startTime = getMs();
+    while(getMs() - startTime < 1000) {
+        boardService();
+        usbComService();
+    }
+
+
+    // *** TARGETED GPIO RESET (preserve USB) ***
+    // Disable ALL peripherals on Port 1 FIRST
+    P1SEL = 0x00;     // Force ALL P1 pins to GPIO mode
+    P1DIR = 0x00;     // Start with all inputs
+    P1 = 0x00;        // Clear all output values
+    
+    // Disable timers that might conflict (but NOT the one USB uses)
+    T1CTL = 0x00;
+    T3CTL = 0x00;
+    T4CTL = 0x00;
+    
+    // DON'T touch U0CSR or U1CSR - USB needs these!
+    
+    // NOW set up our specific pins as outputs
+    P1DIR |= (1 << 1) | (1 << 2) | (1 << 7);  // RGB pins as outputs
+    P1DIR |= (1 << 5);  // Motor direction as output
+    
+    // Verify P1SEL is still clear
+    P1SEL = 0x00;
+    
+    // === LED Test Sequence ===
+    
+    // All OFF (active-low: 0xFF means all high = all off)
+    P1 = 0xFF;
+    delayMs(1000);
+    
+    // Red ON only
+    P1 = 0b11111101;  // Only bit 1 is 0
+    delayMs(1000);
+    
+    // Green ON only
+    P1 = 0b11111011;  // Only bit 2 is 0
+    delayMs(1000);
+    
+    // Blue ON only
+    P1 = 0b01111111;  // Only bit 7 is 0
+    delayMs(1000);
+    
+    // All OFF again
+    P1 = 0xFF;
+    delayMs(500);
+    
+    // === Initialize Motor Control ===
+    timer3Init();
+    
+    // === Motor Direction Test ===
+    
+    // FORWARD - Direction bit 5 = 0, RGB all off (1)
+    P1 = 0b11011111;  // Bit 5 = 0 (direction), RGB bits high (off)
+    T3CC0 = MOTOR_SPEED;
+    delayMs(2000);
+    
+    // STOP
+    T3CC0 = 0;
+    delayMs(1000);
+    
+    // REVERSE - Direction bit 5 = 1, RGB all off (1)
+    P1 = 0b11111111;  // Bit 5 = 1 (direction), RGB bits high (off)
+    T3CC0 = MOTOR_SPEED;
+    delayMs(2000);
+    
+    // STOP
+    T3CC0 = 0;
+
+    while(1)
+    {
+        boardService();
+        usbComService();
+        delayMs(100);
+    }
+}

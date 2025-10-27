@@ -1,36 +1,80 @@
+
 # OpenHouse_UPEI_2025
 
-This repository documents the work completed for the Open House at UPEI 2025. It contains per-project subfolders (GUI, OptiTrack, Raspberry Pi 3, Wixel + ZUMO) with production-quality README templates, usage notes, and developer-oriented quickstarts.
+Production-quality documentation for demos prepared for the UPEI Open House (2025). This repository collects per-demo code, wiring, scripts, and instructions so others can reproduce the setups and run live demos.
 
-## Purpose
-Provide a centralized, well-documented record of demos, software, configurations, and instructions so others can reproduce hardware setups, run demos, and extend the work.
+## Quick summary
+- Purpose: provide reproducible, well-documented demos that integrate motion capture (OptiTrack), robot platforms (Zumo + Wixel), a demo GUI, and Raspberry Pi-based clients.
+- Status: OptiTrack integration completed (see `OptiTrack/`); Raspberry Pi work in progress (`RaspberryPi3/`).
 
-## Repository layout
-- `GUI/` — User interface code and documentation (desktop/web demos, design notes).
-- `OptiTrack/` — Motion capture integration, NATNet notes, calibration, sample scripts.
-- `RaspberryPi3/` — OS images, setup instructions, scripts and hardware wiring for Raspberry Pi 3 demos.
-- `Wixel_ZUMO/` — Wixel firmware examples and Zumo robot code, wiring and flashing instructions.
+## Table of contents
+- Overview
+- Quickstart
+- Repository layout
+- How it works (architecture)
+- Component docs and usage
+- Contributing & development
+- License & maintainers
 
 ## Quickstart
-1. Clone the repo:
+Follow these steps to get a demo environment running locally for development or testing.
 
-   git clone <your-remote-url> OpenHouse_UPEI_2025
+1. Clone the repository:
 
-2. Open the folder in your editor (VS Code recommended).
-3. Read the top-level README and then the README inside the subfolder relevant to the demo you want to run.
+   git clone https://github.com/CooKingThe1st/OpenHouse_UPEI_2025.git
+   cd OpenHouse_UPEI_2025
 
-## How to use this repo
-- Each subfolder contains a self-contained `README.md` with a Quickstart that describes dependencies, flashing and run commands, and where to find demo artifacts (binaries, images, scripts).
-- Keep commits small and focused. Use branches for experimental changes.
+2. Read the top-level README (this file) and then the README inside the folder for the component you're using:
 
-## Contribution guidelines
-- Add changes to a subfolder and update that subfolder's README with any new prerequisites or instructions.
-- Add scripts or configuration files (e.g., Dockerfile, requirements.txt) for reproducible environment setup.
+   - `OptiTrack/` — motion-capture server, NATNet/TCP bridge, and client examples (completed).
+   - `RaspberryPi3/` — Pi provisioning scripts, image notes, and headless setup (in progress).
+   - `GUI/` — demonstration GUI and integration examples.
+   - `Wixel_ZUMO/` — firmware and Zumo wiring/flash instructions.
 
-## Next steps / Suggested additions
-- Add demonstrative artifacts (small example binaries or screenshots) where licensing permits.
-- Add CI that lints code and validates README structure (optional).
+3. Follow the chosen component quickstart (each component README contains step-by-step commands and prerequisites).
+
+## Repository layout
+Top-level folders and purpose:
+
+- `GUI/` — demo UI code, screenshots, and usage notes. Should contain `requirements.txt` or `package.json` depending on stack.
+- `OptiTrack/` — completed OptiTrack integration, NATNet->TCP bridge notes, example clients (`client_rasp_opti.py`).
+- `RaspberryPi3/` — Raspberry Pi provisioning scripts, `setup/`, `src/`, and `images/` references.
+- `Wixel_ZUMO/` — Wixel firmware, Zumo robot code, wiring and safety notes.
+
+## How it works (architecture)
+High-level data flows used in the demos:
+
+- OptiTrack cameras capture markers -> Motive (OptiTrack host) -> streaming via NATNet/VRPN or the NATNet->TCP bridge -> clients (GUI, Pi, robots).
+- GUI connects to the demo data sources (NATNet/bridge/websocket) and sends high-level commands to robot controllers.
+- Raspberry Pi clients run lightweight Python scripts or services that receive pose/command data and control attached peripherals (motors, sensors) via GPIO, I2C, SPI, or microcontrollers.
+
+For a visual summary see `OptiTrack/diagrams/` (if present).
+
+## Component highlights and usage
+- OptiTrack: use `OptiTrack/README.md` — includes NATNet->TCP bridge rationale, sample `client_rasp_opti.py`, and camera tuning notes.
+- Raspberry Pi 3: `RaspberryPi3/README.md` — provisioning scripts and headless setup. This folder will include precise SD image instructions and systemd unit examples.
+- GUI: inspect `GUI/README.md` for framework-specific steps (PyQt or Electron examples).
+- Wixel + Zumo: firmware flashing and wiring in `Wixel_ZUMO/README.md`.
+
+## Development & reproducibility
+- Use virtual environments (Python venv) or containers for GUI and client development.
+- Do not commit large binary images (SD card images). Instead include checksums and torrent or release assets if needed.
+- Add `requirements.txt` or `package.json` to top-level subfolders for clearer reproducibility.
+
+## Contributing
+- Keep PRs small and focused. Include a short description of the change, which demo it affects, and any hardware consequences.
+- Update the relevant subfolder README with new steps when you add scripts, services, or hardware changes.
+- Add automated checks later (linting / README structure checks) if we decide to add CI.
+
+## Maintainers and contact
+- Repo owner: GitHub: `@CooKingThe1st` — https://github.com/CooKingThe1st
+- Contact workflow: open an issue for questions, or mention `@CooKingThe1st` on GitHub. If you prefer direct email contact, add a `MAINTAINERS.md` with addresses (keeps this repo public-friendly).
+
+## License
+This repository includes a `LICENSE` file. Respect the license terms for code and any third-party assets.
 
 ---
 
-Maintainers: Add names and contact information in a `MAINTAINERS.md` when available.
+Last updated: 2025-10-27
+
+If you'd like, I can now (a) polish each subfolder README for consistency, (b) add a CONTRIBUTING.md and MAINTAINERS.md, and (c) wire a minimal CI check for README presence per folder. Tell me which you'd like me to do next.

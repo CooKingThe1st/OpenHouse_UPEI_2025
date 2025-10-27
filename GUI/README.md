@@ -1,51 +1,52 @@
+
 # GUI
 
 Overview
 
-This folder contains user interface code and artefacts used in demos and the Open House. It can host multiple frontends (PyQt/PySide, Qt, Electron, or web-based React/Vue apps). The goal is a polished, cross-platform GUI that integrates with the motion capture system and robot controllers for live demos.
+This folder contains the demonstration user interface used in Open House sessions. The GUI acts as the visual control and monitoring surface — receiving pose updates (from OptiTrack or replay logs) and sending high-level commands to robots.
 
-Quickstart
+Status
 
-- Recommended: run the GUI inside a virtual environment or Node container depending on stack.
+- Example frontends: PyQt (Python) and an optional Electron-based UI (Node). Add `requirements.txt` or `package.json` depending on the stack you prefer.
 
-PyQt example (Python):
+Quickstart (PyQt / Python)
 
-1. Create a venv and install dependencies:
+1. Create a virtual environment and install dependencies:
 
    python -m venv .venv
    .\.venv\Scripts\Activate.ps1; python -m pip install -r requirements.txt
 
-2. Run the app:
+2. Run the app (example):
 
    .\.venv\Scripts\Activate.ps1; python main.py
 
-Electron example (Node):
+Quickstart (Electron / Node)
 
-1. Install dependencies:
+1. Install dependencies and start the dev server:
 
    npm install
-
-2. Start in dev mode:
-
    npm run dev
 
-Usage
+Usage notes
 
-- The GUI should have clear controls for connecting to the OptiTrack stream and for controlling/disabling the robot outputs.
-- Provide a simple "demo mode" with pre-recorded motion paths for offline demos.
+- Connection: the GUI should be configurable to connect to a TCP bridge (OptiTrack bridge), NATNet client, or a replay file. Keep connection settings in a single config file.
+- Demo mode: provide an offline replay mode which reads pre-recorded pose logs for demo environments without live OptiTrack hardware.
 
 How it works
 
-- The GUI is a thin layer: it connects to data sources (NATNet / websocket / REST) and forwards control commands to robot controllers using a well-defined API.
-- Keep hardware-specific code in the lower-level modules to keep the UI testable and platform independent.
+- Architecture: GUI <-> data source (NATNet/TCP bridge/replay) and GUI -> controller API (HTTP / MQTT / socket) to send commands.
+- Keep hardware-specific code isolated in an adapter layer to make the UI mockable for testing.
 
 Files and structure
 
-- `src/` — GUI source code.
-- `docs/` — Design notes, screenshots, and interaction diagrams.
-- `requirements.txt` or `package.json` — Dependencies.
+- `src/` — UI source code.
+- `docs/` — screenshots, GIFs, and user flows.
+- `requirements.txt` or `package.json` — dependency manifest.
+- `config/` — example connection profiles (host, port, demo-mode toggles).
 
-Notes
+Developer tips
 
-- Include screenshots and short GIFs in `docs/` for the README preview on GitHub.
-- Prefer cross-platform frameworks for ease of display on different machines during Open House.
+- Test UI flows using recorded motion logs rather than live hardware during development to avoid hardware risks.
+- Add automated UI smoke tests if you plan to iterate frequently.
+
+Last updated: 2025-10-27

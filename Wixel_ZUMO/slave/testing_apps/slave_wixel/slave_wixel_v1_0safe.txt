@@ -1,0 +1,315 @@
+/*
+ * ================= SLAVE WIXEL CODE =================
+ *
+ * This code receives commands from the master Wixel and controls
+ * RGB LEDs based on the received commands.
+ *
+ * Features:
+ * - Direct radio register control (RX mode)
+ * - DMA-based packet reception
+ * - Parses addressed packets from master
+ * - Controls RGB LEDs (P1_1=RED, P1_2=GREEN, P1_7=BLUE)
+ * - LED Status Feedback:
+ *   * RED LED: Flashes to indicate radio is active and listening
+ *   * YELLOW LED: Flashes when data is received
+ *
+ * C89 Style: All variables at the top.
+ * ====================================================
+ */
+
+#include <wixel.h>
+#include <radio_registers.h>
+
+/* ================== CONFIGURATION CONSTANTS ================== */
+
+// --- Slave Configuration ---
+// Change this value to match the slave's address (0x01 or 0x02)
+#define THIS_SLAVE_ADDRESS  0x02
+
+// --- Protocol Definitions ---
+#define CMD_SET_LED         0x01
+#define MESSAGE_DELIMITER   0xFF
+#define RADIO_PACKET_SIZE   16
+
+// --- GPIO Pin Definitions (Status LEDs) ---
+#define STATUS_RED_PIN      0   // P1_0 = Red LED (connection status)
+#define STATUS_YELLOW_PIN   3   // P1_3 = Yellow LED (data received)
+
+// --- GPIO Pin Definitions (RGB Control) ---
+#define LED_RED_PIN         1
+#define LED_GREEN_PIN       2
+#define LED_BLUE_PIN        7
+
+// --- Timing Constants ---
+#define CONNECTION_TIMEOUT  2000   // 2 seconds without packet = no connection
+#define RED_LED_BLINK_RATE  500    // Red LED blink period (ms)
+#define YELLOW_LED_PULSE    100    // Yellow LED pulse duration (ms)
+
+/* ================== GLOBAL VARIABLES (C89 Style) ================== */
+
+// Radio RX packet buffer (packet[0] = length, packet[1..16] = data, packet[17..18] = RSSI/LQI)
+static volatile XDATA uint8 rxPacket[1 + RADIO_PACKET_SIZE + 2];
+
+// Current RGB LED values
+uint8 ledRed = 0;
+uint8 ledGreen = 0;
+uint8 ledBlue = 0;
+
+// Last time we received a valid packet
+uint16 lastPacketTime = 0;
+
+// Last time we blinked the red LED
+uint16 lastRedBlinkTime = 0;
+
+// Flag to track if we just received data (for yellow LED pulse)
+BIT dataReceivedFlag = 0;
+uint16 dataReceivedTime = 0;
+
+/*
+ * Initialize the radio for direct reception
+ * (matches test_radio_signal_rx.c approach)
+ */
+void radioInit()
+{
+    radioRegistersInit();
+    
+    // Use default radio channel (128) - must match master
+    CHANNR = 128;
+    
+    // Set packet length
+    PKTLEN = RADIO_PACKET_SIZE;
+    
+    // MCSM0: Auto-calibrate when going from idle to RX or TX
+    MCSM0 = 0x14;
+    
+    // MCSM1: Disable CCA, go to IDLE after RX or TX
+    MCSM1 = 0x00;
+    
+    // Configure DMA channel for radio RX
+    dmaConfig.radio.DC6 = 19;  // WORDSIZE = 0, TMODE = 0, TRIG = 19
+    
+    dmaConfig.radio.SRCADDRH = XDATA_SFR_ADDRESS(RFD) >> 8;
+    dmaConfig.radio.SRCADDRL = XDATA_SFR_ADDRESS(RFD);
+    dmaConfig.radio.DESTADDRH = (unsigned int)rxPacket >> 8;
+    dmaConfig.radio.DESTADDRL = (unsigned int)rxPacket;
+    dmaConfig.radio.LENL = 1 + PKTLEN + 2;
+    dmaConfig.radio.VLEN_LENH = 0b10000000;  // Transfer length is FirstByte+3
+    dmaConfig.radio.DC7 = 0x10;  // SRCINC = 0, DESTINC = 1, IRQMASK = 0, M8 = 0, PRIORITY = 0
+    
+    // Arm DMA channel and switch to RX mode
+    DMAARM |= (1<<DMA_CHANNEL_RADIO);
+    RFST = 2;  // Switch radio to RX mode
+}
+
+/*
+ * Initialize GPIO pins for status LEDs and RGB LED control
+ */
+void gpioInit()
+{
+    // *** TARGETED GPIO RESET (preserve USB) ***
+    P1SEL = 0x00;
+    P1DIR = 0x00;
+    P1 = 0x00;
+    
+        // Disable timers that might conflict (but NOT the one USB uses)
+
+    T1CTL = 0x00;
+    T3CTL = 0x00;
+    T4CTL = 0x00;
+    
+
+    P1SEL = 0x00;
+
+    // Configure RGB control pins
+    P1DIR |= (1 << LED_RED_PIN);
+    P1DIR |= (1 << LED_GREEN_PIN);
+    P1DIR |= (1 << LED_BLUE_PIN);
+    
+    // Ensure P1SEL doesn't interfere (not special function)
+    P1SEL &= ~(1 << LED_RED_PIN);
+    P1SEL &= ~(1 << LED_GREEN_PIN);
+    P1SEL &= ~(1 << LED_BLUE_PIN);
+    
+    // Initialize RGB LEDs to OFF (high = off on active-low pins)
+    P1_1 = 1;  // RGB Red off
+    P1_2 = 1;  // RGB Green off
+    P1_7 = 1;  // RGB Blue off
+}
+
+/*
+ * Update the RGB LED outputs based on ledRed, ledGreen, ledBlue values
+ * Values: 0-255 where 0 = off, 255 = full brightness
+ */
+void updateRgbLeds()
+{
+    // Simple on/off: if value > 127, turn on (low), else turn off (high)
+    P1_1 = (ledRed > 127) ? 0 : 1;
+    P1_2 = (ledGreen > 127) ? 0 : 1;
+    P1_7 = (ledBlue > 127) ? 0 : 1;
+}
+/*
+ * Update status LEDs (red for connection, yellow for data)
+ */
+void updateStatusLeds()
+{
+    uint16 now = (uint16)getMs();
+    BIT isConnected = ((uint16)(now - lastPacketTime) < CONNECTION_TIMEOUT);
+    
+    // RED LED: ON when connected, OFF when disconnected (solid, not blinking)
+    if (isConnected)
+    {
+        LED_RED(1);  // Red LED on (solid)
+    }
+    else
+    {
+        LED_RED(0);  // Red LED off (no connection)
+    }
+    
+    // YELLOW LED: Pulse for 100ms when data received
+    if (dataReceivedFlag)
+    {
+        if ((uint16)(now - dataReceivedTime) < YELLOW_LED_PULSE)
+        {
+            LED_YELLOW(1);  // Yellow LED on
+        }
+        else
+        {
+            LED_YELLOW(0);  // Yellow LED off
+            dataReceivedFlag = 0;
+        }
+    }
+    else
+    {
+        LED_YELLOW(0);  // Ensure yellow LED is off when not pulsing
+    }
+}
+/*
+ * Process received radio packets
+ * Looks for packets addressed to this slave and executes commands
+ */
+void receiveAndProcessPackets()
+{
+    if (RFIF & (1<<4))  // IRQ_DONE flag set
+    {
+        if (radioCrcPassed())
+        {
+            // Packet structure from master:
+            // Bytes 1-8:   Slave 1 data (address, padding, padding, cmd, R, G, B, delimiter)
+            // Bytes 9-16:  Slave 2 data (address, padding, padding, cmd, R, G, B, delimiter)
+            
+            uint8 slaveAddress;
+            uint8 slaveCmd;
+            uint8 slaveRed;
+            uint8 slaveGreen;
+            uint8 slaveBlue;
+            
+            // Determine which slave's data to extract based on THIS_SLAVE_ADDRESS
+            if (THIS_SLAVE_ADDRESS == 0x01)
+            {
+                slaveAddress = rxPacket[1];
+                slaveCmd = rxPacket[4];
+                slaveRed = rxPacket[5];
+                slaveGreen = rxPacket[6];
+                slaveBlue = rxPacket[7];
+            }
+            else  // THIS_SLAVE_ADDRESS == 0x02
+            {
+                slaveAddress = rxPacket[9];
+                slaveCmd = rxPacket[12];
+                slaveRed = rxPacket[13];
+                slaveGreen = rxPacket[14];
+                slaveBlue = rxPacket[15];
+            }
+            
+            // Check if this packet is for us and execute command
+            if (slaveAddress == THIS_SLAVE_ADDRESS && slaveCmd == CMD_SET_LED)
+            {
+                ledRed = slaveRed;
+                ledGreen = slaveGreen;
+                ledBlue = slaveBlue;
+                lastPacketTime = (uint16)getMs();
+                
+                // Trigger yellow LED pulse on data reception
+                dataReceivedFlag = 1;
+                dataReceivedTime = (uint16)getMs();
+            }
+        }
+        
+        // Clear IRQ and re-arm DMA for next packet
+        RFIF &= ~(1<<4);
+        DMAARM |= (1<<DMA_CHANNEL_RADIO);
+        RFST = 2;  // Back to RX mode
+    }
+}
+
+/*
+ * Timeout handler: turn off LEDs if no packet received for CONNECTION_TIMEOUT ms
+ */
+void handlePacketTimeout()
+{
+    if ((uint16)(getMs() - lastPacketTime) > CONNECTION_TIMEOUT)
+    {
+        ledRed = 0;
+        ledGreen = 0;
+        ledBlue = 0;
+    }
+}
+
+/*
+ * Main function
+ */
+void main()
+{
+    systemInit();
+    radioInit();
+    gpioInit();
+    
+    
+    lastPacketTime = (uint16)getMs();
+    lastRedBlinkTime = (uint16)getMs();
+    
+    // === RGB LED Test Sequence ===
+    // Test all three colors one by one
+    
+    // Red on, others off
+    P1_1 = 0;  // Red on
+    P1_2 = 1;  // Green off
+    P1_7 = 1;  // Blue off
+    delayMs(500);
+    
+    // Green on, others off
+    P1_1 = 1;  // Red off
+    P1_2 = 0;  // Green on
+    P1_7 = 1;  // Blue off
+    delayMs(500);
+    
+    // Blue on, others off
+    P1_1 = 1;  // Red off
+    P1_2 = 1;  // Green off
+    P1_7 = 0;  // Blue on
+    delayMs(500);
+    
+    // All on (white-ish)
+    P1_1 = 0;  // Red on
+    P1_2 = 0;  // Green on
+    P1_7 = 0;  // Blue on
+    delayMs(500);
+    
+    // All off
+    P1_1 = 1;  // Red off
+    P1_2 = 1;  // Green off
+    P1_7 = 1;  // Blue off
+    delayMs(500);
+
+    lastPacketTime = (uint16)getMs();
+    lastRedBlinkTime = (uint16)getMs();
+    
+    while(1)
+    {
+        boardService();
+        receiveAndProcessPackets();
+        handlePacketTimeout();
+        updateRgbLeds();
+        updateStatusLeds();
+    }
+}

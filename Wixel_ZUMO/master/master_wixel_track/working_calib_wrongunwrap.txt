@@ -1,0 +1,481 @@
+"""
+================= ROBOT CALIBRATION AUTOMATOR =================
+
+This script automates the 3-phase calibration plan:
+1.  Connects to OptiTrack and Serial.
+2.  Prompts for a Robot ID to test.
+3.  Runs Phase 1: Linear Velocity tests (forward/backward)
+    -   Sends CMD_AUX 0x1F (Manual PWM) for 2 seconds.
+    -   Records start/end position from OptiTrack.
+    -   Calculates true linear velocity.
+    -   Calculates orientation drift (should be ~0).
+    -   Calculates movement heading (for marker offset).
+4.  Runs Phase 2: Angular Velocity tests (left/right spin)
+    -   Sends CMD_AUX 0x1F (Manual PWM) for 2 seconds.
+    -   Records start/end angle from OptiTrack.
+    -   Calculates true angular velocity.
+5.  Saves all results to "calibration_log.csv" for analysis.
+
+Based on the 3-phase plan and test_serial.py.
+=====================================================================
+"""
+
+import serial
+import time
+import threading
+import socket
+import math
+import sys
+import csv
+from datetime import datetime
+
+# --- Workaround for SerialException ---
+try:
+    SerialException = serial.SerialException
+except Exception:
+    try:
+        from serial.serialutil import SerialException
+    except Exception:
+        SerialException = Exception
+
+# ==================== CONFIGURATION ====================
+
+# --- Connections ---
+SERIAL_PORT = "COM9"
+BAUD_RATE = 9600
+SERIAL_TIMEOUT = 1.0
+
+OPTITRACK_SERVER_IP = "192.168.0.100"
+OPTITRACK_PORT = 5400
+OPTITRACK_BUFFER_SIZE = 8192
+
+# --- Calibration Parameters ---
+CALIBRATION_LOG_FILE = "calibration_log.csv"
+TEST_DURATION_S = 2.0       # MUST match the delayMs(2000) in executeManualPwm()
+SETTLE_TIME_BEFORE_CMD = 1.0  # Wait for OptiTrack to be stable
+WAIT_TIME_AFTER_CMD = 4     # Wait for robot to finish move and stop
+
+# PWM values to test.
+# Start just above your PWM_DEADZONE (30)
+PWM_TEST_POINTS_LINEAR = [40, 50, 60, 70, 80, 90] #, 100, 110, 120, 130, 140, 150, 160, 170]
+PWM_TEST_POINTS_ANGULAR = [50, 60, 70, 80, 90, 100]
+
+# --- Protocol ---
+CMD_AUX = 0x14
+MESSAGE_DELIMITER = 0xFF
+BYTES_PER_SLAVE = 16
+
+# ==================== OPTITRACK CLIENT ====================
+# (Copied directly from test_serial.py)
+
+class OptiTrackClient:
+    def __init__(self, server_ip, port):
+        self.server_ip = server_ip
+        self.port = port
+        self.sock = None
+        self.connected = False
+        self.robot_positions = {}
+        self.position_lock = threading.Lock()
+        self.running = True
+
+    def connect(self):
+        try:
+            print(f"[OptiTrack] Connecting to {self.server_ip}:{self.port}...")
+            self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.sock.settimeout(5.0)
+            self.sock.connect((self.server_ip, self.port))
+            self.sock.settimeout(0.5)
+            self.connected = True
+            print(f"✓ Connected to OptiTrack server!")
+            return True
+        except Exception as e:
+            print(f"✗ OptiTrack connection failed: {e}")
+            return False
+
+    def disconnect(self):
+        self.running = False
+        if self.sock:
+            try:
+                self.sock.close()
+            except:
+                pass
+        self.connected = False
+
+    def parse_robot_data(self, raw_data):
+        if not raw_data or len(raw_data) < 5:
+            return []
+        try:
+            parts = raw_data.split(';')
+            robots = []
+            seen_robot_ids = set()
+            for part in parts:
+                part = part.strip()
+                if not part:
+                    continue
+                values = [v.strip() for v in part.split(',')]
+                try:
+                    if len(values) == 5:
+                        robot_id = int(values[0])
+                        x = float(values[1])
+                        y = float(values[2])
+                        z = float(values[3])
+                        rotation = float(values[4])
+                        if robot_id in seen_robot_ids:
+                            continue
+                        if any(v != v for v in [x, y, z, rotation]):
+                            continue
+                        seen_robot_ids.add(robot_id)
+                        robot = {'id': robot_id, 'x': x, 'y': y, 'z': z, 'rotation': rotation}
+                        robots.append(robot)
+                except (ValueError, IndexError):
+                    continue
+            robots.sort(key=lambda r: r['id'])
+            return robots
+        except Exception as e:
+            return []
+
+    def receive_positions(self):
+        print("[OptiTrack Thread] Started - receiving position data...")
+        while self.connected and self.running:
+            try:
+                data = self.sock.recv(OPTITRACK_BUFFER_SIZE)
+                if not data:
+                    print("[OptiTrack] Server disconnected")
+                    self.connected = False
+                    break
+                decoded = data.decode('utf-8', errors='ignore')
+                cleaned = decoded.replace('\x00', '').strip()
+                robots = self.parse_robot_data(cleaned)
+                with self.position_lock:
+                    self.robot_positions = {r['id']: r for r in robots}
+            except socket.timeout:
+                continue
+            except Exception as e:
+                if self.running:
+                    print(f"[OptiTrack ERROR] {e}")
+                    self.connected = False
+                break
+        print("[OptiTrack Thread] Stopped.")
+
+    def get_position(self, robot_id):
+        """Get latest position for a robot (meters, meters, degrees)"""
+        with self.position_lock:
+            if robot_id in self.robot_positions:
+                pos = self.robot_positions[robot_id]
+                # OptiTrack gives rotation in -180 to 180, let's keep it
+                return pos['x'], pos['y'], pos['rotation']
+        print(f"[Warning] No OptiTrack data for Robot ID {robot_id}. Returning (0,0,0).")
+        return 0.0, 0.0, 0.0
+
+# ==================== SERIAL & PACKET FUNCTIONS ====================
+# (Simplified from test_serial.py)
+
+ser = None
+serial_lock = threading.Lock()
+num_slaves = 4
+slaves = [None] * num_slaves # We only need to configure one at a time
+
+def open_serial_connection():
+    global ser
+    try:
+        ser = serial.Serial(SERIAL_PORT, BAUD_RATE, timeout=SERIAL_TIMEOUT)
+        time.sleep(2) # Wait for DTR
+        print(f"✓ Connected to {SERIAL_PORT} at {BAUD_RATE} baud")
+        return True
+    except SerialException as e:
+        print(f"✗ Failed to open serial port {SERIAL_PORT}: {e}")
+        return False
+
+def send_packet_to_master(packet_data, label=""):
+    try:
+        with serial_lock:
+            if ser and ser.is_open:
+                ser.write(packet_data)
+                # log_sent_packet(packet_data, label) # Logging is now to CSV
+                print(f"✓ [{label}] Sent command.")
+                return True
+    except SerialException as e:
+        print(f"✗ Failed to send packet: {e}")
+        return False
+
+def send_manual_pwm_command(slave_id, pwm_left, pwm_right):
+    """
+    Builds and sends a complete 64-byte packet with a Manual PWM
+    command for the target slave_id. All other slaves get CMD_AUX.
+    """
+    global optitrack
+    
+    # Clamp values
+    pwm_left = max(-255, min(255, pwm_left))
+    pwm_right = max(-255, min(255, pwm_right))
+    
+    pwm_left_bytes = pwm_left.to_bytes(2, byteorder='big', signed=True)
+    pwm_right_bytes = pwm_right.to_bytes(2, byteorder='big', signed=True)
+    
+    complete_packet = bytearray()
+    
+    for i in range(1, num_slaves + 1):
+        # Get current position for all slaves
+        x, y, theta = optitrack.get_position(i)
+        x_mm = int(x * 1000)
+        y_mm = int(y * 1000)
+        theta_int = int(theta) # C-code expects an int
+        
+        packet = bytearray(BYTES_PER_SLAVE)
+        packet[0] = i
+        packet[1] = (x_mm >> 8) & 0xFF
+        packet[2] = x_mm & 0xFF
+        packet[3] = (y_mm >> 8) & 0xFF
+        packet[4] = y_mm & 0xFF
+        packet[5] = theta_int & 0xFF
+        
+        if i == slave_id:
+            # This is our target robot
+            packet[6] = CMD_AUX
+            packet[7] = 0x1F  # Sub-command
+            packet[8] = pwm_left_bytes[0]
+            packet[9] = pwm_left_bytes[1]
+            packet[10] = pwm_right_bytes[0]
+            packet[11] = pwm_right_bytes[1]
+        else:
+            # Other slaves get a standard AUX
+            packet[6] = CMD_AUX
+            packet[7] = 0x9F
+        
+        packet[15] = MESSAGE_DELIMITER
+        complete_packet.extend(packet)
+
+    send_packet_to_master(complete_packet, f"CALIBRATE (Robot {slave_id}: L={pwm_left}, R={pwm_right})")
+
+def normalize_angle_diff(diff):
+    """Normalize an angle difference to the range [-180, 180]"""
+    diff = (diff + 180) % 360 - 180
+    return diff
+
+# ==================== CALIBRATION PHASES ====================
+
+def run_linear_tests(writer, slave_id):
+    """
+    PHASE 1: Run linear velocity tests (forward and backward)
+    """
+    print("\n" + "="*50)
+    print(f"--- PHASE 1: LINEAR VELOCITY (Robot {slave_id}) ---")
+    print("="*50)
+    
+    for pwm in PWM_TEST_POINTS_LINEAR:
+        # --- Test FORWARD motion ---
+        print(f"\nTesting: FORWARD PWM = {pwm}")
+        time.sleep(SETTLE_TIME_BEFORE_CMD)
+        
+        # 1. Get Start Position
+        x_start, y_start, theta_start = optitrack.get_position(slave_id)
+        
+        # 2. Send Command
+        send_manual_pwm_command(slave_id, pwm, pwm)
+        
+        # 3. Wait for command to finish
+        time.sleep(WAIT_TIME_AFTER_CMD)
+        
+        # 4. Get End Position
+        x_end, y_end, theta_end = optitrack.get_position(slave_id)
+        
+        # 5. Calculate Metrics
+        dx = x_end - x_start
+        dy = y_end - y_start
+        dist_m = math.sqrt(dx**2 + dy**2)
+        vel_linear_mm_s = (dist_m * 1000) / TEST_DURATION_S
+        
+        delta_theta = normalize_angle_diff(theta_end - theta_start)
+        vel_angular_deg_s_drift = delta_theta / TEST_DURATION_S
+        
+        # This is your "orientation offset" calculation
+        movement_heading_deg = math.degrees(math.atan2(dy, dx))
+        
+        print(f"  Result: Velocity = {vel_linear_mm_s:.2f} mm/s")
+        print(f"  Drift: {vel_angular_deg_s_drift:.2f} deg/s")
+        print(f"  Movement Heading: {movement_heading_deg:.2f} deg (vs Robot Heading: {theta_start:.2f} deg)")
+        
+        # 6. Log to CSV
+        writer.writerow(['linear_fwd', pwm, pwm, 
+                         f"{vel_linear_mm_s:.4f}", f"{vel_angular_deg_s_drift:.4f}", f"{movement_heading_deg:.4f}",
+                         x_start, y_start, theta_start, x_end, y_end, theta_end])
+
+        # --- Test BACKWARD motion ---
+        print(f"\nTesting: BACKWARD PWM = -{pwm}")
+        time.sleep(SETTLE_TIME_BEFORE_CMD)
+        
+        x_start, y_start, theta_start = optitrack.get_position(slave_id)
+        send_manual_pwm_command(slave_id, -pwm, -pwm)
+        time.sleep(WAIT_TIME_AFTER_CMD)
+        x_end, y_end, theta_end = optitrack.get_position(slave_id)
+        
+        dx = x_end - x_start
+        dy = y_end - y_start
+        dist_m = math.sqrt(dx**2 + dy**2)
+        vel_linear_mm_s = (dist_m * 1000) / TEST_DURATION_S # Velocity is always positive, sign is from PWM
+        
+        delta_theta = normalize_angle_diff(theta_end - theta_start)
+        vel_angular_deg_s_drift = delta_theta / TEST_DURATION_S
+        movement_heading_deg = math.degrees(math.atan2(dy, dx))
+
+        print(f"  Result: Velocity = {vel_linear_mm_s:.2f} mm/s")
+        print(f"  Drift: {vel_angular_deg_s_drift:.2f} deg/s")
+        print(f"  Movement Heading: {movement_heading_deg:.2f} deg (vs Robot Heading: {theta_start:.2f} deg)")
+
+        writer.writerow(['linear_bwd', -pwm, -pwm, 
+                         f"{vel_linear_mm_s:.4f}", f"{vel_angular_deg_s_drift:.4f}", f"{movement_heading_deg:.4f}",
+                         x_start, y_start, theta_start, x_end, y_end, theta_end])
+
+def run_angular_tests(writer, slave_id):
+    """
+    PHASE 2: Run angular velocity tests (spinning)
+    """
+    print("\n" + "="*50)
+    print(f"--- PHASE 2: ANGULAR VELOCITY (Robot {slave_id}) ---")
+    print("="*50)
+    
+    for pwm in PWM_TEST_POINTS_ANGULAR:
+        # --- Test SPIN RIGHT (CW) ---
+        print(f"\nTesting: SPIN RIGHT (CW) PWM = L:{pwm}, R:{-pwm}")
+        time.sleep(SETTLE_TIME_BEFORE_CMD)
+        
+        # 1. Get Start Angle
+        x_start, y_start, theta_start = optitrack.get_position(slave_id)
+        
+        # 2. Send Command
+        send_manual_pwm_command(slave_id, pwm, -pwm) # CW Spin
+        
+        # 3. Wait
+        time.sleep(WAIT_TIME_AFTER_CMD)
+        
+        # 4. Get End Angle
+        x_end, y_end, theta_end = optitrack.get_position(slave_id)
+        
+        # 5. Calculate Metrics
+        dx = x_end - x_start
+        dy = y_end - y_start
+        dist_m = math.sqrt(dx**2 + dy**2)
+        vel_linear_mm_s_drift = (dist_m * 1000) / TEST_DURATION_S
+        
+        delta_theta = normalize_angle_diff(theta_end - theta_start)
+        vel_angular_deg_s = delta_theta / TEST_DURATION_S
+        
+        print(f"  Result: Angular Velocity = {vel_angular_deg_s:.2f} deg/s")
+        print(f"  Position Drift: {vel_linear_mm_s_drift:.2f} mm/s")
+
+        # 6. Log to CSV
+        writer.writerow(['angular_cw', pwm, -pwm,
+                         f"{vel_linear_mm_s_drift:.4f}", f"{vel_angular_deg_s:.4f}", "N/A",
+                         x_start, y_start, theta_start, x_end, y_end, theta_end])
+
+        # --- Test SPIN LEFT (CCW) ---
+        print(f"\nTesting: SPIN LEFT (CCW) PWM = L:{-pwm}, R:{pwm}")
+        time.sleep(SETTLE_TIME_BEFORE_CMD)
+        
+        x_start, y_start, theta_start = optitrack.get_position(slave_id)
+        send_manual_pwm_command(slave_id, -pwm, pwm) # CCW Spin
+        time.sleep(WAIT_TIME_AFTER_CMD)
+        x_end, y_end, theta_end = optitrack.get_position(slave_id)
+        
+        dx = x_end - x_start
+        dy = y_end - y_start
+        dist_m = math.sqrt(dx**2 + dy**2)
+        vel_linear_mm_s_drift = (dist_m * 1000) / TEST_DURATION_S
+        
+        delta_theta = normalize_angle_diff(theta_end - theta_start)
+        vel_angular_deg_s = delta_theta / TEST_DURATION_S
+
+        print(f"  Result: Angular Velocity = {vel_angular_deg_s:.2f} deg/s")
+        print(f"  Position Drift: {vel_linear_mm_s_drift:.2f} mm/s")
+
+        writer.writerow(['angular_ccw', -pwm, pwm,
+                         f"{vel_linear_mm_s_drift:.4f}", f"{vel_angular_deg_s:.4f}", "N/A",
+                         x_start, y_start, theta_start, x_end, y_end, theta_end])
+
+# ==================== MAIN ====================
+
+def main():
+    global optitrack, ser
+    
+    print("="*60)
+    print("ROBOT CALIBRATION AUTOMATOR")
+    print("="*60)
+    
+    # --- 1. Initialize Log File ---
+    try:
+        with open(CALIBRATION_LOG_FILE, 'w', newline='') as f:
+            writer = csv.writer(f)
+            # Write the header row
+            writer.writerow([
+                'test_type', 'pwm_left', 'pwm_right', 
+                'vel_linear_mm_s', 'vel_angular_deg_s', 'movement_heading_deg',
+                'x_start_m', 'y_start_m', 'theta_start_deg',
+                'x_end_m', 'y_end_m', 'theta_end_deg'
+            ])
+        print(f"✓ Log file initialized: {CALIBRATION_LOG_FILE}")
+    except Exception as e:
+        print(f"✗ CRITICAL: Failed to open log file: {e}")
+        return
+
+    # --- 2. Connect to OptiTrack ---
+    optitrack = OptiTrackClient(OPTITRACK_SERVER_IP, OPTITRACK_PORT)
+    if not optitrack.connect():
+        print("✗ CRITICAL: OptiTrack connection failed. Exiting.")
+        return
+    
+    optitrack_thread = threading.Thread(target=optitrack.receive_positions, daemon=True)
+    optitrack_thread.start()
+    time.sleep(1) # Give OptiTrack time to get a frame
+    
+    # --- 3. Connect to Serial ---
+    if not open_serial_connection():
+        print("✗ CRITICAL: Serial connection failed. Exiting.")
+        optitrack.disconnect()
+        return
+        
+    # --- 4. Get Robot ID ---
+    robot_id_to_test = 0
+    while robot_id_to_test not in [1, 2, 3, 4]:
+        try:
+            robot_id_to_test = int(input("\nEnter Robot ID to calibrate (1, 2, 3, or 4): "))
+        except ValueError:
+            pass
+
+    print(f"✓ Starting calibration for Robot ID {robot_id_to_test}")
+    print("Ensure robot has clear space for 2-second movements.")
+    for i in range(5, 0, -1):
+        print(f"Starting in {i}...")
+        time.sleep(1)
+
+    # --- 5. Run Tests ---
+    try:
+        with open(CALIBRATION_LOG_FILE, 'a', newline='') as f:
+            writer = csv.writer(f)
+            
+            # Run Phase 1
+            run_linear_tests(writer, robot_id_to_test)
+            
+            # Run Phase 2
+            run_angular_tests(writer, robot_id_to_test)
+            
+        print("\n" + "="*60)
+        print(f"✓✓✓ CALIBRATION COMPLETE for Robot {robot_id_to_test} ✓✓✓")
+        print(f"Data saved to: {CALIBRATION_LOG_FILE}")
+        print("="*60)
+
+    except Exception as e:
+        print(f"\n✗ An error occurred during calibration: {e}")
+    except KeyboardInterrupt:
+        print("\n[!] Calibration interrupted by user.")
+    
+    finally:
+        # --- 6. Cleanup ---
+        if optitrack:
+            optitrack.disconnect()
+        if ser:
+            ser.close()
+            print("✓ Serial connection closed")
+        print("Exiting.")
+
+if __name__ == "__main__":
+    main()

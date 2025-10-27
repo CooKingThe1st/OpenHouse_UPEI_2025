@@ -1,0 +1,92 @@
+code for advance slave wixel
+
+should always listening to radio, never skip this part
+packet logic is still the same
+
+ADD Data0 Data1 Data2 Cmd Data3 .. .. Data12 Data13 Delimiter then repeat for (n-1) slave
+
+so the data packet will have a total of n times 16 bytes, where n is the number of slaves
+and the whole packet maybe like this: 
+ADD Data0 Data1 Data2 Cmd Data3 Data4 Data5 Data6 ....... Data13 Delimiter ADD Data0 Data1 Data2 Cmd  etc.
+
+but now, data0, data1, data2 are reserved for robot actual position x, y, theta. this is for the robot localization for the movement purpose.
+so the robot always knows where it is in the field. (assuming optitrack is not malfunctioning)
+    however, coz we get harsh sunlight here, the optitrack sometimes lose track or return false feedback (a jump in position).
+    so we also have a simple filering mechanism here in the slave robot side (basically a threshold based jump filter, is the change is not much then we accept it with a high alpha, else we accept with a low alpha to smooth the jump).
+    we also limit the robot max speed to loosen this effect too, to be more reliable with this filter.
+
+slave should operate like a state machine, with 3 main state:
+IDLE: will flash the RGB led to red or purple
+HOME: will flash the  RGB led to blue,
+RUN: will flash the  RGB led to green,
+
+so the logic is,  the state will change based on the command received from master, 
+and if possible, from the internal sensor/timer as well. but  we can not use  any onboard sensor from Zumo tho, as they need the SCL and SDA, which we are using for another purposes
+
+the slave will NOT be able to send any data back to master, it will only receive commands and execute them. remember that, so this is a one way communication, and an open loop from the master POV
+
+here are the command could be from the master: (for cmd), this is a draft, we will replace the nickname with the actual command code later
+    CMD_STOP: should stop all motion and abort all current operation
+    CMD_GO_TO: should go to a specific location (Data3 and Data 4)
+    CMD_PREP: tell the slave to prepare for an operation. after this the master begin to send multiple PREP CMD to the slave.
+                this also make the slave stop any current operation and listen to collect the needed data.
+                this process can continue for quite a while until the master send a different command.
+    CMD_RUN: tell the slave to start the operation prepared by the previous PREP commands.
+                after this command, the slave should start the operation.
+    thats it for now.
+
+the state machine logic should/ maybe like this, for each state, we have different behavior for the RGB led, and different response to the command received
+
+IDLE: RGB led flash red or purple. robot should be stationary
+    on CMD_PREP: purple led, stay in IDLE, collecting data for the operation
+    on CMD_RUN: go to RUN state (but reject if not enough data is collected yet)
+    on CMD_STOP: red led, stay in IDLE
+    on CMD_GO_TO: go to HOME state 
+HOME: RGB led flash blue. this is a transition state, as robot will head to the target location specified by the CMD_GO_TO
+    on CMD_PREP: ignore, stay in HOME.
+    on CMD_RUN: ignore, stay in HOME
+    on CMD_STOP: red led, go to IDLE
+    on CMD_GO_TO: update target location, stay in HOME.
+    on reach destination: red led, go to IDLE state.
+        detect the reach destination by using a distance threshold to the target location.
+RUN: RGB led flash green. robot is executing the operation prepared by the previous PREP commands. 
+    on CMD_PREP: ignore, stay in RUN.
+    on CMD_RUN: ignore, stay in RUN
+    on CMD_STOP: red led, go to IDLE
+    on CMD_GO_TO: ignore, stay in RUN.
+    on finish operation: red led, go to IDLE state.
+
+the operation in RUN state, technically could be anything, but here, it is tracking a predefined path with optional obstacle avoidance features.
+the path is defined by the previous PREP commands, which is a series of waypoints and their order.
+the data format in the PREP command will be like this to a robot with ADD add 
+    add Data0 Data1 Data2 PREP  ORDER POSITIONX POSITIONY ORDER POSITIONX POSITIONY ORDER POSITIONX POSITIONY Data13 DELIMITER 
+coz we limit to 10 bytes of data reserve for the CMD, so we can only send 3 waypoints each time (position + order) to the slave.
+so if we want to send more waypoints, we need to send multiple PREP commands to the slave, and the slave will store them in a predefine-size array of 20 waypoints.
+so the slave will collect all the waypoints from multiple PREP commands, until it receive a different command (CMD_RUN, CMD_STOP, CMD_GO_TO)
+the master during this time would keep sending PREP data for a while (maybe 5 seconds ) to make sure the slave get all the data.
+
+if master sends CMD_GO_TO during PREP collection then clear the waypoint buffer
+if master sends CMD_RUN during PREP collection then ignore if not enough waypoints is collected yet (always 20 waypoints).
+
+
+when it receive CMD_RUN, it will start to execute the path following operation based on the collected waypoints.
+the path following algorithm for now is a simple APF (artificial potential field) based path following
+    with the obstacle here is the other slave robots (possible coz the slave receive the same radio signal so they know where the other robots are)
+    this will be a threshold based repulsion field for the obstacles, and an attraction field for the waypoints.
+the robot will follow the path until it reach the last waypoint, then it will go back to IDLE state.
+the obstacle avoidance is optional, and should be activated by the Data13 in the PREP command.
+        when activated, obstacle avoidance feature will be on, for both the path following and the GO_TO operation.
+        when deactivated, the robot will just follow the path or go to the target location without any avoidance.
+
+above is the overall logic for the slave wixel code.
+for the master wixel code, its bit easier coz we already handle the logic in the slave, but we still need to handle the USB-SERIAL command from the computer to the master.
+
+
+but before we code everything , we need to make sure the basic communication, state change and RGB led control is working first. (disable the motor control and path tracking and goal reaching function for now).
+this initial version will be quite straightforward, implement the above logic.
+but for the motor control make it zero, and for the path tracking and goal reaching, its a placeholder and do nothing, but will timeout after a while to go back (and assume that the goal is reached after timeout).
+
+
+some Q&A:
+Issue: In HOME and RUN states, is position filtering applied before or after state transitions? If filtering introduces lag, destination detection in HOME will be delayed
+this is a good question. i think lag is acceptable as the robot is slow.

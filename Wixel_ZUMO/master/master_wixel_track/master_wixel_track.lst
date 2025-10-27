@@ -1,0 +1,2574 @@
+                              1 ;--------------------------------------------------------
+                              2 ; File Created by SDCC : free open source ANSI-C Compiler
+                              3 ; Version 3.1.0 #7066 (Nov 22 2011) (MINGW32)
+                              4 ; This file was generated Fri Oct 24 22:20:40 2025
+                              5 ;--------------------------------------------------------
+                              6 	.module master_wixel_track
+                              7 	.optsdcc -mmcs51 --model-medium
+                              8 	
+                              9 ;--------------------------------------------------------
+                             10 ; Public variables in this module
+                             11 ;--------------------------------------------------------
+                             12 	.globl _main
+                             13 	.globl _initSystems
+                             14 	.globl _processBytesFromUsb
+                             15 	.globl _handleSerialTimeout
+                             16 	.globl _processSerialPacket
+                             17 	.globl _updateLeds
+                             18 	.globl _sendRadioPacket
+                             19 	.globl _radioInit
+                             20 	.globl _failSafeBootloader
+                             21 	.globl _sprintf
+                             22 	.globl _usbComTxSend
+                             23 	.globl _usbComRxReceiveByte
+                             24 	.globl _usbComRxAvailable
+                             25 	.globl _usbComService
+                             26 	.globl _usbInit
+                             27 	.globl _radioRegistersInit
+                             28 	.globl _delayMs
+                             29 	.globl _getMs
+                             30 	.globl _boardService
+                             31 	.globl _systemInit
+                             32 	.globl _theta
+                             33 	.globl _posY
+                             34 	.globl _posX
+                             35 	.globl _fsi
+                             36 	.globl _responseLength
+                             37 	.globl _radioTxPulseStart
+                             38 	.globl _serialRxPulseStart
+                             39 	.globl _lastHeartbeatTime
+                             40 	.globl _lastRadioTxTime
+                             41 	.globl _lastSerialRxTime
+                             42 	.globl _slaveAddresses
+                             43 	.globl _serialBufferIndex
+                             44 	.globl _radioTxPulseActive
+                             45 	.globl _serialRxPulseActive
+                             46 ;--------------------------------------------------------
+                             47 ; special function registers
+                             48 ;--------------------------------------------------------
+                             49 	.area RSEG    (ABS,DATA)
+   0000                      50 	.org 0x0000
+                    0080     51 Fmaster_wixel_track$P0$0$0 == 0x0080
+                    0080     52 _P0	=	0x0080
+                    0081     53 Fmaster_wixel_track$SP$0$0 == 0x0081
+                    0081     54 _SP	=	0x0081
+                    0082     55 Fmaster_wixel_track$DPL0$0$0 == 0x0082
+                    0082     56 _DPL0	=	0x0082
+                    0083     57 Fmaster_wixel_track$DPH0$0$0 == 0x0083
+                    0083     58 _DPH0	=	0x0083
+                    0084     59 Fmaster_wixel_track$DPL1$0$0 == 0x0084
+                    0084     60 _DPL1	=	0x0084
+                    0085     61 Fmaster_wixel_track$DPH1$0$0 == 0x0085
+                    0085     62 _DPH1	=	0x0085
+                    0086     63 Fmaster_wixel_track$U0CSR$0$0 == 0x0086
+                    0086     64 _U0CSR	=	0x0086
+                    0087     65 Fmaster_wixel_track$PCON$0$0 == 0x0087
+                    0087     66 _PCON	=	0x0087
+                    0088     67 Fmaster_wixel_track$TCON$0$0 == 0x0088
+                    0088     68 _TCON	=	0x0088
+                    0089     69 Fmaster_wixel_track$P0IFG$0$0 == 0x0089
+                    0089     70 _P0IFG	=	0x0089
+                    008A     71 Fmaster_wixel_track$P1IFG$0$0 == 0x008a
+                    008A     72 _P1IFG	=	0x008a
+                    008B     73 Fmaster_wixel_track$P2IFG$0$0 == 0x008b
+                    008B     74 _P2IFG	=	0x008b
+                    008C     75 Fmaster_wixel_track$PICTL$0$0 == 0x008c
+                    008C     76 _PICTL	=	0x008c
+                    008D     77 Fmaster_wixel_track$P1IEN$0$0 == 0x008d
+                    008D     78 _P1IEN	=	0x008d
+                    008F     79 Fmaster_wixel_track$P0INP$0$0 == 0x008f
+                    008F     80 _P0INP	=	0x008f
+                    0090     81 Fmaster_wixel_track$P1$0$0 == 0x0090
+                    0090     82 _P1	=	0x0090
+                    0091     83 Fmaster_wixel_track$RFIM$0$0 == 0x0091
+                    0091     84 _RFIM	=	0x0091
+                    0092     85 Fmaster_wixel_track$DPS$0$0 == 0x0092
+                    0092     86 _DPS	=	0x0092
+                    0093     87 Fmaster_wixel_track$MPAGE$0$0 == 0x0093
+                    0093     88 _MPAGE	=	0x0093
+                    0095     89 Fmaster_wixel_track$ENDIAN$0$0 == 0x0095
+                    0095     90 _ENDIAN	=	0x0095
+                    0098     91 Fmaster_wixel_track$S0CON$0$0 == 0x0098
+                    0098     92 _S0CON	=	0x0098
+                    009A     93 Fmaster_wixel_track$IEN2$0$0 == 0x009a
+                    009A     94 _IEN2	=	0x009a
+                    009B     95 Fmaster_wixel_track$S1CON$0$0 == 0x009b
+                    009B     96 _S1CON	=	0x009b
+                    009C     97 Fmaster_wixel_track$T2CT$0$0 == 0x009c
+                    009C     98 _T2CT	=	0x009c
+                    009D     99 Fmaster_wixel_track$T2PR$0$0 == 0x009d
+                    009D    100 _T2PR	=	0x009d
+                    009E    101 Fmaster_wixel_track$T2CTL$0$0 == 0x009e
+                    009E    102 _T2CTL	=	0x009e
+                    00A0    103 Fmaster_wixel_track$P2$0$0 == 0x00a0
+                    00A0    104 _P2	=	0x00a0
+                    00A1    105 Fmaster_wixel_track$WORIRQ$0$0 == 0x00a1
+                    00A1    106 _WORIRQ	=	0x00a1
+                    00A2    107 Fmaster_wixel_track$WORCTRL$0$0 == 0x00a2
+                    00A2    108 _WORCTRL	=	0x00a2
+                    00A3    109 Fmaster_wixel_track$WOREVT0$0$0 == 0x00a3
+                    00A3    110 _WOREVT0	=	0x00a3
+                    00A4    111 Fmaster_wixel_track$WOREVT1$0$0 == 0x00a4
+                    00A4    112 _WOREVT1	=	0x00a4
+                    00A5    113 Fmaster_wixel_track$WORTIME0$0$0 == 0x00a5
+                    00A5    114 _WORTIME0	=	0x00a5
+                    00A6    115 Fmaster_wixel_track$WORTIME1$0$0 == 0x00a6
+                    00A6    116 _WORTIME1	=	0x00a6
+                    00A8    117 Fmaster_wixel_track$IEN0$0$0 == 0x00a8
+                    00A8    118 _IEN0	=	0x00a8
+                    00A9    119 Fmaster_wixel_track$IP0$0$0 == 0x00a9
+                    00A9    120 _IP0	=	0x00a9
+                    00AB    121 Fmaster_wixel_track$FWT$0$0 == 0x00ab
+                    00AB    122 _FWT	=	0x00ab
+                    00AC    123 Fmaster_wixel_track$FADDRL$0$0 == 0x00ac
+                    00AC    124 _FADDRL	=	0x00ac
+                    00AD    125 Fmaster_wixel_track$FADDRH$0$0 == 0x00ad
+                    00AD    126 _FADDRH	=	0x00ad
+                    00AE    127 Fmaster_wixel_track$FCTL$0$0 == 0x00ae
+                    00AE    128 _FCTL	=	0x00ae
+                    00AF    129 Fmaster_wixel_track$FWDATA$0$0 == 0x00af
+                    00AF    130 _FWDATA	=	0x00af
+                    00B1    131 Fmaster_wixel_track$ENCDI$0$0 == 0x00b1
+                    00B1    132 _ENCDI	=	0x00b1
+                    00B2    133 Fmaster_wixel_track$ENCDO$0$0 == 0x00b2
+                    00B2    134 _ENCDO	=	0x00b2
+                    00B3    135 Fmaster_wixel_track$ENCCS$0$0 == 0x00b3
+                    00B3    136 _ENCCS	=	0x00b3
+                    00B4    137 Fmaster_wixel_track$ADCCON1$0$0 == 0x00b4
+                    00B4    138 _ADCCON1	=	0x00b4
+                    00B5    139 Fmaster_wixel_track$ADCCON2$0$0 == 0x00b5
+                    00B5    140 _ADCCON2	=	0x00b5
+                    00B6    141 Fmaster_wixel_track$ADCCON3$0$0 == 0x00b6
+                    00B6    142 _ADCCON3	=	0x00b6
+                    00B8    143 Fmaster_wixel_track$IEN1$0$0 == 0x00b8
+                    00B8    144 _IEN1	=	0x00b8
+                    00B9    145 Fmaster_wixel_track$IP1$0$0 == 0x00b9
+                    00B9    146 _IP1	=	0x00b9
+                    00BA    147 Fmaster_wixel_track$ADCL$0$0 == 0x00ba
+                    00BA    148 _ADCL	=	0x00ba
+                    00BB    149 Fmaster_wixel_track$ADCH$0$0 == 0x00bb
+                    00BB    150 _ADCH	=	0x00bb
+                    00BC    151 Fmaster_wixel_track$RNDL$0$0 == 0x00bc
+                    00BC    152 _RNDL	=	0x00bc
+                    00BD    153 Fmaster_wixel_track$RNDH$0$0 == 0x00bd
+                    00BD    154 _RNDH	=	0x00bd
+                    00BE    155 Fmaster_wixel_track$SLEEP$0$0 == 0x00be
+                    00BE    156 _SLEEP	=	0x00be
+                    00C0    157 Fmaster_wixel_track$IRCON$0$0 == 0x00c0
+                    00C0    158 _IRCON	=	0x00c0
+                    00C1    159 Fmaster_wixel_track$U0DBUF$0$0 == 0x00c1
+                    00C1    160 _U0DBUF	=	0x00c1
+                    00C2    161 Fmaster_wixel_track$U0BAUD$0$0 == 0x00c2
+                    00C2    162 _U0BAUD	=	0x00c2
+                    00C4    163 Fmaster_wixel_track$U0UCR$0$0 == 0x00c4
+                    00C4    164 _U0UCR	=	0x00c4
+                    00C5    165 Fmaster_wixel_track$U0GCR$0$0 == 0x00c5
+                    00C5    166 _U0GCR	=	0x00c5
+                    00C6    167 Fmaster_wixel_track$CLKCON$0$0 == 0x00c6
+                    00C6    168 _CLKCON	=	0x00c6
+                    00C7    169 Fmaster_wixel_track$MEMCTR$0$0 == 0x00c7
+                    00C7    170 _MEMCTR	=	0x00c7
+                    00C9    171 Fmaster_wixel_track$WDCTL$0$0 == 0x00c9
+                    00C9    172 _WDCTL	=	0x00c9
+                    00CA    173 Fmaster_wixel_track$T3CNT$0$0 == 0x00ca
+                    00CA    174 _T3CNT	=	0x00ca
+                    00CB    175 Fmaster_wixel_track$T3CTL$0$0 == 0x00cb
+                    00CB    176 _T3CTL	=	0x00cb
+                    00CC    177 Fmaster_wixel_track$T3CCTL0$0$0 == 0x00cc
+                    00CC    178 _T3CCTL0	=	0x00cc
+                    00CD    179 Fmaster_wixel_track$T3CC0$0$0 == 0x00cd
+                    00CD    180 _T3CC0	=	0x00cd
+                    00CE    181 Fmaster_wixel_track$T3CCTL1$0$0 == 0x00ce
+                    00CE    182 _T3CCTL1	=	0x00ce
+                    00CF    183 Fmaster_wixel_track$T3CC1$0$0 == 0x00cf
+                    00CF    184 _T3CC1	=	0x00cf
+                    00D0    185 Fmaster_wixel_track$PSW$0$0 == 0x00d0
+                    00D0    186 _PSW	=	0x00d0
+                    00D1    187 Fmaster_wixel_track$DMAIRQ$0$0 == 0x00d1
+                    00D1    188 _DMAIRQ	=	0x00d1
+                    00D2    189 Fmaster_wixel_track$DMA1CFGL$0$0 == 0x00d2
+                    00D2    190 _DMA1CFGL	=	0x00d2
+                    00D3    191 Fmaster_wixel_track$DMA1CFGH$0$0 == 0x00d3
+                    00D3    192 _DMA1CFGH	=	0x00d3
+                    00D4    193 Fmaster_wixel_track$DMA0CFGL$0$0 == 0x00d4
+                    00D4    194 _DMA0CFGL	=	0x00d4
+                    00D5    195 Fmaster_wixel_track$DMA0CFGH$0$0 == 0x00d5
+                    00D5    196 _DMA0CFGH	=	0x00d5
+                    00D6    197 Fmaster_wixel_track$DMAARM$0$0 == 0x00d6
+                    00D6    198 _DMAARM	=	0x00d6
+                    00D7    199 Fmaster_wixel_track$DMAREQ$0$0 == 0x00d7
+                    00D7    200 _DMAREQ	=	0x00d7
+                    00D8    201 Fmaster_wixel_track$TIMIF$0$0 == 0x00d8
+                    00D8    202 _TIMIF	=	0x00d8
+                    00D9    203 Fmaster_wixel_track$RFD$0$0 == 0x00d9
+                    00D9    204 _RFD	=	0x00d9
+                    00DA    205 Fmaster_wixel_track$T1CC0L$0$0 == 0x00da
+                    00DA    206 _T1CC0L	=	0x00da
+                    00DB    207 Fmaster_wixel_track$T1CC0H$0$0 == 0x00db
+                    00DB    208 _T1CC0H	=	0x00db
+                    00DC    209 Fmaster_wixel_track$T1CC1L$0$0 == 0x00dc
+                    00DC    210 _T1CC1L	=	0x00dc
+                    00DD    211 Fmaster_wixel_track$T1CC1H$0$0 == 0x00dd
+                    00DD    212 _T1CC1H	=	0x00dd
+                    00DE    213 Fmaster_wixel_track$T1CC2L$0$0 == 0x00de
+                    00DE    214 _T1CC2L	=	0x00de
+                    00DF    215 Fmaster_wixel_track$T1CC2H$0$0 == 0x00df
+                    00DF    216 _T1CC2H	=	0x00df
+                    00E0    217 Fmaster_wixel_track$ACC$0$0 == 0x00e0
+                    00E0    218 _ACC	=	0x00e0
+                    00E1    219 Fmaster_wixel_track$RFST$0$0 == 0x00e1
+                    00E1    220 _RFST	=	0x00e1
+                    00E2    221 Fmaster_wixel_track$T1CNTL$0$0 == 0x00e2
+                    00E2    222 _T1CNTL	=	0x00e2
+                    00E3    223 Fmaster_wixel_track$T1CNTH$0$0 == 0x00e3
+                    00E3    224 _T1CNTH	=	0x00e3
+                    00E4    225 Fmaster_wixel_track$T1CTL$0$0 == 0x00e4
+                    00E4    226 _T1CTL	=	0x00e4
+                    00E5    227 Fmaster_wixel_track$T1CCTL0$0$0 == 0x00e5
+                    00E5    228 _T1CCTL0	=	0x00e5
+                    00E6    229 Fmaster_wixel_track$T1CCTL1$0$0 == 0x00e6
+                    00E6    230 _T1CCTL1	=	0x00e6
+                    00E7    231 Fmaster_wixel_track$T1CCTL2$0$0 == 0x00e7
+                    00E7    232 _T1CCTL2	=	0x00e7
+                    00E8    233 Fmaster_wixel_track$IRCON2$0$0 == 0x00e8
+                    00E8    234 _IRCON2	=	0x00e8
+                    00E9    235 Fmaster_wixel_track$RFIF$0$0 == 0x00e9
+                    00E9    236 _RFIF	=	0x00e9
+                    00EA    237 Fmaster_wixel_track$T4CNT$0$0 == 0x00ea
+                    00EA    238 _T4CNT	=	0x00ea
+                    00EB    239 Fmaster_wixel_track$T4CTL$0$0 == 0x00eb
+                    00EB    240 _T4CTL	=	0x00eb
+                    00EC    241 Fmaster_wixel_track$T4CCTL0$0$0 == 0x00ec
+                    00EC    242 _T4CCTL0	=	0x00ec
+                    00ED    243 Fmaster_wixel_track$T4CC0$0$0 == 0x00ed
+                    00ED    244 _T4CC0	=	0x00ed
+                    00EE    245 Fmaster_wixel_track$T4CCTL1$0$0 == 0x00ee
+                    00EE    246 _T4CCTL1	=	0x00ee
+                    00EF    247 Fmaster_wixel_track$T4CC1$0$0 == 0x00ef
+                    00EF    248 _T4CC1	=	0x00ef
+                    00F0    249 Fmaster_wixel_track$B$0$0 == 0x00f0
+                    00F0    250 _B	=	0x00f0
+                    00F1    251 Fmaster_wixel_track$PERCFG$0$0 == 0x00f1
+                    00F1    252 _PERCFG	=	0x00f1
+                    00F2    253 Fmaster_wixel_track$ADCCFG$0$0 == 0x00f2
+                    00F2    254 _ADCCFG	=	0x00f2
+                    00F3    255 Fmaster_wixel_track$P0SEL$0$0 == 0x00f3
+                    00F3    256 _P0SEL	=	0x00f3
+                    00F4    257 Fmaster_wixel_track$P1SEL$0$0 == 0x00f4
+                    00F4    258 _P1SEL	=	0x00f4
+                    00F5    259 Fmaster_wixel_track$P2SEL$0$0 == 0x00f5
+                    00F5    260 _P2SEL	=	0x00f5
+                    00F6    261 Fmaster_wixel_track$P1INP$0$0 == 0x00f6
+                    00F6    262 _P1INP	=	0x00f6
+                    00F7    263 Fmaster_wixel_track$P2INP$0$0 == 0x00f7
+                    00F7    264 _P2INP	=	0x00f7
+                    00F8    265 Fmaster_wixel_track$U1CSR$0$0 == 0x00f8
+                    00F8    266 _U1CSR	=	0x00f8
+                    00F9    267 Fmaster_wixel_track$U1DBUF$0$0 == 0x00f9
+                    00F9    268 _U1DBUF	=	0x00f9
+                    00FA    269 Fmaster_wixel_track$U1BAUD$0$0 == 0x00fa
+                    00FA    270 _U1BAUD	=	0x00fa
+                    00FB    271 Fmaster_wixel_track$U1UCR$0$0 == 0x00fb
+                    00FB    272 _U1UCR	=	0x00fb
+                    00FC    273 Fmaster_wixel_track$U1GCR$0$0 == 0x00fc
+                    00FC    274 _U1GCR	=	0x00fc
+                    00FD    275 Fmaster_wixel_track$P0DIR$0$0 == 0x00fd
+                    00FD    276 _P0DIR	=	0x00fd
+                    00FE    277 Fmaster_wixel_track$P1DIR$0$0 == 0x00fe
+                    00FE    278 _P1DIR	=	0x00fe
+                    00FF    279 Fmaster_wixel_track$P2DIR$0$0 == 0x00ff
+                    00FF    280 _P2DIR	=	0x00ff
+                    FFFFD5D4    281 Fmaster_wixel_track$DMA0CFG$0$0 == 0xffffd5d4
+                    FFFFD5D4    282 _DMA0CFG	=	0xffffd5d4
+                    FFFFD3D2    283 Fmaster_wixel_track$DMA1CFG$0$0 == 0xffffd3d2
+                    FFFFD3D2    284 _DMA1CFG	=	0xffffd3d2
+                    FFFFADAC    285 Fmaster_wixel_track$FADDR$0$0 == 0xffffadac
+                    FFFFADAC    286 _FADDR	=	0xffffadac
+                    FFFFBBBA    287 Fmaster_wixel_track$ADC$0$0 == 0xffffbbba
+                    FFFFBBBA    288 _ADC	=	0xffffbbba
+                    FFFFDBDA    289 Fmaster_wixel_track$T1CC0$0$0 == 0xffffdbda
+                    FFFFDBDA    290 _T1CC0	=	0xffffdbda
+                    FFFFDDDC    291 Fmaster_wixel_track$T1CC1$0$0 == 0xffffdddc
+                    FFFFDDDC    292 _T1CC1	=	0xffffdddc
+                    FFFFDFDE    293 Fmaster_wixel_track$T1CC2$0$0 == 0xffffdfde
+                    FFFFDFDE    294 _T1CC2	=	0xffffdfde
+                            295 ;--------------------------------------------------------
+                            296 ; special function bits
+                            297 ;--------------------------------------------------------
+                            298 	.area RSEG    (ABS,DATA)
+   0000                     299 	.org 0x0000
+                    0080    300 Fmaster_wixel_track$P0_0$0$0 == 0x0080
+                    0080    301 _P0_0	=	0x0080
+                    0081    302 Fmaster_wixel_track$P0_1$0$0 == 0x0081
+                    0081    303 _P0_1	=	0x0081
+                    0082    304 Fmaster_wixel_track$P0_2$0$0 == 0x0082
+                    0082    305 _P0_2	=	0x0082
+                    0083    306 Fmaster_wixel_track$P0_3$0$0 == 0x0083
+                    0083    307 _P0_3	=	0x0083
+                    0084    308 Fmaster_wixel_track$P0_4$0$0 == 0x0084
+                    0084    309 _P0_4	=	0x0084
+                    0085    310 Fmaster_wixel_track$P0_5$0$0 == 0x0085
+                    0085    311 _P0_5	=	0x0085
+                    0086    312 Fmaster_wixel_track$P0_6$0$0 == 0x0086
+                    0086    313 _P0_6	=	0x0086
+                    0087    314 Fmaster_wixel_track$P0_7$0$0 == 0x0087
+                    0087    315 _P0_7	=	0x0087
+                    0088    316 Fmaster_wixel_track$_TCON_0$0$0 == 0x0088
+                    0088    317 __TCON_0	=	0x0088
+                    0089    318 Fmaster_wixel_track$RFTXRXIF$0$0 == 0x0089
+                    0089    319 _RFTXRXIF	=	0x0089
+                    008A    320 Fmaster_wixel_track$_TCON_2$0$0 == 0x008a
+                    008A    321 __TCON_2	=	0x008a
+                    008B    322 Fmaster_wixel_track$URX0IF$0$0 == 0x008b
+                    008B    323 _URX0IF	=	0x008b
+                    008C    324 Fmaster_wixel_track$_TCON_4$0$0 == 0x008c
+                    008C    325 __TCON_4	=	0x008c
+                    008D    326 Fmaster_wixel_track$ADCIF$0$0 == 0x008d
+                    008D    327 _ADCIF	=	0x008d
+                    008E    328 Fmaster_wixel_track$_TCON_6$0$0 == 0x008e
+                    008E    329 __TCON_6	=	0x008e
+                    008F    330 Fmaster_wixel_track$URX1IF$0$0 == 0x008f
+                    008F    331 _URX1IF	=	0x008f
+                    0090    332 Fmaster_wixel_track$P1_0$0$0 == 0x0090
+                    0090    333 _P1_0	=	0x0090
+                    0091    334 Fmaster_wixel_track$P1_1$0$0 == 0x0091
+                    0091    335 _P1_1	=	0x0091
+                    0092    336 Fmaster_wixel_track$P1_2$0$0 == 0x0092
+                    0092    337 _P1_2	=	0x0092
+                    0093    338 Fmaster_wixel_track$P1_3$0$0 == 0x0093
+                    0093    339 _P1_3	=	0x0093
+                    0094    340 Fmaster_wixel_track$P1_4$0$0 == 0x0094
+                    0094    341 _P1_4	=	0x0094
+                    0095    342 Fmaster_wixel_track$P1_5$0$0 == 0x0095
+                    0095    343 _P1_5	=	0x0095
+                    0096    344 Fmaster_wixel_track$P1_6$0$0 == 0x0096
+                    0096    345 _P1_6	=	0x0096
+                    0097    346 Fmaster_wixel_track$P1_7$0$0 == 0x0097
+                    0097    347 _P1_7	=	0x0097
+                    0098    348 Fmaster_wixel_track$ENCIF_0$0$0 == 0x0098
+                    0098    349 _ENCIF_0	=	0x0098
+                    0099    350 Fmaster_wixel_track$ENCIF_1$0$0 == 0x0099
+                    0099    351 _ENCIF_1	=	0x0099
+                    009A    352 Fmaster_wixel_track$_SOCON2$0$0 == 0x009a
+                    009A    353 __SOCON2	=	0x009a
+                    009B    354 Fmaster_wixel_track$_SOCON3$0$0 == 0x009b
+                    009B    355 __SOCON3	=	0x009b
+                    009C    356 Fmaster_wixel_track$_SOCON4$0$0 == 0x009c
+                    009C    357 __SOCON4	=	0x009c
+                    009D    358 Fmaster_wixel_track$_SOCON5$0$0 == 0x009d
+                    009D    359 __SOCON5	=	0x009d
+                    009E    360 Fmaster_wixel_track$_SOCON6$0$0 == 0x009e
+                    009E    361 __SOCON6	=	0x009e
+                    009F    362 Fmaster_wixel_track$_SOCON7$0$0 == 0x009f
+                    009F    363 __SOCON7	=	0x009f
+                    00A0    364 Fmaster_wixel_track$P2_0$0$0 == 0x00a0
+                    00A0    365 _P2_0	=	0x00a0
+                    00A1    366 Fmaster_wixel_track$P2_1$0$0 == 0x00a1
+                    00A1    367 _P2_1	=	0x00a1
+                    00A2    368 Fmaster_wixel_track$P2_2$0$0 == 0x00a2
+                    00A2    369 _P2_2	=	0x00a2
+                    00A3    370 Fmaster_wixel_track$P2_3$0$0 == 0x00a3
+                    00A3    371 _P2_3	=	0x00a3
+                    00A4    372 Fmaster_wixel_track$P2_4$0$0 == 0x00a4
+                    00A4    373 _P2_4	=	0x00a4
+                    00A5    374 Fmaster_wixel_track$P2_5$0$0 == 0x00a5
+                    00A5    375 _P2_5	=	0x00a5
+                    00A6    376 Fmaster_wixel_track$P2_6$0$0 == 0x00a6
+                    00A6    377 _P2_6	=	0x00a6
+                    00A7    378 Fmaster_wixel_track$P2_7$0$0 == 0x00a7
+                    00A7    379 _P2_7	=	0x00a7
+                    00A8    380 Fmaster_wixel_track$RFTXRXIE$0$0 == 0x00a8
+                    00A8    381 _RFTXRXIE	=	0x00a8
+                    00A9    382 Fmaster_wixel_track$ADCIE$0$0 == 0x00a9
+                    00A9    383 _ADCIE	=	0x00a9
+                    00AA    384 Fmaster_wixel_track$URX0IE$0$0 == 0x00aa
+                    00AA    385 _URX0IE	=	0x00aa
+                    00AB    386 Fmaster_wixel_track$URX1IE$0$0 == 0x00ab
+                    00AB    387 _URX1IE	=	0x00ab
+                    00AC    388 Fmaster_wixel_track$ENCIE$0$0 == 0x00ac
+                    00AC    389 _ENCIE	=	0x00ac
+                    00AD    390 Fmaster_wixel_track$STIE$0$0 == 0x00ad
+                    00AD    391 _STIE	=	0x00ad
+                    00AE    392 Fmaster_wixel_track$_IEN06$0$0 == 0x00ae
+                    00AE    393 __IEN06	=	0x00ae
+                    00AF    394 Fmaster_wixel_track$EA$0$0 == 0x00af
+                    00AF    395 _EA	=	0x00af
+                    00B8    396 Fmaster_wixel_track$DMAIE$0$0 == 0x00b8
+                    00B8    397 _DMAIE	=	0x00b8
+                    00B9    398 Fmaster_wixel_track$T1IE$0$0 == 0x00b9
+                    00B9    399 _T1IE	=	0x00b9
+                    00BA    400 Fmaster_wixel_track$T2IE$0$0 == 0x00ba
+                    00BA    401 _T2IE	=	0x00ba
+                    00BB    402 Fmaster_wixel_track$T3IE$0$0 == 0x00bb
+                    00BB    403 _T3IE	=	0x00bb
+                    00BC    404 Fmaster_wixel_track$T4IE$0$0 == 0x00bc
+                    00BC    405 _T4IE	=	0x00bc
+                    00BD    406 Fmaster_wixel_track$P0IE$0$0 == 0x00bd
+                    00BD    407 _P0IE	=	0x00bd
+                    00BE    408 Fmaster_wixel_track$_IEN16$0$0 == 0x00be
+                    00BE    409 __IEN16	=	0x00be
+                    00BF    410 Fmaster_wixel_track$_IEN17$0$0 == 0x00bf
+                    00BF    411 __IEN17	=	0x00bf
+                    00C0    412 Fmaster_wixel_track$DMAIF$0$0 == 0x00c0
+                    00C0    413 _DMAIF	=	0x00c0
+                    00C1    414 Fmaster_wixel_track$T1IF$0$0 == 0x00c1
+                    00C1    415 _T1IF	=	0x00c1
+                    00C2    416 Fmaster_wixel_track$T2IF$0$0 == 0x00c2
+                    00C2    417 _T2IF	=	0x00c2
+                    00C3    418 Fmaster_wixel_track$T3IF$0$0 == 0x00c3
+                    00C3    419 _T3IF	=	0x00c3
+                    00C4    420 Fmaster_wixel_track$T4IF$0$0 == 0x00c4
+                    00C4    421 _T4IF	=	0x00c4
+                    00C5    422 Fmaster_wixel_track$P0IF$0$0 == 0x00c5
+                    00C5    423 _P0IF	=	0x00c5
+                    00C6    424 Fmaster_wixel_track$_IRCON6$0$0 == 0x00c6
+                    00C6    425 __IRCON6	=	0x00c6
+                    00C7    426 Fmaster_wixel_track$STIF$0$0 == 0x00c7
+                    00C7    427 _STIF	=	0x00c7
+                    00D0    428 Fmaster_wixel_track$P$0$0 == 0x00d0
+                    00D0    429 _P	=	0x00d0
+                    00D1    430 Fmaster_wixel_track$F1$0$0 == 0x00d1
+                    00D1    431 _F1	=	0x00d1
+                    00D2    432 Fmaster_wixel_track$OV$0$0 == 0x00d2
+                    00D2    433 _OV	=	0x00d2
+                    00D3    434 Fmaster_wixel_track$RS0$0$0 == 0x00d3
+                    00D3    435 _RS0	=	0x00d3
+                    00D4    436 Fmaster_wixel_track$RS1$0$0 == 0x00d4
+                    00D4    437 _RS1	=	0x00d4
+                    00D5    438 Fmaster_wixel_track$F0$0$0 == 0x00d5
+                    00D5    439 _F0	=	0x00d5
+                    00D6    440 Fmaster_wixel_track$AC$0$0 == 0x00d6
+                    00D6    441 _AC	=	0x00d6
+                    00D7    442 Fmaster_wixel_track$CY$0$0 == 0x00d7
+                    00D7    443 _CY	=	0x00d7
+                    00D8    444 Fmaster_wixel_track$T3OVFIF$0$0 == 0x00d8
+                    00D8    445 _T3OVFIF	=	0x00d8
+                    00D9    446 Fmaster_wixel_track$T3CH0IF$0$0 == 0x00d9
+                    00D9    447 _T3CH0IF	=	0x00d9
+                    00DA    448 Fmaster_wixel_track$T3CH1IF$0$0 == 0x00da
+                    00DA    449 _T3CH1IF	=	0x00da
+                    00DB    450 Fmaster_wixel_track$T4OVFIF$0$0 == 0x00db
+                    00DB    451 _T4OVFIF	=	0x00db
+                    00DC    452 Fmaster_wixel_track$T4CH0IF$0$0 == 0x00dc
+                    00DC    453 _T4CH0IF	=	0x00dc
+                    00DD    454 Fmaster_wixel_track$T4CH1IF$0$0 == 0x00dd
+                    00DD    455 _T4CH1IF	=	0x00dd
+                    00DE    456 Fmaster_wixel_track$OVFIM$0$0 == 0x00de
+                    00DE    457 _OVFIM	=	0x00de
+                    00DF    458 Fmaster_wixel_track$_TIMIF7$0$0 == 0x00df
+                    00DF    459 __TIMIF7	=	0x00df
+                    00E0    460 Fmaster_wixel_track$ACC_0$0$0 == 0x00e0
+                    00E0    461 _ACC_0	=	0x00e0
+                    00E1    462 Fmaster_wixel_track$ACC_1$0$0 == 0x00e1
+                    00E1    463 _ACC_1	=	0x00e1
+                    00E2    464 Fmaster_wixel_track$ACC_2$0$0 == 0x00e2
+                    00E2    465 _ACC_2	=	0x00e2
+                    00E3    466 Fmaster_wixel_track$ACC_3$0$0 == 0x00e3
+                    00E3    467 _ACC_3	=	0x00e3
+                    00E4    468 Fmaster_wixel_track$ACC_4$0$0 == 0x00e4
+                    00E4    469 _ACC_4	=	0x00e4
+                    00E5    470 Fmaster_wixel_track$ACC_5$0$0 == 0x00e5
+                    00E5    471 _ACC_5	=	0x00e5
+                    00E6    472 Fmaster_wixel_track$ACC_6$0$0 == 0x00e6
+                    00E6    473 _ACC_6	=	0x00e6
+                    00E7    474 Fmaster_wixel_track$ACC_7$0$0 == 0x00e7
+                    00E7    475 _ACC_7	=	0x00e7
+                    00E8    476 Fmaster_wixel_track$P2IF$0$0 == 0x00e8
+                    00E8    477 _P2IF	=	0x00e8
+                    00E9    478 Fmaster_wixel_track$UTX0IF$0$0 == 0x00e9
+                    00E9    479 _UTX0IF	=	0x00e9
+                    00EA    480 Fmaster_wixel_track$UTX1IF$0$0 == 0x00ea
+                    00EA    481 _UTX1IF	=	0x00ea
+                    00EB    482 Fmaster_wixel_track$P1IF$0$0 == 0x00eb
+                    00EB    483 _P1IF	=	0x00eb
+                    00EC    484 Fmaster_wixel_track$WDTIF$0$0 == 0x00ec
+                    00EC    485 _WDTIF	=	0x00ec
+                    00ED    486 Fmaster_wixel_track$_IRCON25$0$0 == 0x00ed
+                    00ED    487 __IRCON25	=	0x00ed
+                    00EE    488 Fmaster_wixel_track$_IRCON26$0$0 == 0x00ee
+                    00EE    489 __IRCON26	=	0x00ee
+                    00EF    490 Fmaster_wixel_track$_IRCON27$0$0 == 0x00ef
+                    00EF    491 __IRCON27	=	0x00ef
+                    00F0    492 Fmaster_wixel_track$B_0$0$0 == 0x00f0
+                    00F0    493 _B_0	=	0x00f0
+                    00F1    494 Fmaster_wixel_track$B_1$0$0 == 0x00f1
+                    00F1    495 _B_1	=	0x00f1
+                    00F2    496 Fmaster_wixel_track$B_2$0$0 == 0x00f2
+                    00F2    497 _B_2	=	0x00f2
+                    00F3    498 Fmaster_wixel_track$B_3$0$0 == 0x00f3
+                    00F3    499 _B_3	=	0x00f3
+                    00F4    500 Fmaster_wixel_track$B_4$0$0 == 0x00f4
+                    00F4    501 _B_4	=	0x00f4
+                    00F5    502 Fmaster_wixel_track$B_5$0$0 == 0x00f5
+                    00F5    503 _B_5	=	0x00f5
+                    00F6    504 Fmaster_wixel_track$B_6$0$0 == 0x00f6
+                    00F6    505 _B_6	=	0x00f6
+                    00F7    506 Fmaster_wixel_track$B_7$0$0 == 0x00f7
+                    00F7    507 _B_7	=	0x00f7
+                    00F8    508 Fmaster_wixel_track$U1ACTIVE$0$0 == 0x00f8
+                    00F8    509 _U1ACTIVE	=	0x00f8
+                    00F9    510 Fmaster_wixel_track$U1TX_BYTE$0$0 == 0x00f9
+                    00F9    511 _U1TX_BYTE	=	0x00f9
+                    00FA    512 Fmaster_wixel_track$U1RX_BYTE$0$0 == 0x00fa
+                    00FA    513 _U1RX_BYTE	=	0x00fa
+                    00FB    514 Fmaster_wixel_track$U1ERR$0$0 == 0x00fb
+                    00FB    515 _U1ERR	=	0x00fb
+                    00FC    516 Fmaster_wixel_track$U1FE$0$0 == 0x00fc
+                    00FC    517 _U1FE	=	0x00fc
+                    00FD    518 Fmaster_wixel_track$U1SLAVE$0$0 == 0x00fd
+                    00FD    519 _U1SLAVE	=	0x00fd
+                    00FE    520 Fmaster_wixel_track$U1RE$0$0 == 0x00fe
+                    00FE    521 _U1RE	=	0x00fe
+                    00FF    522 Fmaster_wixel_track$U1MODE$0$0 == 0x00ff
+                    00FF    523 _U1MODE	=	0x00ff
+                            524 ;--------------------------------------------------------
+                            525 ; overlayable register banks
+                            526 ;--------------------------------------------------------
+                            527 	.area REG_BANK_0	(REL,OVR,DATA)
+   0000                     528 	.ds 8
+                            529 ;--------------------------------------------------------
+                            530 ; internal ram data
+                            531 ;--------------------------------------------------------
+                            532 	.area DSEG    (DATA)
+                    0000    533 Lmaster_wixel_track.updateLeds$sloc0$1$0==.
+   0000                     534 _updateLeds_sloc0_1_0:
+   0000                     535 	.ds 4
+                            536 ;--------------------------------------------------------
+                            537 ; overlayable items in internal ram 
+                            538 ;--------------------------------------------------------
+                            539 	.area OSEG    (OVR,DATA)
+                            540 ;--------------------------------------------------------
+                            541 ; Stack segment in internal ram 
+                            542 ;--------------------------------------------------------
+                            543 	.area	SSEG	(DATA)
+   0000                     544 __start__stack:
+   0000                     545 	.ds	1
+                            546 
+                            547 ;--------------------------------------------------------
+                            548 ; indirectly addressable internal ram data
+                            549 ;--------------------------------------------------------
+                            550 	.area ISEG    (DATA)
+                            551 ;--------------------------------------------------------
+                            552 ; absolute internal ram data
+                            553 ;--------------------------------------------------------
+                            554 	.area IABS    (ABS,DATA)
+                            555 	.area IABS    (ABS,DATA)
+                            556 ;--------------------------------------------------------
+                            557 ; bit data
+                            558 ;--------------------------------------------------------
+                            559 	.area BSEG    (BIT)
+                    0000    560 G$serialRxPulseActive$0$0==.
+   0000                     561 _serialRxPulseActive::
+   0000                     562 	.ds 1
+                    0001    563 G$radioTxPulseActive$0$0==.
+   0001                     564 _radioTxPulseActive::
+   0001                     565 	.ds 1
+                            566 ;--------------------------------------------------------
+                            567 ; paged external ram data
+                            568 ;--------------------------------------------------------
+                            569 	.area PSEG    (PAG,XDATA)
+                    0000    570 G$serialBufferIndex$0$0==.
+   0000                     571 _serialBufferIndex::
+   0000                     572 	.ds 1
+                    0001    573 G$slaveAddresses$0$0==.
+   0001                     574 _slaveAddresses::
+   0001                     575 	.ds 4
+                    0005    576 G$lastSerialRxTime$0$0==.
+   0005                     577 _lastSerialRxTime::
+   0005                     578 	.ds 4
+                    0009    579 G$lastRadioTxTime$0$0==.
+   0009                     580 _lastRadioTxTime::
+   0009                     581 	.ds 4
+                    000D    582 G$lastHeartbeatTime$0$0==.
+   000D                     583 _lastHeartbeatTime::
+   000D                     584 	.ds 4
+                    0011    585 G$serialRxPulseStart$0$0==.
+   0011                     586 _serialRxPulseStart::
+   0011                     587 	.ds 2
+                    0013    588 G$radioTxPulseStart$0$0==.
+   0013                     589 _radioTxPulseStart::
+   0013                     590 	.ds 2
+                    0015    591 G$responseLength$0$0==.
+   0015                     592 _responseLength::
+   0015                     593 	.ds 1
+                    0016    594 G$fsi$0$0==.
+   0016                     595 _fsi::
+   0016                     596 	.ds 1
+                    0017    597 G$posX$0$0==.
+   0017                     598 _posX::
+   0017                     599 	.ds 2
+                    0019    600 G$posY$0$0==.
+   0019                     601 _posY::
+   0019                     602 	.ds 2
+                    001B    603 G$theta$0$0==.
+   001B                     604 _theta::
+   001B                     605 	.ds 1
+                    001C    606 Lmaster_wixel_track.processSerialPacket$data3$1$1==.
+   001C                     607 _processSerialPacket_data3_1_1:
+   001C                     608 	.ds 2
+                    001E    609 Lmaster_wixel_track.processSerialPacket$data4$1$1==.
+   001E                     610 _processSerialPacket_data4_1_1:
+   001E                     611 	.ds 2
+                    0020    612 Lmaster_wixel_track.processSerialPacket$posX$1$1==.
+   0020                     613 _processSerialPacket_posX_1_1:
+   0020                     614 	.ds 2
+                    0022    615 Lmaster_wixel_track.processSerialPacket$cmdStr$1$1==.
+   0022                     616 _processSerialPacket_cmdStr_1_1:
+   0022                     617 	.ds 16
+                            618 ;--------------------------------------------------------
+                            619 ; external ram data
+                            620 ;--------------------------------------------------------
+                            621 	.area XSEG    (XDATA)
+                    DF00    622 Fmaster_wixel_track$SYNC1$0$0 == 0xdf00
+                    DF00    623 _SYNC1	=	0xdf00
+                    DF01    624 Fmaster_wixel_track$SYNC0$0$0 == 0xdf01
+                    DF01    625 _SYNC0	=	0xdf01
+                    DF02    626 Fmaster_wixel_track$PKTLEN$0$0 == 0xdf02
+                    DF02    627 _PKTLEN	=	0xdf02
+                    DF03    628 Fmaster_wixel_track$PKTCTRL1$0$0 == 0xdf03
+                    DF03    629 _PKTCTRL1	=	0xdf03
+                    DF04    630 Fmaster_wixel_track$PKTCTRL0$0$0 == 0xdf04
+                    DF04    631 _PKTCTRL0	=	0xdf04
+                    DF05    632 Fmaster_wixel_track$ADDR$0$0 == 0xdf05
+                    DF05    633 _ADDR	=	0xdf05
+                    DF06    634 Fmaster_wixel_track$CHANNR$0$0 == 0xdf06
+                    DF06    635 _CHANNR	=	0xdf06
+                    DF07    636 Fmaster_wixel_track$FSCTRL1$0$0 == 0xdf07
+                    DF07    637 _FSCTRL1	=	0xdf07
+                    DF08    638 Fmaster_wixel_track$FSCTRL0$0$0 == 0xdf08
+                    DF08    639 _FSCTRL0	=	0xdf08
+                    DF09    640 Fmaster_wixel_track$FREQ2$0$0 == 0xdf09
+                    DF09    641 _FREQ2	=	0xdf09
+                    DF0A    642 Fmaster_wixel_track$FREQ1$0$0 == 0xdf0a
+                    DF0A    643 _FREQ1	=	0xdf0a
+                    DF0B    644 Fmaster_wixel_track$FREQ0$0$0 == 0xdf0b
+                    DF0B    645 _FREQ0	=	0xdf0b
+                    DF0C    646 Fmaster_wixel_track$MDMCFG4$0$0 == 0xdf0c
+                    DF0C    647 _MDMCFG4	=	0xdf0c
+                    DF0D    648 Fmaster_wixel_track$MDMCFG3$0$0 == 0xdf0d
+                    DF0D    649 _MDMCFG3	=	0xdf0d
+                    DF0E    650 Fmaster_wixel_track$MDMCFG2$0$0 == 0xdf0e
+                    DF0E    651 _MDMCFG2	=	0xdf0e
+                    DF0F    652 Fmaster_wixel_track$MDMCFG1$0$0 == 0xdf0f
+                    DF0F    653 _MDMCFG1	=	0xdf0f
+                    DF10    654 Fmaster_wixel_track$MDMCFG0$0$0 == 0xdf10
+                    DF10    655 _MDMCFG0	=	0xdf10
+                    DF11    656 Fmaster_wixel_track$DEVIATN$0$0 == 0xdf11
+                    DF11    657 _DEVIATN	=	0xdf11
+                    DF12    658 Fmaster_wixel_track$MCSM2$0$0 == 0xdf12
+                    DF12    659 _MCSM2	=	0xdf12
+                    DF13    660 Fmaster_wixel_track$MCSM1$0$0 == 0xdf13
+                    DF13    661 _MCSM1	=	0xdf13
+                    DF14    662 Fmaster_wixel_track$MCSM0$0$0 == 0xdf14
+                    DF14    663 _MCSM0	=	0xdf14
+                    DF15    664 Fmaster_wixel_track$FOCCFG$0$0 == 0xdf15
+                    DF15    665 _FOCCFG	=	0xdf15
+                    DF16    666 Fmaster_wixel_track$BSCFG$0$0 == 0xdf16
+                    DF16    667 _BSCFG	=	0xdf16
+                    DF17    668 Fmaster_wixel_track$AGCCTRL2$0$0 == 0xdf17
+                    DF17    669 _AGCCTRL2	=	0xdf17
+                    DF18    670 Fmaster_wixel_track$AGCCTRL1$0$0 == 0xdf18
+                    DF18    671 _AGCCTRL1	=	0xdf18
+                    DF19    672 Fmaster_wixel_track$AGCCTRL0$0$0 == 0xdf19
+                    DF19    673 _AGCCTRL0	=	0xdf19
+                    DF1A    674 Fmaster_wixel_track$FREND1$0$0 == 0xdf1a
+                    DF1A    675 _FREND1	=	0xdf1a
+                    DF1B    676 Fmaster_wixel_track$FREND0$0$0 == 0xdf1b
+                    DF1B    677 _FREND0	=	0xdf1b
+                    DF1C    678 Fmaster_wixel_track$FSCAL3$0$0 == 0xdf1c
+                    DF1C    679 _FSCAL3	=	0xdf1c
+                    DF1D    680 Fmaster_wixel_track$FSCAL2$0$0 == 0xdf1d
+                    DF1D    681 _FSCAL2	=	0xdf1d
+                    DF1E    682 Fmaster_wixel_track$FSCAL1$0$0 == 0xdf1e
+                    DF1E    683 _FSCAL1	=	0xdf1e
+                    DF1F    684 Fmaster_wixel_track$FSCAL0$0$0 == 0xdf1f
+                    DF1F    685 _FSCAL0	=	0xdf1f
+                    DF23    686 Fmaster_wixel_track$TEST2$0$0 == 0xdf23
+                    DF23    687 _TEST2	=	0xdf23
+                    DF24    688 Fmaster_wixel_track$TEST1$0$0 == 0xdf24
+                    DF24    689 _TEST1	=	0xdf24
+                    DF25    690 Fmaster_wixel_track$TEST0$0$0 == 0xdf25
+                    DF25    691 _TEST0	=	0xdf25
+                    DF2E    692 Fmaster_wixel_track$PA_TABLE0$0$0 == 0xdf2e
+                    DF2E    693 _PA_TABLE0	=	0xdf2e
+                    DF2F    694 Fmaster_wixel_track$IOCFG2$0$0 == 0xdf2f
+                    DF2F    695 _IOCFG2	=	0xdf2f
+                    DF30    696 Fmaster_wixel_track$IOCFG1$0$0 == 0xdf30
+                    DF30    697 _IOCFG1	=	0xdf30
+                    DF31    698 Fmaster_wixel_track$IOCFG0$0$0 == 0xdf31
+                    DF31    699 _IOCFG0	=	0xdf31
+                    DF36    700 Fmaster_wixel_track$PARTNUM$0$0 == 0xdf36
+                    DF36    701 _PARTNUM	=	0xdf36
+                    DF37    702 Fmaster_wixel_track$VERSION$0$0 == 0xdf37
+                    DF37    703 _VERSION	=	0xdf37
+                    DF38    704 Fmaster_wixel_track$FREQEST$0$0 == 0xdf38
+                    DF38    705 _FREQEST	=	0xdf38
+                    DF39    706 Fmaster_wixel_track$LQI$0$0 == 0xdf39
+                    DF39    707 _LQI	=	0xdf39
+                    DF3A    708 Fmaster_wixel_track$RSSI$0$0 == 0xdf3a
+                    DF3A    709 _RSSI	=	0xdf3a
+                    DF3B    710 Fmaster_wixel_track$MARCSTATE$0$0 == 0xdf3b
+                    DF3B    711 _MARCSTATE	=	0xdf3b
+                    DF3C    712 Fmaster_wixel_track$PKTSTATUS$0$0 == 0xdf3c
+                    DF3C    713 _PKTSTATUS	=	0xdf3c
+                    DF3D    714 Fmaster_wixel_track$VCO_VC_DAC$0$0 == 0xdf3d
+                    DF3D    715 _VCO_VC_DAC	=	0xdf3d
+                    DF40    716 Fmaster_wixel_track$I2SCFG0$0$0 == 0xdf40
+                    DF40    717 _I2SCFG0	=	0xdf40
+                    DF41    718 Fmaster_wixel_track$I2SCFG1$0$0 == 0xdf41
+                    DF41    719 _I2SCFG1	=	0xdf41
+                    DF42    720 Fmaster_wixel_track$I2SDATL$0$0 == 0xdf42
+                    DF42    721 _I2SDATL	=	0xdf42
+                    DF43    722 Fmaster_wixel_track$I2SDATH$0$0 == 0xdf43
+                    DF43    723 _I2SDATH	=	0xdf43
+                    DF44    724 Fmaster_wixel_track$I2SWCNT$0$0 == 0xdf44
+                    DF44    725 _I2SWCNT	=	0xdf44
+                    DF45    726 Fmaster_wixel_track$I2SSTAT$0$0 == 0xdf45
+                    DF45    727 _I2SSTAT	=	0xdf45
+                    DF46    728 Fmaster_wixel_track$I2SCLKF0$0$0 == 0xdf46
+                    DF46    729 _I2SCLKF0	=	0xdf46
+                    DF47    730 Fmaster_wixel_track$I2SCLKF1$0$0 == 0xdf47
+                    DF47    731 _I2SCLKF1	=	0xdf47
+                    DF48    732 Fmaster_wixel_track$I2SCLKF2$0$0 == 0xdf48
+                    DF48    733 _I2SCLKF2	=	0xdf48
+                    DE00    734 Fmaster_wixel_track$USBADDR$0$0 == 0xde00
+                    DE00    735 _USBADDR	=	0xde00
+                    DE01    736 Fmaster_wixel_track$USBPOW$0$0 == 0xde01
+                    DE01    737 _USBPOW	=	0xde01
+                    DE02    738 Fmaster_wixel_track$USBIIF$0$0 == 0xde02
+                    DE02    739 _USBIIF	=	0xde02
+                    DE04    740 Fmaster_wixel_track$USBOIF$0$0 == 0xde04
+                    DE04    741 _USBOIF	=	0xde04
+                    DE06    742 Fmaster_wixel_track$USBCIF$0$0 == 0xde06
+                    DE06    743 _USBCIF	=	0xde06
+                    DE07    744 Fmaster_wixel_track$USBIIE$0$0 == 0xde07
+                    DE07    745 _USBIIE	=	0xde07
+                    DE09    746 Fmaster_wixel_track$USBOIE$0$0 == 0xde09
+                    DE09    747 _USBOIE	=	0xde09
+                    DE0B    748 Fmaster_wixel_track$USBCIE$0$0 == 0xde0b
+                    DE0B    749 _USBCIE	=	0xde0b
+                    DE0C    750 Fmaster_wixel_track$USBFRML$0$0 == 0xde0c
+                    DE0C    751 _USBFRML	=	0xde0c
+                    DE0D    752 Fmaster_wixel_track$USBFRMH$0$0 == 0xde0d
+                    DE0D    753 _USBFRMH	=	0xde0d
+                    DE0E    754 Fmaster_wixel_track$USBINDEX$0$0 == 0xde0e
+                    DE0E    755 _USBINDEX	=	0xde0e
+                    DE10    756 Fmaster_wixel_track$USBMAXI$0$0 == 0xde10
+                    DE10    757 _USBMAXI	=	0xde10
+                    DE11    758 Fmaster_wixel_track$USBCSIL$0$0 == 0xde11
+                    DE11    759 _USBCSIL	=	0xde11
+                    DE12    760 Fmaster_wixel_track$USBCSIH$0$0 == 0xde12
+                    DE12    761 _USBCSIH	=	0xde12
+                    DE13    762 Fmaster_wixel_track$USBMAXO$0$0 == 0xde13
+                    DE13    763 _USBMAXO	=	0xde13
+                    DE14    764 Fmaster_wixel_track$USBCSOL$0$0 == 0xde14
+                    DE14    765 _USBCSOL	=	0xde14
+                    DE15    766 Fmaster_wixel_track$USBCSOH$0$0 == 0xde15
+                    DE15    767 _USBCSOH	=	0xde15
+                    DE16    768 Fmaster_wixel_track$USBCNTL$0$0 == 0xde16
+                    DE16    769 _USBCNTL	=	0xde16
+                    DE17    770 Fmaster_wixel_track$USBCNTH$0$0 == 0xde17
+                    DE17    771 _USBCNTH	=	0xde17
+                    DE20    772 Fmaster_wixel_track$USBF0$0$0 == 0xde20
+                    DE20    773 _USBF0	=	0xde20
+                    DE22    774 Fmaster_wixel_track$USBF1$0$0 == 0xde22
+                    DE22    775 _USBF1	=	0xde22
+                    DE24    776 Fmaster_wixel_track$USBF2$0$0 == 0xde24
+                    DE24    777 _USBF2	=	0xde24
+                    DE26    778 Fmaster_wixel_track$USBF3$0$0 == 0xde26
+                    DE26    779 _USBF3	=	0xde26
+                    DE28    780 Fmaster_wixel_track$USBF4$0$0 == 0xde28
+                    DE28    781 _USBF4	=	0xde28
+                    DE2A    782 Fmaster_wixel_track$USBF5$0$0 == 0xde2a
+                    DE2A    783 _USBF5	=	0xde2a
+                    0000    784 Fmaster_wixel_track$txPacket$0$0==.
+   0000                     785 _txPacket:
+   0000                     786 	.ds 65
+                    0041    787 Fmaster_wixel_track$serialBuffer$0$0==.
+   0041                     788 _serialBuffer:
+   0041                     789 	.ds 100
+                    00A5    790 Fmaster_wixel_track$serialResponse$0$0==.
+   00A5                     791 _serialResponse:
+   00A5                     792 	.ds 64
+                            793 ;--------------------------------------------------------
+                            794 ; absolute external ram data
+                            795 ;--------------------------------------------------------
+                            796 	.area XABS    (ABS,XDATA)
+                            797 ;--------------------------------------------------------
+                            798 ; external initialized ram data
+                            799 ;--------------------------------------------------------
+                            800 	.area XISEG   (XDATA)
+                            801 	.area HOME    (CODE)
+                            802 	.area GSINIT0 (CODE)
+                            803 	.area GSINIT1 (CODE)
+                            804 	.area GSINIT2 (CODE)
+                            805 	.area GSINIT3 (CODE)
+                            806 	.area GSINIT4 (CODE)
+                            807 	.area GSINIT5 (CODE)
+                            808 	.area GSINIT  (CODE)
+                            809 	.area GSFINAL (CODE)
+                            810 	.area CSEG    (CODE)
+                            811 ;--------------------------------------------------------
+                            812 ; interrupt vector 
+                            813 ;--------------------------------------------------------
+                            814 	.area HOME    (CODE)
+   0000                     815 __interrupt_vect:
+   0000 02s00r00            816 	ljmp	__sdcc_gsinit_startup
+   0003 32                  817 	reti
+   0004                     818 	.ds	7
+   000B 32                  819 	reti
+   000C                     820 	.ds	7
+   0013 32                  821 	reti
+   0014                     822 	.ds	7
+   001B 32                  823 	reti
+   001C                     824 	.ds	7
+   0023 32                  825 	reti
+   0024                     826 	.ds	7
+   002B 32                  827 	reti
+   002C                     828 	.ds	7
+   0033 32                  829 	reti
+   0034                     830 	.ds	7
+   003B 32                  831 	reti
+   003C                     832 	.ds	7
+   0043 32                  833 	reti
+   0044                     834 	.ds	7
+   004B 32                  835 	reti
+   004C                     836 	.ds	7
+   0053 32                  837 	reti
+   0054                     838 	.ds	7
+   005B 32                  839 	reti
+   005C                     840 	.ds	7
+   0063 02s00r00            841 	ljmp	_ISR_T4
+                            842 ;--------------------------------------------------------
+                            843 ; global & static initialisations
+                            844 ;--------------------------------------------------------
+                            845 	.area HOME    (CODE)
+                            846 	.area GSINIT  (CODE)
+                            847 	.area GSFINAL (CODE)
+                            848 	.area GSINIT  (CODE)
+                            849 	.globl __sdcc_gsinit_startup
+                            850 	.globl __sdcc_program_startup
+                            851 	.globl __start__stack
+                            852 	.globl __mcs51_genXINIT
+                            853 	.globl __mcs51_genXRAMCLEAR
+                            854 	.globl __mcs51_genRAMCLEAR
+                    0000    855 	G$main$0$0 ==.
+                    0000    856 	C$master_wixel_track.c$74$1$1 ==.
+                            857 ;	apps/master_wixel_track/master_wixel_track.c:74: BIT serialRxPulseActive = 0;
+   0000 C2*00               858 	clr	_serialRxPulseActive
+                    0002    859 	G$main$0$0 ==.
+                    0002    860 	C$master_wixel_track.c$76$1$1 ==.
+                            861 ;	apps/master_wixel_track/master_wixel_track.c:76: BIT radioTxPulseActive = 0;
+   0002 C2*01               862 	clr	_radioTxPulseActive
+                    0004    863 	G$main$0$0 ==.
+                    0004    864 	C$master_wixel_track.c$60$1$1 ==.
+                            865 ;	apps/master_wixel_track/master_wixel_track.c:60: uint8 serialBufferIndex = 0;
+   0004 78r00               866 	mov	r0,#_serialBufferIndex
+   0006 E4                  867 	clr	a
+   0007 F2                  868 	movx	@r0,a
+                    0008    869 	G$main$0$0 ==.
+                    0008    870 	C$master_wixel_track.c$66$1$1 ==.
+                            871 ;	apps/master_wixel_track/master_wixel_track.c:66: uint8 slaveAddresses[NUM_SLAVES] = {SLAVE_1_ADDRESS, SLAVE_2_ADDRESS, SLAVE_3_ADDRESS, SLAVE_4_ADDRESS};
+   0008 78r01               872 	mov	r0,#_slaveAddresses
+   000A 74 01               873 	mov	a,#0x01
+   000C F2                  874 	movx	@r0,a
+   000D 78r02               875 	mov	r0,#(_slaveAddresses + 0x0001)
+   000F 74 02               876 	mov	a,#0x02
+   0011 F2                  877 	movx	@r0,a
+   0012 78r03               878 	mov	r0,#(_slaveAddresses + 0x0002)
+   0014 74 03               879 	mov	a,#0x03
+   0016 F2                  880 	movx	@r0,a
+   0017 78r04               881 	mov	r0,#(_slaveAddresses + 0x0003)
+   0019 74 04               882 	mov	a,#0x04
+   001B F2                  883 	movx	@r0,a
+                    001C    884 	G$main$0$0 ==.
+                    001C    885 	C$master_wixel_track.c$69$1$1 ==.
+                            886 ;	apps/master_wixel_track/master_wixel_track.c:69: uint32 lastSerialRxTime = 0;
+   001C 78r05               887 	mov	r0,#_lastSerialRxTime
+   001E E4                  888 	clr	a
+   001F F2                  889 	movx	@r0,a
+   0020 08                  890 	inc	r0
+   0021 F2                  891 	movx	@r0,a
+   0022 08                  892 	inc	r0
+   0023 F2                  893 	movx	@r0,a
+   0024 08                  894 	inc	r0
+   0025 F2                  895 	movx	@r0,a
+                    0026    896 	G$main$0$0 ==.
+                    0026    897 	C$master_wixel_track.c$70$1$1 ==.
+                            898 ;	apps/master_wixel_track/master_wixel_track.c:70: uint32 lastRadioTxTime = 0;
+   0026 78r09               899 	mov	r0,#_lastRadioTxTime
+   0028 E4                  900 	clr	a
+   0029 F2                  901 	movx	@r0,a
+   002A 08                  902 	inc	r0
+   002B F2                  903 	movx	@r0,a
+   002C 08                  904 	inc	r0
+   002D F2                  905 	movx	@r0,a
+   002E 08                  906 	inc	r0
+   002F F2                  907 	movx	@r0,a
+                    0030    908 	G$main$0$0 ==.
+                    0030    909 	C$master_wixel_track.c$71$1$1 ==.
+                            910 ;	apps/master_wixel_track/master_wixel_track.c:71: uint32 lastHeartbeatTime = 0;
+   0030 78r0D               911 	mov	r0,#_lastHeartbeatTime
+   0032 E4                  912 	clr	a
+   0033 F2                  913 	movx	@r0,a
+   0034 08                  914 	inc	r0
+   0035 F2                  915 	movx	@r0,a
+   0036 08                  916 	inc	r0
+   0037 F2                  917 	movx	@r0,a
+   0038 08                  918 	inc	r0
+   0039 F2                  919 	movx	@r0,a
+                    003A    920 	G$main$0$0 ==.
+                    003A    921 	C$master_wixel_track.c$75$1$1 ==.
+                            922 ;	apps/master_wixel_track/master_wixel_track.c:75: uint16 serialRxPulseStart = 0;
+   003A 78r11               923 	mov	r0,#_serialRxPulseStart
+   003C E4                  924 	clr	a
+   003D F2                  925 	movx	@r0,a
+   003E 08                  926 	inc	r0
+   003F F2                  927 	movx	@r0,a
+                    0040    928 	G$main$0$0 ==.
+                    0040    929 	C$master_wixel_track.c$77$1$1 ==.
+                            930 ;	apps/master_wixel_track/master_wixel_track.c:77: uint16 radioTxPulseStart = 0;
+   0040 78r13               931 	mov	r0,#_radioTxPulseStart
+   0042 E4                  932 	clr	a
+   0043 F2                  933 	movx	@r0,a
+   0044 08                  934 	inc	r0
+   0045 F2                  935 	movx	@r0,a
+                    0046    936 	G$main$0$0 ==.
+                    0046    937 	C$master_wixel_track.c$85$1$1 ==.
+                            938 ;	apps/master_wixel_track/master_wixel_track.c:85: int16 posX = 0;
+   0046 78r17               939 	mov	r0,#_posX
+   0048 E4                  940 	clr	a
+   0049 F2                  941 	movx	@r0,a
+   004A 08                  942 	inc	r0
+   004B F2                  943 	movx	@r0,a
+                    004C    944 	G$main$0$0 ==.
+                    004C    945 	C$master_wixel_track.c$86$1$1 ==.
+                            946 ;	apps/master_wixel_track/master_wixel_track.c:86: int16 posY = 0;
+   004C 78r19               947 	mov	r0,#_posY
+   004E E4                  948 	clr	a
+   004F F2                  949 	movx	@r0,a
+   0050 08                  950 	inc	r0
+   0051 F2                  951 	movx	@r0,a
+                    0052    952 	G$main$0$0 ==.
+                    0052    953 	C$master_wixel_track.c$87$1$1 ==.
+                            954 ;	apps/master_wixel_track/master_wixel_track.c:87: int8 theta = 0;
+   0052 78r1B               955 	mov	r0,#_theta
+   0054 E4                  956 	clr	a
+   0055 F2                  957 	movx	@r0,a
+                            958 	.area GSFINAL (CODE)
+   0000 02s00r66            959 	ljmp	__sdcc_program_startup
+                            960 ;--------------------------------------------------------
+                            961 ; Home
+                            962 ;--------------------------------------------------------
+                            963 	.area HOME    (CODE)
+                            964 	.area HOME    (CODE)
+   0066                     965 __sdcc_program_startup:
+   0066 12s06rF2            966 	lcall	_main
+                            967 ;	return from main will lock up
+   0069 80 FE               968 	sjmp .
+                            969 ;--------------------------------------------------------
+                            970 ; code
+                            971 ;--------------------------------------------------------
+                            972 	.area CSEG    (CODE)
+                            973 ;------------------------------------------------------------
+                            974 ;Allocation info for local variables in function 'failSafeBootloader'
+                            975 ;------------------------------------------------------------
+                    0000    976 	G$failSafeBootloader$0$0 ==.
+                    0000    977 	C$master_wixel_track.c$90$0$0 ==.
+                            978 ;	apps/master_wixel_track/master_wixel_track.c:90: void failSafeBootloader()
+                            979 ;	-----------------------------------------
+                            980 ;	 function failSafeBootloader
+                            981 ;	-----------------------------------------
+   0000                     982 _failSafeBootloader:
+                    0007    983 	ar7 = 0x07
+                    0006    984 	ar6 = 0x06
+                    0005    985 	ar5 = 0x05
+                    0004    986 	ar4 = 0x04
+                    0003    987 	ar3 = 0x03
+                    0002    988 	ar2 = 0x02
+                    0001    989 	ar1 = 0x01
+                    0000    990 	ar0 = 0x00
+                    0000    991 	C$master_wixel_track.c$92$2$2 ==.
+                            992 ;	apps/master_wixel_track/master_wixel_track.c:92: LED_YELLOW(0);
+   0000 AF FF               993 	mov	r7,_P2DIR
+   0002 53 07 FB            994 	anl	ar7,#0xFB
+   0005 8F FF               995 	mov	_P2DIR,r7
+                    0007    996 	C$master_wixel_track.c$93$2$3 ==.
+                            997 ;	apps/master_wixel_track/master_wixel_track.c:93: LED_YELLOW_TOGGLE();
+   0007 63 FF 04            998 	xrl	_P2DIR,#0x04
+                    000A    999 	C$master_wixel_track.c$94$1$1 ==.
+                           1000 ;	apps/master_wixel_track/master_wixel_track.c:94: delayMs(200);
+   000A 90 00 C8           1001 	mov	dptr,#0x00C8
+   000D 12s00r00           1002 	lcall	_delayMs
+                    0010   1003 	C$master_wixel_track.c$96$1$1 ==.
+                           1004 ;	apps/master_wixel_track/master_wixel_track.c:96: for(fsi = 0; fsi < 20; fsi++)
+   0010 78r16              1005 	mov	r0,#_fsi
+   0012 E4                 1006 	clr	a
+   0013 F2                 1007 	movx	@r0,a
+   0014                    1008 00101$:
+   0014 78r16              1009 	mov	r0,#_fsi
+   0016 E2                 1010 	movx	a,@r0
+   0017 B4 14 00           1011 	cjne	a,#0x14,00109$
+   001A                    1012 00109$:
+   001A 50 14              1013 	jnc	00104$
+                    001C   1014 	C$master_wixel_track.c$98$3$5 ==.
+                           1015 ;	apps/master_wixel_track/master_wixel_track.c:98: LED_YELLOW_TOGGLE();
+   001C 63 FF 04           1016 	xrl	_P2DIR,#0x04
+                    001F   1017 	C$master_wixel_track.c$99$2$4 ==.
+                           1018 ;	apps/master_wixel_track/master_wixel_track.c:99: boardService();
+   001F 12s00r00           1019 	lcall	_boardService
+                    0022   1020 	C$master_wixel_track.c$100$2$4 ==.
+                           1021 ;	apps/master_wixel_track/master_wixel_track.c:100: delayMs(100);
+   0022 90 00 64           1022 	mov	dptr,#0x0064
+   0025 12s00r00           1023 	lcall	_delayMs
+                    0028   1024 	C$master_wixel_track.c$96$1$1 ==.
+                           1025 ;	apps/master_wixel_track/master_wixel_track.c:96: for(fsi = 0; fsi < 20; fsi++)
+   0028 78r16              1026 	mov	r0,#_fsi
+   002A E2                 1027 	movx	a,@r0
+   002B 24 01              1028 	add	a,#0x01
+   002D F2                 1029 	movx	@r0,a
+   002E 80 E4              1030 	sjmp	00101$
+   0030                    1031 00104$:
+                    0030   1032 	C$master_wixel_track.c$103$2$6 ==.
+                           1033 ;	apps/master_wixel_track/master_wixel_track.c:103: LED_YELLOW(0);
+   0030 AF FF              1034 	mov	r7,_P2DIR
+   0032 53 07 FB           1035 	anl	ar7,#0xFB
+   0035 8F FF              1036 	mov	_P2DIR,r7
+                    0037   1037 	C$master_wixel_track.c$104$2$6 ==.
+                    0037   1038 	XG$failSafeBootloader$0$0 ==.
+   0037 22                 1039 	ret
+                           1040 ;------------------------------------------------------------
+                           1041 ;Allocation info for local variables in function 'radioInit'
+                           1042 ;------------------------------------------------------------
+                    0038   1043 	G$radioInit$0$0 ==.
+                    0038   1044 	C$master_wixel_track.c$106$2$6 ==.
+                           1045 ;	apps/master_wixel_track/master_wixel_track.c:106: void radioInit()
+                           1046 ;	-----------------------------------------
+                           1047 ;	 function radioInit
+                           1048 ;	-----------------------------------------
+   0038                    1049 _radioInit:
+                    0038   1050 	C$master_wixel_track.c$108$1$1 ==.
+                           1051 ;	apps/master_wixel_track/master_wixel_track.c:108: radioRegistersInit();
+   0038 12s00r00           1052 	lcall	_radioRegistersInit
+                    003B   1053 	C$master_wixel_track.c$110$1$1 ==.
+                           1054 ;	apps/master_wixel_track/master_wixel_track.c:110: CHANNR = 128;
+   003B 90 DF 06           1055 	mov	dptr,#_CHANNR
+   003E 74 80              1056 	mov	a,#0x80
+   0040 F0                 1057 	movx	@dptr,a
+                    0041   1058 	C$master_wixel_track.c$111$1$1 ==.
+                           1059 ;	apps/master_wixel_track/master_wixel_track.c:111: PKTLEN = RADIO_PACKET_SIZE;     // HARDCODED: 64 bytes for 4 slaves
+   0041 90 DF 02           1060 	mov	dptr,#_PKTLEN
+   0044 74 40              1061 	mov	a,#0x40
+   0046 F0                 1062 	movx	@dptr,a
+                    0047   1063 	C$master_wixel_track.c$113$1$1 ==.
+                           1064 ;	apps/master_wixel_track/master_wixel_track.c:113: MCSM0 = 0x14;
+   0047 90 DF 14           1065 	mov	dptr,#_MCSM0
+   004A 74 14              1066 	mov	a,#0x14
+   004C F0                 1067 	movx	@dptr,a
+                    004D   1068 	C$master_wixel_track.c$114$1$1 ==.
+                           1069 ;	apps/master_wixel_track/master_wixel_track.c:114: MCSM1 = 0x00;
+   004D 90 DF 13           1070 	mov	dptr,#_MCSM1
+   0050 E4                 1071 	clr	a
+   0051 F0                 1072 	movx	@dptr,a
+                    0052   1073 	C$master_wixel_track.c$115$1$1 ==.
+                           1074 ;	apps/master_wixel_track/master_wixel_track.c:115: IOCFG2 = 0b011011;
+   0052 90 DF 2F           1075 	mov	dptr,#_IOCFG2
+   0055 74 1B              1076 	mov	a,#0x1B
+   0057 F0                 1077 	movx	@dptr,a
+                    0058   1078 	C$master_wixel_track.c$118$1$1 ==.
+                           1079 ;	apps/master_wixel_track/master_wixel_track.c:118: dmaConfig.radio.DC6 = 19;
+   0058 90s00r06           1080 	mov	dptr,#(_dmaConfig + 0x0006)
+   005B 74 13              1081 	mov	a,#0x13
+   005D F0                 1082 	movx	@dptr,a
+                    005E   1083 	C$master_wixel_track.c$119$1$1 ==.
+                           1084 ;	apps/master_wixel_track/master_wixel_track.c:119: dmaConfig.radio.SRCADDRH = (unsigned int)txPacket >> 8;
+   005E 7Er00              1085 	mov	r6,#_txPacket
+   0060 7Fs00              1086 	mov	r7,#(_txPacket >> 8)
+   0062 8F 06              1087 	mov	ar6,r7
+   0064 90s00r00           1088 	mov	dptr,#_dmaConfig
+   0067 EE                 1089 	mov	a,r6
+   0068 F0                 1090 	movx	@dptr,a
+                    0069   1091 	C$master_wixel_track.c$120$1$1 ==.
+                           1092 ;	apps/master_wixel_track/master_wixel_track.c:120: dmaConfig.radio.SRCADDRL = (unsigned int)txPacket;
+   0069 7Er00              1093 	mov	r6,#_txPacket
+   006B 7Fs00              1094 	mov	r7,#(_txPacket >> 8)
+   006D 90s00r01           1095 	mov	dptr,#(_dmaConfig + 0x0001)
+   0070 EE                 1096 	mov	a,r6
+   0071 F0                 1097 	movx	@dptr,a
+                    0072   1098 	C$master_wixel_track.c$121$1$1 ==.
+                           1099 ;	apps/master_wixel_track/master_wixel_track.c:121: dmaConfig.radio.DESTADDRH = XDATA_SFR_ADDRESS(RFD) >> 8;
+   0072 7E D9              1100 	mov	r6,#_RFD
+   0074 7F 00              1101 	mov	r7,#0x00
+   0076 74 DF              1102 	mov	a,#0xDF
+   0078 2F                 1103 	add	a,r7
+   0079 FE                 1104 	mov	r6,a
+   007A 90s00r02           1105 	mov	dptr,#(_dmaConfig + 0x0002)
+   007D EE                 1106 	mov	a,r6
+   007E F0                 1107 	movx	@dptr,a
+                    007F   1108 	C$master_wixel_track.c$122$1$1 ==.
+                           1109 ;	apps/master_wixel_track/master_wixel_track.c:122: dmaConfig.radio.DESTADDRL = XDATA_SFR_ADDRESS(RFD);
+   007F 7E D9              1110 	mov	r6,#_RFD
+   0081 90s00r03           1111 	mov	dptr,#(_dmaConfig + 0x0003)
+   0084 EE                 1112 	mov	a,r6
+   0085 F0                 1113 	movx	@dptr,a
+                    0086   1114 	C$master_wixel_track.c$123$1$1 ==.
+                           1115 ;	apps/master_wixel_track/master_wixel_track.c:123: dmaConfig.radio.LENL = 1 + RADIO_PACKET_SIZE;
+   0086 90s00r05           1116 	mov	dptr,#(_dmaConfig + 0x0005)
+   0089 74 41              1117 	mov	a,#0x41
+   008B F0                 1118 	movx	@dptr,a
+                    008C   1119 	C$master_wixel_track.c$124$1$1 ==.
+                           1120 ;	apps/master_wixel_track/master_wixel_track.c:124: dmaConfig.radio.VLEN_LENH = 0b00100000;
+   008C 90s00r04           1121 	mov	dptr,#(_dmaConfig + 0x0004)
+   008F 74 20              1122 	mov	a,#0x20
+   0091 F0                 1123 	movx	@dptr,a
+                    0092   1124 	C$master_wixel_track.c$125$1$1 ==.
+                           1125 ;	apps/master_wixel_track/master_wixel_track.c:125: dmaConfig.radio.DC7 = 0x40;
+   0092 90s00r07           1126 	mov	dptr,#(_dmaConfig + 0x0007)
+   0095 74 40              1127 	mov	a,#0x40
+   0097 F0                 1128 	movx	@dptr,a
+                    0098   1129 	C$master_wixel_track.c$127$1$1 ==.
+                           1130 ;	apps/master_wixel_track/master_wixel_track.c:127: txPacket[0] = RADIO_PACKET_SIZE;
+   0098 90s00r00           1131 	mov	dptr,#_txPacket
+   009B 74 40              1132 	mov	a,#0x40
+   009D F0                 1133 	movx	@dptr,a
+                    009E   1134 	C$master_wixel_track.c$129$1$1 ==.
+                           1135 ;	apps/master_wixel_track/master_wixel_track.c:129: RFST = 4;
+   009E 75 E1 04           1136 	mov	_RFST,#0x04
+                    00A1   1137 	C$master_wixel_track.c$130$1$1 ==.
+                    00A1   1138 	XG$radioInit$0$0 ==.
+   00A1 22                 1139 	ret
+                           1140 ;------------------------------------------------------------
+                           1141 ;Allocation info for local variables in function 'sendRadioPacket'
+                           1142 ;------------------------------------------------------------
+                    00A2   1143 	G$sendRadioPacket$0$0 ==.
+                    00A2   1144 	C$master_wixel_track.c$134$1$1 ==.
+                           1145 ;	apps/master_wixel_track/master_wixel_track.c:134: void sendRadioPacket()
+                           1146 ;	-----------------------------------------
+                           1147 ;	 function sendRadioPacket
+                           1148 ;	-----------------------------------------
+   00A2                    1149 _sendRadioPacket:
+                    00A2   1150 	C$master_wixel_track.c$136$1$1 ==.
+                           1151 ;	apps/master_wixel_track/master_wixel_track.c:136: if (MARCSTATE == 1)
+   00A2 90 DF 3B           1152 	mov	dptr,#_MARCSTATE
+   00A5 E0                 1153 	movx	a,@dptr
+   00A6 FF                 1154 	mov	r7,a
+   00A7 BF 01 34           1155 	cjne	r7,#0x01,00103$
+                    00AA   1156 	C$master_wixel_track.c$138$2$2 ==.
+                           1157 ;	apps/master_wixel_track/master_wixel_track.c:138: RFIF &= ~(1<<4);
+   00AA AF E9              1158 	mov	r7,_RFIF
+   00AC 53 07 EF           1159 	anl	ar7,#0xEF
+   00AF 8F E9              1160 	mov	_RFIF,r7
+                    00B1   1161 	C$master_wixel_track.c$139$2$2 ==.
+                           1162 ;	apps/master_wixel_track/master_wixel_track.c:139: DMAARM |= (1<<DMA_CHANNEL_RADIO);
+   00B1 43 D6 02           1163 	orl	_DMAARM,#0x02
+                    00B4   1164 	C$master_wixel_track.c$140$2$2 ==.
+                           1165 ;	apps/master_wixel_track/master_wixel_track.c:140: RFST = 3;
+   00B4 75 E1 03           1166 	mov	_RFST,#0x03
+                    00B7   1167 	C$master_wixel_track.c$142$2$2 ==.
+                           1168 ;	apps/master_wixel_track/master_wixel_track.c:142: radioTxPulseActive = 1;
+   00B7 D2*01              1169 	setb	_radioTxPulseActive
+                    00B9   1170 	C$master_wixel_track.c$143$2$2 ==.
+                           1171 ;	apps/master_wixel_track/master_wixel_track.c:143: radioTxPulseStart = (uint16)getMs();
+   00B9 12s00r00           1172 	lcall	_getMs
+   00BC AC 82              1173 	mov	r4,dpl
+   00BE AD 83              1174 	mov	r5,dph
+   00C0 78r13              1175 	mov	r0,#_radioTxPulseStart
+   00C2 EC                 1176 	mov	a,r4
+   00C3 F2                 1177 	movx	@r0,a
+   00C4 08                 1178 	inc	r0
+   00C5 ED                 1179 	mov	a,r5
+   00C6 F2                 1180 	movx	@r0,a
+                    00C7   1181 	C$master_wixel_track.c$145$2$2 ==.
+                           1182 ;	apps/master_wixel_track/master_wixel_track.c:145: lastRadioTxTime = getMs();
+   00C7 12s00r00           1183 	lcall	_getMs
+   00CA AC 82              1184 	mov	r4,dpl
+   00CC AD 83              1185 	mov	r5,dph
+   00CE AE F0              1186 	mov	r6,b
+   00D0 FF                 1187 	mov	r7,a
+   00D1 78r09              1188 	mov	r0,#_lastRadioTxTime
+   00D3 EC                 1189 	mov	a,r4
+   00D4 F2                 1190 	movx	@r0,a
+   00D5 08                 1191 	inc	r0
+   00D6 ED                 1192 	mov	a,r5
+   00D7 F2                 1193 	movx	@r0,a
+   00D8 08                 1194 	inc	r0
+   00D9 EE                 1195 	mov	a,r6
+   00DA F2                 1196 	movx	@r0,a
+   00DB 08                 1197 	inc	r0
+   00DC EF                 1198 	mov	a,r7
+   00DD F2                 1199 	movx	@r0,a
+   00DE                    1200 00103$:
+                    00DE   1201 	C$master_wixel_track.c$147$2$1 ==.
+                    00DE   1202 	XG$sendRadioPacket$0$0 ==.
+   00DE 22                 1203 	ret
+                           1204 ;------------------------------------------------------------
+                           1205 ;Allocation info for local variables in function 'updateLeds'
+                           1206 ;------------------------------------------------------------
+                           1207 ;sloc0                     Allocated with name '_updateLeds_sloc0_1_0'
+                           1208 ;------------------------------------------------------------
+                    00DF   1209 	G$updateLeds$0$0 ==.
+                    00DF   1210 	C$master_wixel_track.c$151$2$1 ==.
+                           1211 ;	apps/master_wixel_track/master_wixel_track.c:151: void updateLeds()
+                           1212 ;	-----------------------------------------
+                           1213 ;	 function updateLeds
+                           1214 ;	-----------------------------------------
+   00DF                    1215 _updateLeds:
+                    00DF   1216 	C$master_wixel_track.c$153$1$1 ==.
+                           1217 ;	apps/master_wixel_track/master_wixel_track.c:153: uint16 now = (uint16)getMs();
+   00DF 12s00r00           1218 	lcall	_getMs
+   00E2 AC 82              1219 	mov	r4,dpl
+   00E4 AD 83              1220 	mov	r5,dph
+   00E6 AE F0              1221 	mov	r6,b
+   00E8 FF                 1222 	mov	r7,a
+                    00E9   1223 	C$master_wixel_track.c$156$1$1 ==.
+                           1224 ;	apps/master_wixel_track/master_wixel_track.c:156: if (serialRxPulseActive)
+   00E9 30*00 27           1225 	jnb	_serialRxPulseActive,00105$
+                    00EC   1226 	C$master_wixel_track.c$158$2$2 ==.
+                           1227 ;	apps/master_wixel_track/master_wixel_track.c:158: if ((uint16)(now - serialRxPulseStart) < SERIAL_RX_PULSE)
+   00EC 78r11              1228 	mov	r0,#_serialRxPulseStart
+   00EE D3                 1229 	setb	c
+   00EF E2                 1230 	movx	a,@r0
+   00F0 9C                 1231 	subb	a,r4
+   00F1 F4                 1232 	cpl	a
+   00F2 B3                 1233 	cpl	c
+   00F3 FE                 1234 	mov	r6,a
+   00F4 B3                 1235 	cpl	c
+   00F5 08                 1236 	inc	r0
+   00F6 E2                 1237 	movx	a,@r0
+   00F7 9D                 1238 	subb	a,r5
+   00F8 F4                 1239 	cpl	a
+   00F9 FF                 1240 	mov	r7,a
+   00FA C3                 1241 	clr	c
+   00FB EE                 1242 	mov	a,r6
+   00FC 94 64              1243 	subb	a,#0x64
+   00FE EF                 1244 	mov	a,r7
+   00FF 94 00              1245 	subb	a,#0x00
+   0101 50 05              1246 	jnc	00102$
+                    0103   1247 	C$master_wixel_track.c$160$4$4 ==.
+                           1248 ;	apps/master_wixel_track/master_wixel_track.c:160: LED_RED(1);
+   0103 43 FF 02           1249 	orl	_P2DIR,#0x02
+   0106 80 12              1250 	sjmp	00106$
+   0108                    1251 00102$:
+                    0108   1252 	C$master_wixel_track.c$164$4$6 ==.
+                           1253 ;	apps/master_wixel_track/master_wixel_track.c:164: LED_RED(0);
+   0108 AF FF              1254 	mov	r7,_P2DIR
+   010A 53 07 FD           1255 	anl	ar7,#0xFD
+   010D 8F FF              1256 	mov	_P2DIR,r7
+                    010F   1257 	C$master_wixel_track.c$165$3$5 ==.
+                           1258 ;	apps/master_wixel_track/master_wixel_track.c:165: serialRxPulseActive = 0;
+   010F C2*00              1259 	clr	_serialRxPulseActive
+   0111 80 07              1260 	sjmp	00106$
+   0113                    1261 00105$:
+                    0113   1262 	C$master_wixel_track.c$170$3$8 ==.
+                           1263 ;	apps/master_wixel_track/master_wixel_track.c:170: LED_RED(0);
+   0113 AF FF              1264 	mov	r7,_P2DIR
+   0115 53 07 FD           1265 	anl	ar7,#0xFD
+   0118 8F FF              1266 	mov	_P2DIR,r7
+   011A                    1267 00106$:
+                    011A   1268 	C$master_wixel_track.c$174$1$1 ==.
+                           1269 ;	apps/master_wixel_track/master_wixel_track.c:174: if (radioTxPulseActive)
+   011A 30*01 27           1270 	jnb	_radioTxPulseActive,00111$
+                    011D   1271 	C$master_wixel_track.c$176$2$9 ==.
+                           1272 ;	apps/master_wixel_track/master_wixel_track.c:176: if ((uint16)(now - radioTxPulseStart) < RADIO_TX_PULSE)
+   011D 78r13              1273 	mov	r0,#_radioTxPulseStart
+   011F D3                 1274 	setb	c
+   0120 E2                 1275 	movx	a,@r0
+   0121 9C                 1276 	subb	a,r4
+   0122 F4                 1277 	cpl	a
+   0123 B3                 1278 	cpl	c
+   0124 FE                 1279 	mov	r6,a
+   0125 B3                 1280 	cpl	c
+   0126 08                 1281 	inc	r0
+   0127 E2                 1282 	movx	a,@r0
+   0128 9D                 1283 	subb	a,r5
+   0129 F4                 1284 	cpl	a
+   012A FF                 1285 	mov	r7,a
+   012B C3                 1286 	clr	c
+   012C EE                 1287 	mov	a,r6
+   012D 94 64              1288 	subb	a,#0x64
+   012F EF                 1289 	mov	a,r7
+   0130 94 00              1290 	subb	a,#0x00
+   0132 50 05              1291 	jnc	00108$
+                    0134   1292 	C$master_wixel_track.c$178$4$11 ==.
+                           1293 ;	apps/master_wixel_track/master_wixel_track.c:178: LED_GREEN(1);
+   0134 43 FF 10           1294 	orl	_P2DIR,#0x10
+   0137 80 12              1295 	sjmp	00112$
+   0139                    1296 00108$:
+                    0139   1297 	C$master_wixel_track.c$182$4$13 ==.
+                           1298 ;	apps/master_wixel_track/master_wixel_track.c:182: LED_GREEN(0);
+   0139 AF FF              1299 	mov	r7,_P2DIR
+   013B 53 07 EF           1300 	anl	ar7,#0xEF
+   013E 8F FF              1301 	mov	_P2DIR,r7
+                    0140   1302 	C$master_wixel_track.c$183$3$12 ==.
+                           1303 ;	apps/master_wixel_track/master_wixel_track.c:183: radioTxPulseActive = 0;
+   0140 C2*01              1304 	clr	_radioTxPulseActive
+   0142 80 07              1305 	sjmp	00112$
+   0144                    1306 00111$:
+                    0144   1307 	C$master_wixel_track.c$188$3$15 ==.
+                           1308 ;	apps/master_wixel_track/master_wixel_track.c:188: LED_GREEN(0);
+   0144 AF FF              1309 	mov	r7,_P2DIR
+   0146 53 07 EF           1310 	anl	ar7,#0xEF
+   0149 8F FF              1311 	mov	_P2DIR,r7
+   014B                    1312 00112$:
+                    014B   1313 	C$master_wixel_track.c$192$1$1 ==.
+                           1314 ;	apps/master_wixel_track/master_wixel_track.c:192: if ((uint16)(now - lastHeartbeatTime) >= HEARTBEAT_PERIOD)
+   014B 8C*00              1315 	mov	_updateLeds_sloc0_1_0,r4
+   014D 8D*01              1316 	mov	(_updateLeds_sloc0_1_0 + 1),r5
+   014F 75*02 00           1317 	mov	(_updateLeds_sloc0_1_0 + 2),#0x00
+   0152 75*03 00           1318 	mov	(_updateLeds_sloc0_1_0 + 3),#0x00
+   0155 78r0D              1319 	mov	r0,#_lastHeartbeatTime
+   0157 D3                 1320 	setb	c
+   0158 E2                 1321 	movx	a,@r0
+   0159 95*00              1322 	subb	a,_updateLeds_sloc0_1_0
+   015B F4                 1323 	cpl	a
+   015C B3                 1324 	cpl	c
+   015D FA                 1325 	mov	r2,a
+   015E B3                 1326 	cpl	c
+   015F 08                 1327 	inc	r0
+   0160 E2                 1328 	movx	a,@r0
+   0161 95*01              1329 	subb	a,(_updateLeds_sloc0_1_0 + 1)
+   0163 F4                 1330 	cpl	a
+   0164 B3                 1331 	cpl	c
+   0165 FB                 1332 	mov	r3,a
+   0166 B3                 1333 	cpl	c
+   0167 08                 1334 	inc	r0
+   0168 E2                 1335 	movx	a,@r0
+   0169 95*02              1336 	subb	a,(_updateLeds_sloc0_1_0 + 2)
+   016B F4                 1337 	cpl	a
+   016C B3                 1338 	cpl	c
+   016D FE                 1339 	mov	r6,a
+   016E B3                 1340 	cpl	c
+   016F 08                 1341 	inc	r0
+   0170 E2                 1342 	movx	a,@r0
+   0171 95*03              1343 	subb	a,(_updateLeds_sloc0_1_0 + 3)
+   0173 F4                 1344 	cpl	a
+   0174 FF                 1345 	mov	r7,a
+   0175 C3                 1346 	clr	c
+   0176 EA                 1347 	mov	a,r2
+   0177 94 F4              1348 	subb	a,#0xF4
+   0179 EB                 1349 	mov	a,r3
+   017A 94 01              1350 	subb	a,#0x01
+   017C 40 14              1351 	jc	00115$
+                    017E   1352 	C$master_wixel_track.c$194$3$17 ==.
+                           1353 ;	apps/master_wixel_track/master_wixel_track.c:194: LED_YELLOW_TOGGLE();
+   017E 63 FF 04           1354 	xrl	_P2DIR,#0x04
+                    0181   1355 	C$master_wixel_track.c$195$2$16 ==.
+                           1356 ;	apps/master_wixel_track/master_wixel_track.c:195: lastHeartbeatTime = now;
+   0181 78r0D              1357 	mov	r0,#_lastHeartbeatTime
+   0183 E5*00              1358 	mov	a,_updateLeds_sloc0_1_0
+   0185 F2                 1359 	movx	@r0,a
+   0186 08                 1360 	inc	r0
+   0187 E5*01              1361 	mov	a,(_updateLeds_sloc0_1_0 + 1)
+   0189 F2                 1362 	movx	@r0,a
+   018A 08                 1363 	inc	r0
+   018B E5*02              1364 	mov	a,(_updateLeds_sloc0_1_0 + 2)
+   018D F2                 1365 	movx	@r0,a
+   018E 08                 1366 	inc	r0
+   018F E5*03              1367 	mov	a,(_updateLeds_sloc0_1_0 + 3)
+   0191 F2                 1368 	movx	@r0,a
+   0192                    1369 00115$:
+                    0192   1370 	C$master_wixel_track.c$197$2$1 ==.
+                    0192   1371 	XG$updateLeds$0$0 ==.
+   0192 22                 1372 	ret
+                           1373 ;------------------------------------------------------------
+                           1374 ;Allocation info for local variables in function 'processSerialPacket'
+                           1375 ;------------------------------------------------------------
+                    0193   1376 	G$processSerialPacket$0$0 ==.
+                    0193   1377 	C$master_wixel_track.c$200$2$1 ==.
+                           1378 ;	apps/master_wixel_track/master_wixel_track.c:200: void processSerialPacket()
+                           1379 ;	-----------------------------------------
+                           1380 ;	 function processSerialPacket
+                           1381 ;	-----------------------------------------
+   0193                    1382 _processSerialPacket:
+                    0193   1383 	C$master_wixel_track.c$215$1$1 ==.
+                           1384 ;	apps/master_wixel_track/master_wixel_track.c:215: responseLength = 0;
+   0193 78r15              1385 	mov	r0,#_responseLength
+   0195 E4                 1386 	clr	a
+   0196 F2                 1387 	movx	@r0,a
+                    0197   1388 	C$master_wixel_track.c$218$1$1 ==.
+                           1389 ;	apps/master_wixel_track/master_wixel_track.c:218: if (serialBufferIndex != RADIO_PACKET_SIZE)
+   0197 78r00              1390 	mov	r0,#_serialBufferIndex
+   0199 E2                 1391 	movx	a,@r0
+   019A B4 40 02           1392 	cjne	a,#0x40,00139$
+   019D 80 3D              1393 	sjmp	00102$
+   019F                    1394 00139$:
+                    019F   1395 	C$master_wixel_track.c$220$2$2 ==.
+                           1396 ;	apps/master_wixel_track/master_wixel_track.c:220: responseLength = sprintf((char*)serialResponse, "ERROR: Expected 64 bytes, got %d\r\n", serialBufferIndex);
+   019F 78r00              1397 	mov	r0,#_serialBufferIndex
+   01A1 E2                 1398 	movx	a,@r0
+   01A2 FE                 1399 	mov	r6,a
+   01A3 7F 00              1400 	mov	r7,#0x00
+   01A5 C0 06              1401 	push	ar6
+   01A7 C0 07              1402 	push	ar7
+   01A9 74r00              1403 	mov	a,#__str_0
+   01AB C0 E0              1404 	push	acc
+   01AD 74s00              1405 	mov	a,#(__str_0 >> 8)
+   01AF C0 E0              1406 	push	acc
+   01B1 74 80              1407 	mov	a,#0x80
+   01B3 C0 E0              1408 	push	acc
+   01B5 74rA5              1409 	mov	a,#_serialResponse
+   01B7 C0 E0              1410 	push	acc
+   01B9 74s00              1411 	mov	a,#(_serialResponse >> 8)
+   01BB C0 E0              1412 	push	acc
+   01BD E4                 1413 	clr	a
+   01BE C0 E0              1414 	push	acc
+   01C0 12s00r00           1415 	lcall	_sprintf
+   01C3 AE 82              1416 	mov	r6,dpl
+   01C5 E5 81              1417 	mov	a,sp
+   01C7 24 F8              1418 	add	a,#0xf8
+   01C9 F5 81              1419 	mov	sp,a
+   01CB 78r15              1420 	mov	r0,#_responseLength
+   01CD EE                 1421 	mov	a,r6
+   01CE F2                 1422 	movx	@r0,a
+                    01CF   1423 	C$master_wixel_track.c$221$2$2 ==.
+                           1424 ;	apps/master_wixel_track/master_wixel_track.c:221: usbComTxSend(serialResponse, responseLength);
+   01CF 78r00              1425 	mov	r0,#_usbComTxSend_PARM_2
+   01D1 EE                 1426 	mov	a,r6
+   01D2 F2                 1427 	movx	@r0,a
+   01D3 90s00rA5           1428 	mov	dptr,#_serialResponse
+   01D6 12s00r00           1429 	lcall	_usbComTxSend
+                    01D9   1430 	C$master_wixel_track.c$222$2$2 ==.
+                           1431 ;	apps/master_wixel_track/master_wixel_track.c:222: return;
+   01D9 02s05r09           1432 	ljmp	00124$
+   01DC                    1433 00102$:
+                    01DC   1434 	C$master_wixel_track.c$226$1$1 ==.
+                           1435 ;	apps/master_wixel_track/master_wixel_track.c:226: for (slaveIndex = 0; slaveIndex < NUM_SLAVES; slaveIndex++)
+   01DC 7F 00              1436 	mov	r7,#0x00
+   01DE 7E 00              1437 	mov	r6,#0x00
+   01E0                    1438 00116$:
+   01E0 BE 04 00           1439 	cjne	r6,#0x04,00140$
+   01E3                    1440 00140$:
+   01E3 50 5B              1441 	jnc	00119$
+                    01E5   1442 	C$master_wixel_track.c$228$2$3 ==.
+                           1443 ;	apps/master_wixel_track/master_wixel_track.c:228: uint8 serialOffset = slaveIndex * BYTES_PER_SLAVE;
+   01E5 EE                 1444 	mov	a,r6
+   01E6 C4                 1445 	swap	a
+   01E7 54 F0              1446 	anl	a,#0xF0
+                    01E9   1447 	C$master_wixel_track.c$230$2$3 ==.
+                           1448 ;	apps/master_wixel_track/master_wixel_track.c:230: if (serialBuffer[serialOffset + BYTES_PER_SLAVE - 1] != MESSAGE_DELIMITER)
+   01E9 24 0F              1449 	add	a,#0x0F
+   01EB 24r41              1450 	add	a,#_serialBuffer
+   01ED F5 82              1451 	mov	dpl,a
+   01EF E4                 1452 	clr	a
+   01F0 34s00              1453 	addc	a,#(_serialBuffer >> 8)
+   01F2 F5 83              1454 	mov	dph,a
+   01F4 E0                 1455 	movx	a,@dptr
+   01F5 FD                 1456 	mov	r5,a
+   01F6 BD FF 02           1457 	cjne	r5,#0xFF,00142$
+   01F9 80 40              1458 	sjmp	00118$
+   01FB                    1459 00142$:
+                    01FB   1460 	C$master_wixel_track.c$232$3$4 ==.
+                           1461 ;	apps/master_wixel_track/master_wixel_track.c:232: responseLength = sprintf((char*)serialResponse, "ERROR: Invalid delimiter for slave %d\r\n", slaveIndex + 1);
+   01FB 8F 04              1462 	mov	ar4,r7
+   01FD 7D 00              1463 	mov	r5,#0x00
+   01FF 0C                 1464 	inc	r4
+   0200 BC 00 01           1465 	cjne	r4,#0x00,00143$
+   0203 0D                 1466 	inc	r5
+   0204                    1467 00143$:
+   0204 C0 04              1468 	push	ar4
+   0206 C0 05              1469 	push	ar5
+   0208 74r23              1470 	mov	a,#__str_1
+   020A C0 E0              1471 	push	acc
+   020C 74s00              1472 	mov	a,#(__str_1 >> 8)
+   020E C0 E0              1473 	push	acc
+   0210 74 80              1474 	mov	a,#0x80
+   0212 C0 E0              1475 	push	acc
+   0214 74rA5              1476 	mov	a,#_serialResponse
+   0216 C0 E0              1477 	push	acc
+   0218 74s00              1478 	mov	a,#(_serialResponse >> 8)
+   021A C0 E0              1479 	push	acc
+   021C E4                 1480 	clr	a
+   021D C0 E0              1481 	push	acc
+   021F 12s00r00           1482 	lcall	_sprintf
+   0222 AC 82              1483 	mov	r4,dpl
+   0224 E5 81              1484 	mov	a,sp
+   0226 24 F8              1485 	add	a,#0xf8
+   0228 F5 81              1486 	mov	sp,a
+   022A 78r15              1487 	mov	r0,#_responseLength
+   022C EC                 1488 	mov	a,r4
+   022D F2                 1489 	movx	@r0,a
+                    022E   1490 	C$master_wixel_track.c$233$3$4 ==.
+                           1491 ;	apps/master_wixel_track/master_wixel_track.c:233: usbComTxSend(serialResponse, responseLength);
+   022E 78r00              1492 	mov	r0,#_usbComTxSend_PARM_2
+   0230 EC                 1493 	mov	a,r4
+   0231 F2                 1494 	movx	@r0,a
+   0232 90s00rA5           1495 	mov	dptr,#_serialResponse
+   0235 12s00r00           1496 	lcall	_usbComTxSend
+                    0238   1497 	C$master_wixel_track.c$234$3$4 ==.
+                           1498 ;	apps/master_wixel_track/master_wixel_track.c:234: return;
+   0238 02s05r09           1499 	ljmp	00124$
+   023B                    1500 00118$:
+                    023B   1501 	C$master_wixel_track.c$226$1$1 ==.
+                           1502 ;	apps/master_wixel_track/master_wixel_track.c:226: for (slaveIndex = 0; slaveIndex < NUM_SLAVES; slaveIndex++)
+   023B 0E                 1503 	inc	r6
+   023C 8E 07              1504 	mov	ar7,r6
+   023E 80 A0              1505 	sjmp	00116$
+   0240                    1506 00119$:
+                    0240   1507 	C$master_wixel_track.c$239$1$1 ==.
+                           1508 ;	apps/master_wixel_track/master_wixel_track.c:239: for (i = 0; i < RADIO_PACKET_SIZE; i++)
+   0240 7F 00              1509 	mov	r7,#0x00
+   0242                    1510 00120$:
+   0242 BF 40 00           1511 	cjne	r7,#0x40,00144$
+   0245                    1512 00144$:
+   0245 50 1F              1513 	jnc	00123$
+                    0247   1514 	C$master_wixel_track.c$241$2$5 ==.
+                           1515 ;	apps/master_wixel_track/master_wixel_track.c:241: txPacket[1 + i] = serialBuffer[i];
+   0247 EF                 1516 	mov	a,r7
+   0248 04                 1517 	inc	a
+   0249 FE                 1518 	mov	r6,a
+   024A 24r00              1519 	add	a,#_txPacket
+   024C FC                 1520 	mov	r4,a
+   024D E4                 1521 	clr	a
+   024E 34s00              1522 	addc	a,#(_txPacket >> 8)
+   0250 FD                 1523 	mov	r5,a
+   0251 EF                 1524 	mov	a,r7
+   0252 24r41              1525 	add	a,#_serialBuffer
+   0254 F5 82              1526 	mov	dpl,a
+   0256 E4                 1527 	clr	a
+   0257 34s00              1528 	addc	a,#(_serialBuffer >> 8)
+   0259 F5 83              1529 	mov	dph,a
+   025B E0                 1530 	movx	a,@dptr
+   025C FB                 1531 	mov	r3,a
+   025D 8C 82              1532 	mov	dpl,r4
+   025F 8D 83              1533 	mov	dph,r5
+   0261 F0                 1534 	movx	@dptr,a
+                    0262   1535 	C$master_wixel_track.c$239$1$1 ==.
+                           1536 ;	apps/master_wixel_track/master_wixel_track.c:239: for (i = 0; i < RADIO_PACKET_SIZE; i++)
+   0262 8E 07              1537 	mov	ar7,r6
+   0264 80 DC              1538 	sjmp	00120$
+   0266                    1539 00123$:
+                    0266   1540 	C$master_wixel_track.c$245$1$1 ==.
+                           1541 ;	apps/master_wixel_track/master_wixel_track.c:245: sendRadioPacket();
+   0266 12s00rA2           1542 	lcall	_sendRadioPacket
+                    0269   1543 	C$master_wixel_track.c$248$1$1 ==.
+                           1544 ;	apps/master_wixel_track/master_wixel_track.c:248: serialRxPulseActive = 1;
+   0269 D2*00              1545 	setb	_serialRxPulseActive
+                    026B   1546 	C$master_wixel_track.c$249$1$1 ==.
+                           1547 ;	apps/master_wixel_track/master_wixel_track.c:249: serialRxPulseStart = (uint16)getMs();
+   026B 12s00r00           1548 	lcall	_getMs
+   026E AC 82              1549 	mov	r4,dpl
+   0270 AD 83              1550 	mov	r5,dph
+   0272 78r11              1551 	mov	r0,#_serialRxPulseStart
+   0274 EC                 1552 	mov	a,r4
+   0275 F2                 1553 	movx	@r0,a
+   0276 08                 1554 	inc	r0
+   0277 ED                 1555 	mov	a,r5
+   0278 F2                 1556 	movx	@r0,a
+                    0279   1557 	C$master_wixel_track.c$251$1$1 ==.
+                           1558 ;	apps/master_wixel_track/master_wixel_track.c:251: lastSerialRxTime = getMs();
+   0279 12s00r00           1559 	lcall	_getMs
+   027C AC 82              1560 	mov	r4,dpl
+   027E AD 83              1561 	mov	r5,dph
+   0280 AE F0              1562 	mov	r6,b
+   0282 FF                 1563 	mov	r7,a
+   0283 78r05              1564 	mov	r0,#_lastSerialRxTime
+   0285 EC                 1565 	mov	a,r4
+   0286 F2                 1566 	movx	@r0,a
+   0287 08                 1567 	inc	r0
+   0288 ED                 1568 	mov	a,r5
+   0289 F2                 1569 	movx	@r0,a
+   028A 08                 1570 	inc	r0
+   028B EE                 1571 	mov	a,r6
+   028C F2                 1572 	movx	@r0,a
+   028D 08                 1573 	inc	r0
+   028E EF                 1574 	mov	a,r7
+   028F F2                 1575 	movx	@r0,a
+                    0290   1576 	C$master_wixel_track.c$256$1$1 ==.
+                           1577 ;	apps/master_wixel_track/master_wixel_track.c:256: posX = (int16)((serialBuffer[1] << 8) | serialBuffer[2]);
+   0290 90s00r42           1578 	mov	dptr,#(_serialBuffer + 0x0001)
+   0293 E0                 1579 	movx	a,@dptr
+   0294 FE                 1580 	mov	r6,a
+   0295 7F 00              1581 	mov	r7,#0x00
+   0297 90s00r43           1582 	mov	dptr,#(_serialBuffer + 0x0002)
+   029A E0                 1583 	movx	a,@dptr
+   029B FD                 1584 	mov	r5,a
+   029C 7C 00              1585 	mov	r4,#0x00
+   029E 78r20              1586 	mov	r0,#_processSerialPacket_posX_1_1
+   02A0 ED                 1587 	mov	a,r5
+   02A1 4F                 1588 	orl	a,r7
+   02A2 F2                 1589 	movx	@r0,a
+   02A3 EC                 1590 	mov	a,r4
+   02A4 4E                 1591 	orl	a,r6
+   02A5 08                 1592 	inc	r0
+   02A6 F2                 1593 	movx	@r0,a
+                    02A7   1594 	C$master_wixel_track.c$257$1$1 ==.
+                           1595 ;	apps/master_wixel_track/master_wixel_track.c:257: posY = (int16)((serialBuffer[3] << 8) | serialBuffer[4]);
+   02A7 90s00r44           1596 	mov	dptr,#(_serialBuffer + 0x0003)
+   02AA E0                 1597 	movx	a,@dptr
+   02AB FC                 1598 	mov	r4,a
+   02AC 7D 00              1599 	mov	r5,#0x00
+   02AE 90s00r45           1600 	mov	dptr,#(_serialBuffer + 0x0004)
+   02B1 E0                 1601 	movx	a,@dptr
+   02B2 7A 00              1602 	mov	r2,#0x00
+   02B4 42 05              1603 	orl	ar5,a
+   02B6 EA                 1604 	mov	a,r2
+   02B7 42 04              1605 	orl	ar4,a
+                    02B9   1606 	C$master_wixel_track.c$258$1$1 ==.
+                           1607 ;	apps/master_wixel_track/master_wixel_track.c:258: theta = (int8)(serialBuffer[5]);
+   02B9 90s00r46           1608 	mov	dptr,#(_serialBuffer + 0x0005)
+   02BC E0                 1609 	movx	a,@dptr
+   02BD FB                 1610 	mov	r3,a
+   02BE 78r1B              1611 	mov	r0,#_theta
+   02C0 F2                 1612 	movx	@r0,a
+                    02C1   1613 	C$master_wixel_track.c$261$1$1 ==.
+                           1614 ;	apps/master_wixel_track/master_wixel_track.c:261: if (serialBuffer[6] != CMD_AUX)
+   02C1 90s00r47           1615 	mov	dptr,#(_serialBuffer + 0x0006)
+   02C4 E0                 1616 	movx	a,@dptr
+   02C5 FA                 1617 	mov	r2,a
+   02C6 BA 14 03           1618 	cjne	r2,#0x14,00146$
+   02C9 02s04rC3           1619 	ljmp	00114$
+   02CC                    1620 00146$:
+                    02CC   1621 	C$master_wixel_track.c$263$1$1 ==.
+                           1622 ;	apps/master_wixel_track/master_wixel_track.c:263: cmd = serialBuffer[6];
+   02CC C0 05              1623 	push	ar5
+   02CE C0 04              1624 	push	ar4
+                    02D0   1625 	C$master_wixel_track.c$264$2$6 ==.
+                           1626 ;	apps/master_wixel_track/master_wixel_track.c:264: data3 = (int16)((serialBuffer[7] << 8) | serialBuffer[8]);
+   02D0 90s00r48           1627 	mov	dptr,#(_serialBuffer + 0x0007)
+   02D3 E0                 1628 	movx	a,@dptr
+   02D4 FC                 1629 	mov	r4,a
+   02D5 7D 00              1630 	mov	r5,#0x00
+   02D7 90s00r49           1631 	mov	dptr,#(_serialBuffer + 0x0008)
+   02DA E0                 1632 	movx	a,@dptr
+   02DB FF                 1633 	mov	r7,a
+   02DC 7E 00              1634 	mov	r6,#0x00
+   02DE 78r1C              1635 	mov	r0,#_processSerialPacket_data3_1_1
+   02E0 EF                 1636 	mov	a,r7
+   02E1 4D                 1637 	orl	a,r5
+   02E2 F2                 1638 	movx	@r0,a
+   02E3 EE                 1639 	mov	a,r6
+   02E4 4C                 1640 	orl	a,r4
+   02E5 08                 1641 	inc	r0
+   02E6 F2                 1642 	movx	@r0,a
+                    02E7   1643 	C$master_wixel_track.c$265$2$6 ==.
+                           1644 ;	apps/master_wixel_track/master_wixel_track.c:265: data4 = (int16)((serialBuffer[9] << 8) | serialBuffer[10]);
+   02E7 90s00r4A           1645 	mov	dptr,#(_serialBuffer + 0x0009)
+   02EA E0                 1646 	movx	a,@dptr
+   02EB FE                 1647 	mov	r6,a
+   02EC 7F 00              1648 	mov	r7,#0x00
+   02EE 90s00r4B           1649 	mov	dptr,#(_serialBuffer + 0x000a)
+   02F1 E0                 1650 	movx	a,@dptr
+   02F2 FD                 1651 	mov	r5,a
+   02F3 7C 00              1652 	mov	r4,#0x00
+   02F5 78r1E              1653 	mov	r0,#_processSerialPacket_data4_1_1
+   02F7 ED                 1654 	mov	a,r5
+   02F8 4F                 1655 	orl	a,r7
+   02F9 F2                 1656 	movx	@r0,a
+   02FA EC                 1657 	mov	a,r4
+   02FB 4E                 1658 	orl	a,r6
+   02FC 08                 1659 	inc	r0
+   02FD F2                 1660 	movx	@r0,a
+                    02FE   1661 	C$master_wixel_track.c$268$2$6 ==.
+                           1662 ;	apps/master_wixel_track/master_wixel_track.c:268: switch(cmd)
+   02FE BA 10 06           1663 	cjne	r2,#0x10,00147$
+   0301 D0 04              1664 	pop	ar4
+   0303 D0 05              1665 	pop	ar5
+   0305 80 23              1666 	sjmp	00105$
+   0307                    1667 00147$:
+   0307 D0 04              1668 	pop	ar4
+   0309 D0 05              1669 	pop	ar5
+   030B BA 11 02           1670 	cjne	r2,#0x11,00148$
+   030E 80 46              1671 	sjmp	00106$
+   0310                    1672 00148$:
+   0310 BA 12 02           1673 	cjne	r2,#0x12,00149$
+   0313 80 6D              1674 	sjmp	00107$
+   0315                    1675 00149$:
+   0315 BA 13 03           1676 	cjne	r2,#0x13,00150$
+   0318 02s03rAE           1677 	ljmp	00108$
+   031B                    1678 00150$:
+   031B BA 14 03           1679 	cjne	r2,#0x14,00151$
+   031E 02s03rDA           1680 	ljmp	00109$
+   0321                    1681 00151$:
+   0321 BA 15 03           1682 	cjne	r2,#0x15,00152$
+   0324 02s04r05           1683 	ljmp	00110$
+   0327                    1684 00152$:
+   0327 02s04r30           1685 	ljmp	00111$
+                    032A   1686 	C$master_wixel_track.c$270$3$7 ==.
+                           1687 ;	apps/master_wixel_track/master_wixel_track.c:270: case CMD_STOP:
+   032A                    1688 00105$:
+                    032A   1689 	C$master_wixel_track.c$271$3$7 ==.
+                           1690 ;	apps/master_wixel_track/master_wixel_track.c:271: sprintf(cmdStr, "STOP");
+   032A C0 05              1691 	push	ar5
+   032C C0 04              1692 	push	ar4
+   032E 74r4B              1693 	mov	a,#__str_2
+   0330 C0 E0              1694 	push	acc
+   0332 74s00              1695 	mov	a,#(__str_2 >> 8)
+   0334 C0 E0              1696 	push	acc
+   0336 74 80              1697 	mov	a,#0x80
+   0338 C0 E0              1698 	push	acc
+   033A 74r22              1699 	mov	a,#_processSerialPacket_cmdStr_1_1
+   033C C0 E0              1700 	push	acc
+   033E 74s00              1701 	mov	a,#(_processSerialPacket_cmdStr_1_1 >> 8)
+   0340 C0 E0              1702 	push	acc
+   0342 74 60              1703 	mov	a,#0x60
+   0344 C0 E0              1704 	push	acc
+   0346 12s00r00           1705 	lcall	_sprintf
+   0349 E5 81              1706 	mov	a,sp
+   034B 24 FA              1707 	add	a,#0xfa
+   034D F5 81              1708 	mov	sp,a
+   034F D0 04              1709 	pop	ar4
+   0351 D0 05              1710 	pop	ar5
+                    0353   1711 	C$master_wixel_track.c$272$3$7 ==.
+                           1712 ;	apps/master_wixel_track/master_wixel_track.c:272: break;
+   0353 02s04r59           1713 	ljmp	00112$
+                    0356   1714 	C$master_wixel_track.c$273$3$7 ==.
+                           1715 ;	apps/master_wixel_track/master_wixel_track.c:273: case CMD_GO_TO:
+   0356                    1716 00106$:
+                    0356   1717 	C$master_wixel_track.c$274$3$7 ==.
+                           1718 ;	apps/master_wixel_track/master_wixel_track.c:274: sprintf(cmdStr, "GO_TO");
+   0356 C0 05              1719 	push	ar5
+   0358 C0 04              1720 	push	ar4
+   035A 74r50              1721 	mov	a,#__str_3
+   035C C0 E0              1722 	push	acc
+   035E 74s00              1723 	mov	a,#(__str_3 >> 8)
+   0360 C0 E0              1724 	push	acc
+   0362 74 80              1725 	mov	a,#0x80
+   0364 C0 E0              1726 	push	acc
+   0366 74r22              1727 	mov	a,#_processSerialPacket_cmdStr_1_1
+   0368 C0 E0              1728 	push	acc
+   036A 74s00              1729 	mov	a,#(_processSerialPacket_cmdStr_1_1 >> 8)
+   036C C0 E0              1730 	push	acc
+   036E 74 60              1731 	mov	a,#0x60
+   0370 C0 E0              1732 	push	acc
+   0372 12s00r00           1733 	lcall	_sprintf
+   0375 E5 81              1734 	mov	a,sp
+   0377 24 FA              1735 	add	a,#0xfa
+   0379 F5 81              1736 	mov	sp,a
+   037B D0 04              1737 	pop	ar4
+   037D D0 05              1738 	pop	ar5
+                    037F   1739 	C$master_wixel_track.c$275$3$7 ==.
+                           1740 ;	apps/master_wixel_track/master_wixel_track.c:275: break;
+   037F 02s04r59           1741 	ljmp	00112$
+                    0382   1742 	C$master_wixel_track.c$276$3$7 ==.
+                           1743 ;	apps/master_wixel_track/master_wixel_track.c:276: case CMD_PREP:
+   0382                    1744 00107$:
+                    0382   1745 	C$master_wixel_track.c$277$3$7 ==.
+                           1746 ;	apps/master_wixel_track/master_wixel_track.c:277: sprintf(cmdStr, "PREP");
+   0382 C0 05              1747 	push	ar5
+   0384 C0 04              1748 	push	ar4
+   0386 74r56              1749 	mov	a,#__str_4
+   0388 C0 E0              1750 	push	acc
+   038A 74s00              1751 	mov	a,#(__str_4 >> 8)
+   038C C0 E0              1752 	push	acc
+   038E 74 80              1753 	mov	a,#0x80
+   0390 C0 E0              1754 	push	acc
+   0392 74r22              1755 	mov	a,#_processSerialPacket_cmdStr_1_1
+   0394 C0 E0              1756 	push	acc
+   0396 74s00              1757 	mov	a,#(_processSerialPacket_cmdStr_1_1 >> 8)
+   0398 C0 E0              1758 	push	acc
+   039A 74 60              1759 	mov	a,#0x60
+   039C C0 E0              1760 	push	acc
+   039E 12s00r00           1761 	lcall	_sprintf
+   03A1 E5 81              1762 	mov	a,sp
+   03A3 24 FA              1763 	add	a,#0xfa
+   03A5 F5 81              1764 	mov	sp,a
+   03A7 D0 04              1765 	pop	ar4
+   03A9 D0 05              1766 	pop	ar5
+                    03AB   1767 	C$master_wixel_track.c$278$3$7 ==.
+                           1768 ;	apps/master_wixel_track/master_wixel_track.c:278: break;
+   03AB 02s04r59           1769 	ljmp	00112$
+                    03AE   1770 	C$master_wixel_track.c$279$3$7 ==.
+                           1771 ;	apps/master_wixel_track/master_wixel_track.c:279: case CMD_RUN:
+   03AE                    1772 00108$:
+                    03AE   1773 	C$master_wixel_track.c$280$3$7 ==.
+                           1774 ;	apps/master_wixel_track/master_wixel_track.c:280: sprintf(cmdStr, "RUN");
+   03AE C0 05              1775 	push	ar5
+   03B0 C0 04              1776 	push	ar4
+   03B2 74r5B              1777 	mov	a,#__str_5
+   03B4 C0 E0              1778 	push	acc
+   03B6 74s00              1779 	mov	a,#(__str_5 >> 8)
+   03B8 C0 E0              1780 	push	acc
+   03BA 74 80              1781 	mov	a,#0x80
+   03BC C0 E0              1782 	push	acc
+   03BE 74r22              1783 	mov	a,#_processSerialPacket_cmdStr_1_1
+   03C0 C0 E0              1784 	push	acc
+   03C2 74s00              1785 	mov	a,#(_processSerialPacket_cmdStr_1_1 >> 8)
+   03C4 C0 E0              1786 	push	acc
+   03C6 74 60              1787 	mov	a,#0x60
+   03C8 C0 E0              1788 	push	acc
+   03CA 12s00r00           1789 	lcall	_sprintf
+   03CD E5 81              1790 	mov	a,sp
+   03CF 24 FA              1791 	add	a,#0xfa
+   03D1 F5 81              1792 	mov	sp,a
+   03D3 D0 04              1793 	pop	ar4
+   03D5 D0 05              1794 	pop	ar5
+                    03D7   1795 	C$master_wixel_track.c$281$3$7 ==.
+                           1796 ;	apps/master_wixel_track/master_wixel_track.c:281: break;
+   03D7 02s04r59           1797 	ljmp	00112$
+                    03DA   1798 	C$master_wixel_track.c$282$3$7 ==.
+                           1799 ;	apps/master_wixel_track/master_wixel_track.c:282: case CMD_AUX:
+   03DA                    1800 00109$:
+                    03DA   1801 	C$master_wixel_track.c$283$3$7 ==.
+                           1802 ;	apps/master_wixel_track/master_wixel_track.c:283: sprintf(cmdStr, "AUX");
+   03DA C0 05              1803 	push	ar5
+   03DC C0 04              1804 	push	ar4
+   03DE 74r5F              1805 	mov	a,#__str_6
+   03E0 C0 E0              1806 	push	acc
+   03E2 74s00              1807 	mov	a,#(__str_6 >> 8)
+   03E4 C0 E0              1808 	push	acc
+   03E6 74 80              1809 	mov	a,#0x80
+   03E8 C0 E0              1810 	push	acc
+   03EA 74r22              1811 	mov	a,#_processSerialPacket_cmdStr_1_1
+   03EC C0 E0              1812 	push	acc
+   03EE 74s00              1813 	mov	a,#(_processSerialPacket_cmdStr_1_1 >> 8)
+   03F0 C0 E0              1814 	push	acc
+   03F2 74 60              1815 	mov	a,#0x60
+   03F4 C0 E0              1816 	push	acc
+   03F6 12s00r00           1817 	lcall	_sprintf
+   03F9 E5 81              1818 	mov	a,sp
+   03FB 24 FA              1819 	add	a,#0xfa
+   03FD F5 81              1820 	mov	sp,a
+   03FF D0 04              1821 	pop	ar4
+   0401 D0 05              1822 	pop	ar5
+                    0403   1823 	C$master_wixel_track.c$284$3$7 ==.
+                           1824 ;	apps/master_wixel_track/master_wixel_track.c:284: break;
+                    0403   1825 	C$master_wixel_track.c$285$3$7 ==.
+                           1826 ;	apps/master_wixel_track/master_wixel_track.c:285: case CMD_CALIBRATE:
+   0403 80 54              1827 	sjmp	00112$
+   0405                    1828 00110$:
+                    0405   1829 	C$master_wixel_track.c$286$3$7 ==.
+                           1830 ;	apps/master_wixel_track/master_wixel_track.c:286: sprintf(cmdStr, "CALIBRATE");
+   0405 C0 05              1831 	push	ar5
+   0407 C0 04              1832 	push	ar4
+   0409 74r63              1833 	mov	a,#__str_7
+   040B C0 E0              1834 	push	acc
+   040D 74s00              1835 	mov	a,#(__str_7 >> 8)
+   040F C0 E0              1836 	push	acc
+   0411 74 80              1837 	mov	a,#0x80
+   0413 C0 E0              1838 	push	acc
+   0415 74r22              1839 	mov	a,#_processSerialPacket_cmdStr_1_1
+   0417 C0 E0              1840 	push	acc
+   0419 74s00              1841 	mov	a,#(_processSerialPacket_cmdStr_1_1 >> 8)
+   041B C0 E0              1842 	push	acc
+   041D 74 60              1843 	mov	a,#0x60
+   041F C0 E0              1844 	push	acc
+   0421 12s00r00           1845 	lcall	_sprintf
+   0424 E5 81              1846 	mov	a,sp
+   0426 24 FA              1847 	add	a,#0xfa
+   0428 F5 81              1848 	mov	sp,a
+   042A D0 04              1849 	pop	ar4
+   042C D0 05              1850 	pop	ar5
+                    042E   1851 	C$master_wixel_track.c$287$3$7 ==.
+                           1852 ;	apps/master_wixel_track/master_wixel_track.c:287: break;
+                    042E   1853 	C$master_wixel_track.c$288$3$7 ==.
+                           1854 ;	apps/master_wixel_track/master_wixel_track.c:288: default:
+   042E 80 29              1855 	sjmp	00112$
+   0430                    1856 00111$:
+                    0430   1857 	C$master_wixel_track.c$289$3$7 ==.
+                           1858 ;	apps/master_wixel_track/master_wixel_track.c:289: sprintf(cmdStr, "UNKNOWN");
+   0430 C0 05              1859 	push	ar5
+   0432 C0 04              1860 	push	ar4
+   0434 74r6D              1861 	mov	a,#__str_8
+   0436 C0 E0              1862 	push	acc
+   0438 74s00              1863 	mov	a,#(__str_8 >> 8)
+   043A C0 E0              1864 	push	acc
+   043C 74 80              1865 	mov	a,#0x80
+   043E C0 E0              1866 	push	acc
+   0440 74r22              1867 	mov	a,#_processSerialPacket_cmdStr_1_1
+   0442 C0 E0              1868 	push	acc
+   0444 74s00              1869 	mov	a,#(_processSerialPacket_cmdStr_1_1 >> 8)
+   0446 C0 E0              1870 	push	acc
+   0448 74 60              1871 	mov	a,#0x60
+   044A C0 E0              1872 	push	acc
+   044C 12s00r00           1873 	lcall	_sprintf
+   044F E5 81              1874 	mov	a,sp
+   0451 24 FA              1875 	add	a,#0xfa
+   0453 F5 81              1876 	mov	sp,a
+   0455 D0 04              1877 	pop	ar4
+   0457 D0 05              1878 	pop	ar5
+                    0459   1879 	C$master_wixel_track.c$290$2$6 ==.
+                           1880 ;	apps/master_wixel_track/master_wixel_track.c:290: }
+   0459                    1881 00112$:
+                    0459   1882 	C$master_wixel_track.c$298$2$6 ==.
+                           1883 ;	apps/master_wixel_track/master_wixel_track.c:298: cmdStr,
+                    0459   1884 	C$master_wixel_track.c$297$2$6 ==.
+                           1885 ;	apps/master_wixel_track/master_wixel_track.c:297: theta,
+   0459 78r1B              1886 	mov	r0,#_theta
+   045B E2                 1887 	movx	a,@r0
+   045C FE                 1888 	mov	r6,a
+   045D E2                 1889 	movx	a,@r0
+   045E 33                 1890 	rlc	a
+   045F 95 E0              1891 	subb	a,acc
+   0461 FF                 1892 	mov	r7,a
+                    0462   1893 	C$master_wixel_track.c$294$2$6 ==.
+                           1894 ;	apps/master_wixel_track/master_wixel_track.c:294: "Slave 1 Pos: (%d, %d, %d) CMD %s %d, %d, etc\r\n",
+                    0462   1895 	C$master_wixel_track.c$293$2$6 ==.
+                           1896 ;	apps/master_wixel_track/master_wixel_track.c:293: responseLength = sprintf((char*)serialResponse, 
+   0462 78r1E              1897 	mov	r0,#_processSerialPacket_data4_1_1
+   0464 E2                 1898 	movx	a,@r0
+   0465 C0 E0              1899 	push	acc
+   0467 08                 1900 	inc	r0
+   0468 E2                 1901 	movx	a,@r0
+   0469 C0 E0              1902 	push	acc
+   046B 78r1C              1903 	mov	r0,#_processSerialPacket_data3_1_1
+   046D E2                 1904 	movx	a,@r0
+   046E C0 E0              1905 	push	acc
+   0470 08                 1906 	inc	r0
+   0471 E2                 1907 	movx	a,@r0
+   0472 C0 E0              1908 	push	acc
+   0474 74r22              1909 	mov	a,#_processSerialPacket_cmdStr_1_1
+   0476 C0 E0              1910 	push	acc
+   0478 74s00              1911 	mov	a,#(_processSerialPacket_cmdStr_1_1 >> 8)
+   047A C0 E0              1912 	push	acc
+   047C 74 60              1913 	mov	a,#0x60
+   047E C0 E0              1914 	push	acc
+   0480 C0 06              1915 	push	ar6
+   0482 C0 07              1916 	push	ar7
+   0484 C0 05              1917 	push	ar5
+   0486 C0 04              1918 	push	ar4
+   0488 78r20              1919 	mov	r0,#_processSerialPacket_posX_1_1
+   048A E2                 1920 	movx	a,@r0
+   048B C0 E0              1921 	push	acc
+   048D 08                 1922 	inc	r0
+   048E E2                 1923 	movx	a,@r0
+   048F C0 E0              1924 	push	acc
+   0491 74r75              1925 	mov	a,#__str_9
+   0493 C0 E0              1926 	push	acc
+   0495 74s00              1927 	mov	a,#(__str_9 >> 8)
+   0497 C0 E0              1928 	push	acc
+   0499 74 80              1929 	mov	a,#0x80
+   049B C0 E0              1930 	push	acc
+   049D 74rA5              1931 	mov	a,#_serialResponse
+   049F C0 E0              1932 	push	acc
+   04A1 74s00              1933 	mov	a,#(_serialResponse >> 8)
+   04A3 C0 E0              1934 	push	acc
+   04A5 E4                 1935 	clr	a
+   04A6 C0 E0              1936 	push	acc
+   04A8 12s00r00           1937 	lcall	_sprintf
+   04AB AE 82              1938 	mov	r6,dpl
+   04AD E5 81              1939 	mov	a,sp
+   04AF 24 ED              1940 	add	a,#0xed
+   04B1 F5 81              1941 	mov	sp,a
+   04B3 78r15              1942 	mov	r0,#_responseLength
+   04B5 EE                 1943 	mov	a,r6
+   04B6 F2                 1944 	movx	@r0,a
+                    04B7   1945 	C$master_wixel_track.c$300$2$6 ==.
+                           1946 ;	apps/master_wixel_track/master_wixel_track.c:300: usbComTxSend(serialResponse, responseLength);
+   04B7 78r00              1947 	mov	r0,#_usbComTxSend_PARM_2
+   04B9 EE                 1948 	mov	a,r6
+   04BA F2                 1949 	movx	@r0,a
+   04BB 90s00rA5           1950 	mov	dptr,#_serialResponse
+   04BE 12s00r00           1951 	lcall	_usbComTxSend
+   04C1 80 46              1952 	sjmp	00124$
+   04C3                    1953 00114$:
+                    04C3   1954 	C$master_wixel_track.c$311$2$8 ==.
+                           1955 ;	apps/master_wixel_track/master_wixel_track.c:311: theta);
+   04C3 EB                 1956 	mov	a,r3
+   04C4 33                 1957 	rlc	a
+   04C5 95 E0              1958 	subb	a,acc
+   04C7 FF                 1959 	mov	r7,a
+                    04C8   1960 	C$master_wixel_track.c$308$2$8 ==.
+                           1961 ;	apps/master_wixel_track/master_wixel_track.c:308: "AUX: Slave 1 Pos: (%d, %d, %d)\r\n",
+                    04C8   1962 	C$master_wixel_track.c$307$2$8 ==.
+                           1963 ;	apps/master_wixel_track/master_wixel_track.c:307: responseLength = sprintf((char*)serialResponse, 
+   04C8 C0 03              1964 	push	ar3
+   04CA C0 07              1965 	push	ar7
+   04CC C0 05              1966 	push	ar5
+   04CE C0 04              1967 	push	ar4
+   04D0 78r20              1968 	mov	r0,#_processSerialPacket_posX_1_1
+   04D2 E2                 1969 	movx	a,@r0
+   04D3 C0 E0              1970 	push	acc
+   04D5 08                 1971 	inc	r0
+   04D6 E2                 1972 	movx	a,@r0
+   04D7 C0 E0              1973 	push	acc
+   04D9 74rA4              1974 	mov	a,#__str_10
+   04DB C0 E0              1975 	push	acc
+   04DD 74s00              1976 	mov	a,#(__str_10 >> 8)
+   04DF C0 E0              1977 	push	acc
+   04E1 74 80              1978 	mov	a,#0x80
+   04E3 C0 E0              1979 	push	acc
+   04E5 74rA5              1980 	mov	a,#_serialResponse
+   04E7 C0 E0              1981 	push	acc
+   04E9 74s00              1982 	mov	a,#(_serialResponse >> 8)
+   04EB C0 E0              1983 	push	acc
+   04ED E4                 1984 	clr	a
+   04EE C0 E0              1985 	push	acc
+   04F0 12s00r00           1986 	lcall	_sprintf
+   04F3 AE 82              1987 	mov	r6,dpl
+   04F5 E5 81              1988 	mov	a,sp
+   04F7 24 F4              1989 	add	a,#0xf4
+   04F9 F5 81              1990 	mov	sp,a
+   04FB 78r15              1991 	mov	r0,#_responseLength
+   04FD EE                 1992 	mov	a,r6
+   04FE F2                 1993 	movx	@r0,a
+                    04FF   1994 	C$master_wixel_track.c$312$2$8 ==.
+                           1995 ;	apps/master_wixel_track/master_wixel_track.c:312: usbComTxSend(serialResponse, responseLength);
+   04FF 78r00              1996 	mov	r0,#_usbComTxSend_PARM_2
+   0501 EE                 1997 	mov	a,r6
+   0502 F2                 1998 	movx	@r0,a
+   0503 90s00rA5           1999 	mov	dptr,#_serialResponse
+   0506 12s00r00           2000 	lcall	_usbComTxSend
+   0509                    2001 00124$:
+                    0509   2002 	C$master_wixel_track.c$314$1$1 ==.
+                    0509   2003 	XG$processSerialPacket$0$0 ==.
+   0509 22                 2004 	ret
+                           2005 ;------------------------------------------------------------
+                           2006 ;Allocation info for local variables in function 'handleSerialTimeout'
+                           2007 ;------------------------------------------------------------
+                    050A   2008 	G$handleSerialTimeout$0$0 ==.
+                    050A   2009 	C$master_wixel_track.c$317$1$1 ==.
+                           2010 ;	apps/master_wixel_track/master_wixel_track.c:317: void handleSerialTimeout()
+                           2011 ;	-----------------------------------------
+                           2012 ;	 function handleSerialTimeout
+                           2013 ;	-----------------------------------------
+   050A                    2014 _handleSerialTimeout:
+                    050A   2015 	C$master_wixel_track.c$319$1$1 ==.
+                           2016 ;	apps/master_wixel_track/master_wixel_track.c:319: uint32 timeSinceLastRx = getMs() - lastSerialRxTime;
+   050A 12s00r00           2017 	lcall	_getMs
+   050D AC 82              2018 	mov	r4,dpl
+   050F AD 83              2019 	mov	r5,dph
+   0511 AE F0              2020 	mov	r6,b
+   0513 FF                 2021 	mov	r7,a
+   0514 78r05              2022 	mov	r0,#_lastSerialRxTime
+   0516 D3                 2023 	setb	c
+   0517 E2                 2024 	movx	a,@r0
+   0518 9C                 2025 	subb	a,r4
+   0519 F4                 2026 	cpl	a
+   051A B3                 2027 	cpl	c
+   051B FC                 2028 	mov	r4,a
+   051C B3                 2029 	cpl	c
+   051D 08                 2030 	inc	r0
+   051E E2                 2031 	movx	a,@r0
+   051F 9D                 2032 	subb	a,r5
+   0520 F4                 2033 	cpl	a
+   0521 B3                 2034 	cpl	c
+   0522 FD                 2035 	mov	r5,a
+   0523 B3                 2036 	cpl	c
+   0524 08                 2037 	inc	r0
+   0525 E2                 2038 	movx	a,@r0
+   0526 9E                 2039 	subb	a,r6
+   0527 F4                 2040 	cpl	a
+   0528 B3                 2041 	cpl	c
+   0529 FE                 2042 	mov	r6,a
+   052A B3                 2043 	cpl	c
+   052B 08                 2044 	inc	r0
+   052C E2                 2045 	movx	a,@r0
+   052D 9F                 2046 	subb	a,r7
+   052E F4                 2047 	cpl	a
+   052F FF                 2048 	mov	r7,a
+                    0530   2049 	C$master_wixel_track.c$321$1$1 ==.
+                           2050 ;	apps/master_wixel_track/master_wixel_track.c:321: if (timeSinceLastRx >= SERIAL_RX_TIMEOUT)
+   0530 C3                 2051 	clr	c
+   0531 EC                 2052 	mov	a,r4
+   0532 94 60              2053 	subb	a,#0x60
+   0534 ED                 2054 	mov	a,r5
+   0535 94 EA              2055 	subb	a,#0xEA
+   0537 EE                 2056 	mov	a,r6
+   0538 94 00              2057 	subb	a,#0x00
+   053A EF                 2058 	mov	a,r7
+   053B 94 00              2059 	subb	a,#0x00
+   053D 50 03              2060 	jnc	00120$
+   053F 02s06r2A           2061 	ljmp	00111$
+   0542                    2062 00120$:
+                    0542   2063 	C$master_wixel_track.c$328$3$3 ==.
+                           2064 ;	apps/master_wixel_track/master_wixel_track.c:328: for (slaveIndex = 0; slaveIndex < NUM_SLAVES; slaveIndex++)
+   0542 7F 00              2065 	mov	r7,#0x00
+   0544                    2066 00107$:
+   0544 BF 04 00           2067 	cjne	r7,#0x04,00121$
+   0547                    2068 00121$:
+   0547 40 03              2069 	jc	00122$
+   0549 02s05rE0           2070 	ljmp	00110$
+   054C                    2071 00122$:
+                    054C   2072 	C$master_wixel_track.c$330$3$3 ==.
+                           2073 ;	apps/master_wixel_track/master_wixel_track.c:330: txOffset = 1 + (slaveIndex * BYTES_PER_SLAVE);
+   054C EF                 2074 	mov	a,r7
+   054D C4                 2075 	swap	a
+   054E 54 F0              2076 	anl	a,#0xF0
+   0550 FE                 2077 	mov	r6,a
+   0551 0E                 2078 	inc	r6
+                    0552   2079 	C$master_wixel_track.c$332$3$3 ==.
+                           2080 ;	apps/master_wixel_track/master_wixel_track.c:332: txPacket[txOffset + 0] = slaveAddresses[slaveIndex];  // ADD
+   0552 EE                 2081 	mov	a,r6
+   0553 24r00              2082 	add	a,#_txPacket
+   0555 F5 82              2083 	mov	dpl,a
+   0557 E4                 2084 	clr	a
+   0558 34s00              2085 	addc	a,#(_txPacket >> 8)
+   055A F5 83              2086 	mov	dph,a
+   055C EF                 2087 	mov	a,r7
+   055D 24r01              2088 	add	a,#_slaveAddresses
+   055F F9                 2089 	mov	r1,a
+   0560 E3                 2090 	movx	a,@r1
+   0561 F0                 2091 	movx	@dptr,a
+                    0562   2092 	C$master_wixel_track.c$333$3$3 ==.
+                           2093 ;	apps/master_wixel_track/master_wixel_track.c:333: txPacket[txOffset + 1] = 0x00;  // X high
+   0562 EE                 2094 	mov	a,r6
+   0563 04                 2095 	inc	a
+   0564 24r00              2096 	add	a,#_txPacket
+   0566 F5 82              2097 	mov	dpl,a
+   0568 E4                 2098 	clr	a
+   0569 34s00              2099 	addc	a,#(_txPacket >> 8)
+   056B F5 83              2100 	mov	dph,a
+   056D E4                 2101 	clr	a
+   056E F0                 2102 	movx	@dptr,a
+                    056F   2103 	C$master_wixel_track.c$334$3$3 ==.
+                           2104 ;	apps/master_wixel_track/master_wixel_track.c:334: txPacket[txOffset + 2] = 0x00;  // X low
+   056F 74 02              2105 	mov	a,#0x02
+   0571 2E                 2106 	add	a,r6
+   0572 24r00              2107 	add	a,#_txPacket
+   0574 F5 82              2108 	mov	dpl,a
+   0576 E4                 2109 	clr	a
+   0577 34s00              2110 	addc	a,#(_txPacket >> 8)
+   0579 F5 83              2111 	mov	dph,a
+   057B E4                 2112 	clr	a
+   057C F0                 2113 	movx	@dptr,a
+                    057D   2114 	C$master_wixel_track.c$335$3$3 ==.
+                           2115 ;	apps/master_wixel_track/master_wixel_track.c:335: txPacket[txOffset + 3] = 0x00;  // Y high
+   057D 74 03              2116 	mov	a,#0x03
+   057F 2E                 2117 	add	a,r6
+   0580 24r00              2118 	add	a,#_txPacket
+   0582 F5 82              2119 	mov	dpl,a
+   0584 E4                 2120 	clr	a
+   0585 34s00              2121 	addc	a,#(_txPacket >> 8)
+   0587 F5 83              2122 	mov	dph,a
+   0589 E4                 2123 	clr	a
+   058A F0                 2124 	movx	@dptr,a
+                    058B   2125 	C$master_wixel_track.c$336$3$3 ==.
+                           2126 ;	apps/master_wixel_track/master_wixel_track.c:336: txPacket[txOffset + 4] = 0x00;  // Y low
+   058B 74 04              2127 	mov	a,#0x04
+   058D 2E                 2128 	add	a,r6
+   058E 24r00              2129 	add	a,#_txPacket
+   0590 F5 82              2130 	mov	dpl,a
+   0592 E4                 2131 	clr	a
+   0593 34s00              2132 	addc	a,#(_txPacket >> 8)
+   0595 F5 83              2133 	mov	dph,a
+   0597 E4                 2134 	clr	a
+   0598 F0                 2135 	movx	@dptr,a
+                    0599   2136 	C$master_wixel_track.c$337$3$3 ==.
+                           2137 ;	apps/master_wixel_track/master_wixel_track.c:337: txPacket[txOffset + 5] = 0x00;  // Theta
+   0599 74 05              2138 	mov	a,#0x05
+   059B 2E                 2139 	add	a,r6
+   059C 24r00              2140 	add	a,#_txPacket
+   059E F5 82              2141 	mov	dpl,a
+   05A0 E4                 2142 	clr	a
+   05A1 34s00              2143 	addc	a,#(_txPacket >> 8)
+   05A3 F5 83              2144 	mov	dph,a
+   05A5 E4                 2145 	clr	a
+   05A6 F0                 2146 	movx	@dptr,a
+                    05A7   2147 	C$master_wixel_track.c$338$3$3 ==.
+                           2148 ;	apps/master_wixel_track/master_wixel_track.c:338: txPacket[txOffset + 6] = CMD_STOP;  // Command
+   05A7 74 06              2149 	mov	a,#0x06
+   05A9 2E                 2150 	add	a,r6
+   05AA 24r00              2151 	add	a,#_txPacket
+   05AC F5 82              2152 	mov	dpl,a
+   05AE E4                 2153 	clr	a
+   05AF 34s00              2154 	addc	a,#(_txPacket >> 8)
+   05B1 F5 83              2155 	mov	dph,a
+   05B3 74 10              2156 	mov	a,#0x10
+   05B5 F0                 2157 	movx	@dptr,a
+                    05B6   2158 	C$master_wixel_track.c$340$2$1 ==.
+                           2159 ;	apps/master_wixel_track/master_wixel_track.c:340: for (i = 7; i < 15; i++)
+   05B6 7D 07              2160 	mov	r5,#0x07
+   05B8                    2161 00103$:
+   05B8 BD 0F 00           2162 	cjne	r5,#0x0F,00123$
+   05BB                    2163 00123$:
+   05BB 50 10              2164 	jnc	00106$
+                    05BD   2165 	C$master_wixel_track.c$342$4$4 ==.
+                           2166 ;	apps/master_wixel_track/master_wixel_track.c:342: txPacket[txOffset + i] = 0x00;  // Data3-Data13
+   05BD ED                 2167 	mov	a,r5
+   05BE 2E                 2168 	add	a,r6
+   05BF 24r00              2169 	add	a,#_txPacket
+   05C1 F5 82              2170 	mov	dpl,a
+   05C3 E4                 2171 	clr	a
+   05C4 34s00              2172 	addc	a,#(_txPacket >> 8)
+   05C6 F5 83              2173 	mov	dph,a
+   05C8 E4                 2174 	clr	a
+   05C9 F0                 2175 	movx	@dptr,a
+                    05CA   2176 	C$master_wixel_track.c$340$3$3 ==.
+                           2177 ;	apps/master_wixel_track/master_wixel_track.c:340: for (i = 7; i < 15; i++)
+   05CA 0D                 2178 	inc	r5
+   05CB 80 EB              2179 	sjmp	00103$
+   05CD                    2180 00106$:
+                    05CD   2181 	C$master_wixel_track.c$345$3$3 ==.
+                           2182 ;	apps/master_wixel_track/master_wixel_track.c:345: txPacket[txOffset + 15] = MESSAGE_DELIMITER;
+   05CD 74 0F              2183 	mov	a,#0x0F
+   05CF 2E                 2184 	add	a,r6
+   05D0 24r00              2185 	add	a,#_txPacket
+   05D2 F5 82              2186 	mov	dpl,a
+   05D4 E4                 2187 	clr	a
+   05D5 34s00              2188 	addc	a,#(_txPacket >> 8)
+   05D7 F5 83              2189 	mov	dph,a
+   05D9 74 FF              2190 	mov	a,#0xFF
+   05DB F0                 2191 	movx	@dptr,a
+                    05DC   2192 	C$master_wixel_track.c$328$2$2 ==.
+                           2193 ;	apps/master_wixel_track/master_wixel_track.c:328: for (slaveIndex = 0; slaveIndex < NUM_SLAVES; slaveIndex++)
+   05DC 0F                 2194 	inc	r7
+   05DD 02s05r44           2195 	ljmp	00107$
+   05E0                    2196 00110$:
+                    05E0   2197 	C$master_wixel_track.c$348$2$2 ==.
+                           2198 ;	apps/master_wixel_track/master_wixel_track.c:348: sendRadioPacket();
+   05E0 12s00rA2           2199 	lcall	_sendRadioPacket
+                    05E3   2200 	C$master_wixel_track.c$350$2$2 ==.
+                           2201 ;	apps/master_wixel_track/master_wixel_track.c:350: responseLength = sprintf((char*)serialResponse, "[TIMEOUT] No serial data for 60s, sent STOP to all slaves\r\n");
+   05E3 74rC5              2202 	mov	a,#__str_11
+   05E5 C0 E0              2203 	push	acc
+   05E7 74s00              2204 	mov	a,#(__str_11 >> 8)
+   05E9 C0 E0              2205 	push	acc
+   05EB 74 80              2206 	mov	a,#0x80
+   05ED C0 E0              2207 	push	acc
+   05EF 74rA5              2208 	mov	a,#_serialResponse
+   05F1 C0 E0              2209 	push	acc
+   05F3 74s00              2210 	mov	a,#(_serialResponse >> 8)
+   05F5 C0 E0              2211 	push	acc
+   05F7 E4                 2212 	clr	a
+   05F8 C0 E0              2213 	push	acc
+   05FA 12s00r00           2214 	lcall	_sprintf
+   05FD AE 82              2215 	mov	r6,dpl
+   05FF E5 81              2216 	mov	a,sp
+   0601 24 FA              2217 	add	a,#0xfa
+   0603 F5 81              2218 	mov	sp,a
+   0605 78r15              2219 	mov	r0,#_responseLength
+   0607 EE                 2220 	mov	a,r6
+   0608 F2                 2221 	movx	@r0,a
+                    0609   2222 	C$master_wixel_track.c$351$2$2 ==.
+                           2223 ;	apps/master_wixel_track/master_wixel_track.c:351: usbComTxSend(serialResponse, responseLength);
+   0609 78r00              2224 	mov	r0,#_usbComTxSend_PARM_2
+   060B EE                 2225 	mov	a,r6
+   060C F2                 2226 	movx	@r0,a
+   060D 90s00rA5           2227 	mov	dptr,#_serialResponse
+   0610 12s00r00           2228 	lcall	_usbComTxSend
+                    0613   2229 	C$master_wixel_track.c$353$2$2 ==.
+                           2230 ;	apps/master_wixel_track/master_wixel_track.c:353: lastSerialRxTime = getMs();
+   0613 12s00r00           2231 	lcall	_getMs
+   0616 AC 82              2232 	mov	r4,dpl
+   0618 AD 83              2233 	mov	r5,dph
+   061A AE F0              2234 	mov	r6,b
+   061C FF                 2235 	mov	r7,a
+   061D 78r05              2236 	mov	r0,#_lastSerialRxTime
+   061F EC                 2237 	mov	a,r4
+   0620 F2                 2238 	movx	@r0,a
+   0621 08                 2239 	inc	r0
+   0622 ED                 2240 	mov	a,r5
+   0623 F2                 2241 	movx	@r0,a
+   0624 08                 2242 	inc	r0
+   0625 EE                 2243 	mov	a,r6
+   0626 F2                 2244 	movx	@r0,a
+   0627 08                 2245 	inc	r0
+   0628 EF                 2246 	mov	a,r7
+   0629 F2                 2247 	movx	@r0,a
+   062A                    2248 00111$:
+                    062A   2249 	C$master_wixel_track.c$355$2$1 ==.
+                    062A   2250 	XG$handleSerialTimeout$0$0 ==.
+   062A 22                 2251 	ret
+                           2252 ;------------------------------------------------------------
+                           2253 ;Allocation info for local variables in function 'processBytesFromUsb'
+                           2254 ;------------------------------------------------------------
+                    062B   2255 	G$processBytesFromUsb$0$0 ==.
+                    062B   2256 	C$master_wixel_track.c$357$2$1 ==.
+                           2257 ;	apps/master_wixel_track/master_wixel_track.c:357: void processBytesFromUsb()
+                           2258 ;	-----------------------------------------
+                           2259 ;	 function processBytesFromUsb
+                           2260 ;	-----------------------------------------
+   062B                    2261 _processBytesFromUsb:
+                    062B   2262 	C$master_wixel_track.c$361$2$2 ==.
+                           2263 ;	apps/master_wixel_track/master_wixel_track.c:361: while (usbComRxAvailable() && serialBufferIndex < 100)
+   062B                    2264 00104$:
+   062B 12s00r00           2265 	lcall	_usbComRxAvailable
+   062E E5 82              2266 	mov	a,dpl
+   0630 60 32              2267 	jz	00107$
+   0632 78r00              2268 	mov	r0,#_serialBufferIndex
+   0634 E2                 2269 	movx	a,@r0
+   0635 B4 64 00           2270 	cjne	a,#0x64,00114$
+   0638                    2271 00114$:
+   0638 50 2A              2272 	jnc	00107$
+                    063A   2273 	C$master_wixel_track.c$363$2$2 ==.
+                           2274 ;	apps/master_wixel_track/master_wixel_track.c:363: byteReceived = usbComRxReceiveByte();
+   063A 12s00r00           2275 	lcall	_usbComRxReceiveByte
+   063D AF 82              2276 	mov	r7,dpl
+                    063F   2277 	C$master_wixel_track.c$365$2$2 ==.
+                           2278 ;	apps/master_wixel_track/master_wixel_track.c:365: serialBuffer[serialBufferIndex] = byteReceived;
+   063F 78r00              2279 	mov	r0,#_serialBufferIndex
+   0641 E2                 2280 	movx	a,@r0
+   0642 24r41              2281 	add	a,#_serialBuffer
+   0644 F5 82              2282 	mov	dpl,a
+   0646 E4                 2283 	clr	a
+   0647 34s00              2284 	addc	a,#(_serialBuffer >> 8)
+   0649 F5 83              2285 	mov	dph,a
+   064B EF                 2286 	mov	a,r7
+   064C F0                 2287 	movx	@dptr,a
+                    064D   2288 	C$master_wixel_track.c$366$2$2 ==.
+                           2289 ;	apps/master_wixel_track/master_wixel_track.c:366: serialBufferIndex++;
+   064D 78r00              2290 	mov	r0,#_serialBufferIndex
+   064F E2                 2291 	movx	a,@r0
+   0650 24 01              2292 	add	a,#0x01
+   0652 F2                 2293 	movx	@r0,a
+                    0653   2294 	C$master_wixel_track.c$369$2$2 ==.
+                           2295 ;	apps/master_wixel_track/master_wixel_track.c:369: if (serialBufferIndex >= RADIO_PACKET_SIZE)
+   0653 78r00              2296 	mov	r0,#_serialBufferIndex
+   0655 E2                 2297 	movx	a,@r0
+   0656 B4 40 00           2298 	cjne	a,#0x40,00116$
+   0659                    2299 00116$:
+   0659 40 D0              2300 	jc	00104$
+                    065B   2301 	C$master_wixel_track.c$371$3$3 ==.
+                           2302 ;	apps/master_wixel_track/master_wixel_track.c:371: processSerialPacket();
+   065B 12s01r93           2303 	lcall	_processSerialPacket
+                    065E   2304 	C$master_wixel_track.c$372$3$3 ==.
+                           2305 ;	apps/master_wixel_track/master_wixel_track.c:372: serialBufferIndex = 0;
+   065E 78r00              2306 	mov	r0,#_serialBufferIndex
+   0660 E4                 2307 	clr	a
+   0661 F2                 2308 	movx	@r0,a
+   0662 80 C7              2309 	sjmp	00104$
+   0664                    2310 00107$:
+                    0664   2311 	C$master_wixel_track.c$375$1$1 ==.
+                    0664   2312 	XG$processBytesFromUsb$0$0 ==.
+   0664 22                 2313 	ret
+                           2314 ;------------------------------------------------------------
+                           2315 ;Allocation info for local variables in function 'initSystems'
+                           2316 ;------------------------------------------------------------
+                    0665   2317 	G$initSystems$0$0 ==.
+                    0665   2318 	C$master_wixel_track.c$379$1$1 ==.
+                           2319 ;	apps/master_wixel_track/master_wixel_track.c:379: void initSystems()
+                           2320 ;	-----------------------------------------
+                           2321 ;	 function initSystems
+                           2322 ;	-----------------------------------------
+   0665                    2323 _initSystems:
+                    0665   2324 	C$master_wixel_track.c$381$1$1 ==.
+                           2325 ;	apps/master_wixel_track/master_wixel_track.c:381: failSafeBootloader();
+   0665 12s00r00           2326 	lcall	_failSafeBootloader
+                    0668   2327 	C$master_wixel_track.c$382$1$1 ==.
+                           2328 ;	apps/master_wixel_track/master_wixel_track.c:382: systemInit();
+   0668 12s00r00           2329 	lcall	_systemInit
+                    066B   2330 	C$master_wixel_track.c$383$1$1 ==.
+                           2331 ;	apps/master_wixel_track/master_wixel_track.c:383: usbInit();
+   066B 12s00r00           2332 	lcall	_usbInit
+                    066E   2333 	C$master_wixel_track.c$384$1$1 ==.
+                           2334 ;	apps/master_wixel_track/master_wixel_track.c:384: radioInit();
+   066E 12s00r38           2335 	lcall	_radioInit
+                    0671   2336 	C$master_wixel_track.c$386$1$1 ==.
+                           2337 ;	apps/master_wixel_track/master_wixel_track.c:386: lastSerialRxTime = getMs();
+   0671 12s00r00           2338 	lcall	_getMs
+   0674 AC 82              2339 	mov	r4,dpl
+   0676 AD 83              2340 	mov	r5,dph
+   0678 AE F0              2341 	mov	r6,b
+   067A FF                 2342 	mov	r7,a
+   067B 78r05              2343 	mov	r0,#_lastSerialRxTime
+   067D EC                 2344 	mov	a,r4
+   067E F2                 2345 	movx	@r0,a
+   067F 08                 2346 	inc	r0
+   0680 ED                 2347 	mov	a,r5
+   0681 F2                 2348 	movx	@r0,a
+   0682 08                 2349 	inc	r0
+   0683 EE                 2350 	mov	a,r6
+   0684 F2                 2351 	movx	@r0,a
+   0685 08                 2352 	inc	r0
+   0686 EF                 2353 	mov	a,r7
+   0687 F2                 2354 	movx	@r0,a
+                    0688   2355 	C$master_wixel_track.c$387$1$1 ==.
+                           2356 ;	apps/master_wixel_track/master_wixel_track.c:387: lastRadioTxTime = getMs();
+   0688 12s00r00           2357 	lcall	_getMs
+   068B AC 82              2358 	mov	r4,dpl
+   068D AD 83              2359 	mov	r5,dph
+   068F AE F0              2360 	mov	r6,b
+   0691 FF                 2361 	mov	r7,a
+   0692 78r09              2362 	mov	r0,#_lastRadioTxTime
+   0694 EC                 2363 	mov	a,r4
+   0695 F2                 2364 	movx	@r0,a
+   0696 08                 2365 	inc	r0
+   0697 ED                 2366 	mov	a,r5
+   0698 F2                 2367 	movx	@r0,a
+   0699 08                 2368 	inc	r0
+   069A EE                 2369 	mov	a,r6
+   069B F2                 2370 	movx	@r0,a
+   069C 08                 2371 	inc	r0
+   069D EF                 2372 	mov	a,r7
+   069E F2                 2373 	movx	@r0,a
+                    069F   2374 	C$master_wixel_track.c$388$1$1 ==.
+                           2375 ;	apps/master_wixel_track/master_wixel_track.c:388: lastHeartbeatTime = getMs();
+   069F 12s00r00           2376 	lcall	_getMs
+   06A2 AC 82              2377 	mov	r4,dpl
+   06A4 AD 83              2378 	mov	r5,dph
+   06A6 AE F0              2379 	mov	r6,b
+   06A8 FF                 2380 	mov	r7,a
+   06A9 78r0D              2381 	mov	r0,#_lastHeartbeatTime
+   06AB EC                 2382 	mov	a,r4
+   06AC F2                 2383 	movx	@r0,a
+   06AD 08                 2384 	inc	r0
+   06AE ED                 2385 	mov	a,r5
+   06AF F2                 2386 	movx	@r0,a
+   06B0 08                 2387 	inc	r0
+   06B1 EE                 2388 	mov	a,r6
+   06B2 F2                 2389 	movx	@r0,a
+   06B3 08                 2390 	inc	r0
+   06B4 EF                 2391 	mov	a,r7
+   06B5 F2                 2392 	movx	@r0,a
+                    06B6   2393 	C$master_wixel_track.c$390$1$1 ==.
+                           2394 ;	apps/master_wixel_track/master_wixel_track.c:390: responseLength = sprintf((char*)serialResponse, "Master Wixel Ready - 4 SLAVES HARDCODED (PKTLEN=%d)\r\n", PKTLEN);
+   06B6 90 DF 02           2395 	mov	dptr,#_PKTLEN
+   06B9 E0                 2396 	movx	a,@dptr
+   06BA FF                 2397 	mov	r7,a
+   06BB 7E 00              2398 	mov	r6,#0x00
+   06BD C0 07              2399 	push	ar7
+   06BF C0 06              2400 	push	ar6
+   06C1 74r01              2401 	mov	a,#__str_12
+   06C3 C0 E0              2402 	push	acc
+   06C5 74s01              2403 	mov	a,#(__str_12 >> 8)
+   06C7 C0 E0              2404 	push	acc
+   06C9 74 80              2405 	mov	a,#0x80
+   06CB C0 E0              2406 	push	acc
+   06CD 74rA5              2407 	mov	a,#_serialResponse
+   06CF C0 E0              2408 	push	acc
+   06D1 74s00              2409 	mov	a,#(_serialResponse >> 8)
+   06D3 C0 E0              2410 	push	acc
+   06D5 E4                 2411 	clr	a
+   06D6 C0 E0              2412 	push	acc
+   06D8 12s00r00           2413 	lcall	_sprintf
+   06DB AE 82              2414 	mov	r6,dpl
+   06DD E5 81              2415 	mov	a,sp
+   06DF 24 F8              2416 	add	a,#0xf8
+   06E1 F5 81              2417 	mov	sp,a
+   06E3 78r15              2418 	mov	r0,#_responseLength
+   06E5 EE                 2419 	mov	a,r6
+   06E6 F2                 2420 	movx	@r0,a
+                    06E7   2421 	C$master_wixel_track.c$391$1$1 ==.
+                           2422 ;	apps/master_wixel_track/master_wixel_track.c:391: usbComTxSend(serialResponse, responseLength);
+   06E7 78r00              2423 	mov	r0,#_usbComTxSend_PARM_2
+   06E9 EE                 2424 	mov	a,r6
+   06EA F2                 2425 	movx	@r0,a
+   06EB 90s00rA5           2426 	mov	dptr,#_serialResponse
+   06EE 12s00r00           2427 	lcall	_usbComTxSend
+                    06F1   2428 	C$master_wixel_track.c$392$1$1 ==.
+                    06F1   2429 	XG$initSystems$0$0 ==.
+   06F1 22                 2430 	ret
+                           2431 ;------------------------------------------------------------
+                           2432 ;Allocation info for local variables in function 'main'
+                           2433 ;------------------------------------------------------------
+                    06F2   2434 	G$main$0$0 ==.
+                    06F2   2435 	C$master_wixel_track.c$394$1$1 ==.
+                           2436 ;	apps/master_wixel_track/master_wixel_track.c:394: void main()
+                           2437 ;	-----------------------------------------
+                           2438 ;	 function main
+                           2439 ;	-----------------------------------------
+   06F2                    2440 _main:
+                    06F2   2441 	C$master_wixel_track.c$396$1$1 ==.
+                           2442 ;	apps/master_wixel_track/master_wixel_track.c:396: initSystems();
+   06F2 12s06r65           2443 	lcall	_initSystems
+                    06F5   2444 	C$master_wixel_track.c$398$1$1 ==.
+                           2445 ;	apps/master_wixel_track/master_wixel_track.c:398: while(1)
+   06F5                    2446 00102$:
+                    06F5   2447 	C$master_wixel_track.c$400$2$2 ==.
+                           2448 ;	apps/master_wixel_track/master_wixel_track.c:400: boardService();
+   06F5 12s00r00           2449 	lcall	_boardService
+                    06F8   2450 	C$master_wixel_track.c$401$2$2 ==.
+                           2451 ;	apps/master_wixel_track/master_wixel_track.c:401: usbComService();
+   06F8 12s00r00           2452 	lcall	_usbComService
+                    06FB   2453 	C$master_wixel_track.c$403$2$2 ==.
+                           2454 ;	apps/master_wixel_track/master_wixel_track.c:403: processBytesFromUsb();
+   06FB 12s06r2B           2455 	lcall	_processBytesFromUsb
+                    06FE   2456 	C$master_wixel_track.c$404$2$2 ==.
+                           2457 ;	apps/master_wixel_track/master_wixel_track.c:404: handleSerialTimeout();
+   06FE 12s05r0A           2458 	lcall	_handleSerialTimeout
+                    0701   2459 	C$master_wixel_track.c$405$2$2 ==.
+                           2460 ;	apps/master_wixel_track/master_wixel_track.c:405: updateLeds();
+   0701 12s00rDF           2461 	lcall	_updateLeds
+   0704 80 EF              2462 	sjmp	00102$
+                    0706   2463 	C$master_wixel_track.c$407$1$1 ==.
+                    0706   2464 	XG$main$0$0 ==.
+   0706 22                 2465 	ret
+                           2466 	.area CSEG    (CODE)
+                           2467 	.area CONST   (CODE)
+                    0000   2468 Fmaster_wixel_track$_str_0$0$0 == .
+   0000                    2469 __str_0:
+   0000 45 52 52 4F 52 3A  2470 	.ascii "ERROR: Expected 64 bytes, got %d"
+        20 45 78 70 65 63
+        74 65 64 20 36 34
+        20 62 79 74 65 73
+        2C 20 67 6F 74 20
+        25 64
+   0020 0D                 2471 	.db 0x0D
+   0021 0A                 2472 	.db 0x0A
+   0022 00                 2473 	.db 0x00
+                    0023   2474 Fmaster_wixel_track$_str_1$0$0 == .
+   0023                    2475 __str_1:
+   0023 45 52 52 4F 52 3A  2476 	.ascii "ERROR: Invalid delimiter for slave %d"
+        20 49 6E 76 61 6C
+        69 64 20 64 65 6C
+        69 6D 69 74 65 72
+        20 66 6F 72 20 73
+        6C 61 76 65 20 25
+        64
+   0048 0D                 2477 	.db 0x0D
+   0049 0A                 2478 	.db 0x0A
+   004A 00                 2479 	.db 0x00
+                    004B   2480 Fmaster_wixel_track$_str_2$0$0 == .
+   004B                    2481 __str_2:
+   004B 53 54 4F 50        2482 	.ascii "STOP"
+   004F 00                 2483 	.db 0x00
+                    0050   2484 Fmaster_wixel_track$_str_3$0$0 == .
+   0050                    2485 __str_3:
+   0050 47 4F 5F 54 4F     2486 	.ascii "GO_TO"
+   0055 00                 2487 	.db 0x00
+                    0056   2488 Fmaster_wixel_track$_str_4$0$0 == .
+   0056                    2489 __str_4:
+   0056 50 52 45 50        2490 	.ascii "PREP"
+   005A 00                 2491 	.db 0x00
+                    005B   2492 Fmaster_wixel_track$_str_5$0$0 == .
+   005B                    2493 __str_5:
+   005B 52 55 4E           2494 	.ascii "RUN"
+   005E 00                 2495 	.db 0x00
+                    005F   2496 Fmaster_wixel_track$_str_6$0$0 == .
+   005F                    2497 __str_6:
+   005F 41 55 58           2498 	.ascii "AUX"
+   0062 00                 2499 	.db 0x00
+                    0063   2500 Fmaster_wixel_track$_str_7$0$0 == .
+   0063                    2501 __str_7:
+   0063 43 41 4C 49 42 52  2502 	.ascii "CALIBRATE"
+        41 54 45
+   006C 00                 2503 	.db 0x00
+                    006D   2504 Fmaster_wixel_track$_str_8$0$0 == .
+   006D                    2505 __str_8:
+   006D 55 4E 4B 4E 4F 57  2506 	.ascii "UNKNOWN"
+        4E
+   0074 00                 2507 	.db 0x00
+                    0075   2508 Fmaster_wixel_track$_str_9$0$0 == .
+   0075                    2509 __str_9:
+   0075 53 6C 61 76 65 20  2510 	.ascii "Slave 1 Pos: (%d, %d, %d) CMD %s %d, %d, etc"
+        31 20 50 6F 73 3A
+        20 28 25 64 2C 20
+        25 64 2C 20 25 64
+        29 20 43 4D 44 20
+        25 73 20 25 64 2C
+        20 25 64 2C 20 65
+        74 63
+   00A1 0D                 2511 	.db 0x0D
+   00A2 0A                 2512 	.db 0x0A
+   00A3 00                 2513 	.db 0x00
+                    00A4   2514 Fmaster_wixel_track$_str_10$0$0 == .
+   00A4                    2515 __str_10:
+   00A4 41 55 58 3A 20 53  2516 	.ascii "AUX: Slave 1 Pos: (%d, %d, %d)"
+        6C 61 76 65 20 31
+        20 50 6F 73 3A 20
+        28 25 64 2C 20 25
+        64 2C 20 25 64 29
+   00C2 0D                 2517 	.db 0x0D
+   00C3 0A                 2518 	.db 0x0A
+   00C4 00                 2519 	.db 0x00
+                    00C5   2520 Fmaster_wixel_track$_str_11$0$0 == .
+   00C5                    2521 __str_11:
+   00C5 5B 54 49 4D 45 4F  2522 	.ascii "[TIMEOUT] No serial data for 60s, sent STOP to all slaves"
+        55 54 5D 20 4E 6F
+        20 73 65 72 69 61
+        6C 20 64 61 74 61
+        20 66 6F 72 20 36
+        30 73 2C 20 73 65
+        6E 74 20 53 54 4F
+        50 20 74 6F 20 61
+        6C 6C 20 73 6C 61
+        76 65 73
+   00FE 0D                 2523 	.db 0x0D
+   00FF 0A                 2524 	.db 0x0A
+   0100 00                 2525 	.db 0x00
+                    0101   2526 Fmaster_wixel_track$_str_12$0$0 == .
+   0101                    2527 __str_12:
+   0101 4D 61 73 74 65 72  2528 	.ascii "Master Wixel Ready - 4 SLAVES HARDCODED (PKTLEN=%d)"
+        20 57 69 78 65 6C
+        20 52 65 61 64 79
+        20 2D 20 34 20 53
+        4C 41 56 45 53 20
+        48 41 52 44 43 4F
+        44 45 44 20 28 50
+        4B 54 4C 45 4E 3D
+        25 64 29
+   0134 0D                 2529 	.db 0x0D
+   0135 0A                 2530 	.db 0x0A
+   0136 00                 2531 	.db 0x00
+                           2532 	.area XINIT   (CODE)
+                           2533 	.area CABS    (ABS,CODE)

@@ -1,0 +1,2 @@
+# Example cronjob to run the demo at boot for the 'pi' user
+@reboot /usr/bin/python3 /home/pi/OpenHouse_UPEI_2025/RaspberryPi3/src/lil_demo_path_tracking.py >> /var/log/lil_demo.log 2>&1

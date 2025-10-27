@@ -1,0 +1,8 @@
+# Core GUI and Path Planning Dependencies
+numpy>=1.20.0
+scipy>=1.7.0
+opencv-python-headless>=4.5.0
+PyQt5>=5.15.0
+
+# Robot Communication Dependencies
+pyserial>=3.5

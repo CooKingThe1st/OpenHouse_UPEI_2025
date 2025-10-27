@@ -1,0 +1,376 @@
+/*
+ * ================= MINIMAL SLAVE WIXEL (HARDCODED 4 SLAVES) =================
+ *
+ * SIMPLIFIED VERSION - ALWAYS 4 SLAVES, NO DYNAMIC CONFIGURATION
+ * 
+ * Packet structure (64 bytes total):
+ * - Slave 1: bytes 1-16
+ * - Slave 2: bytes 17-32
+ * - Slave 3: bytes 33-48
+ * - Slave 4: bytes 49-64
+ *
+ * Each slave packet (16 bytes):
+ * [ADD] [X_h] [X_l] [Y_h] [Y_l] [Theta] [Cmd] [Data3..Data13] [Delimiter]
+ *
+ * LED Indicators:
+ * - Onboard RED: Connection status (on when receiving packets)
+ * - Onboard YELLOW: RX pulse (100ms flash per packet)
+ * - RGB LEDs: Show command state
+ *   * RED = STOP
+ *   * BLUE = GO_TO
+ *   * PURPLE = PREP
+ *   * GREEN = RUN
+ *   * (unchanged for AUX)
+ * ============================================================
+ */
+
+#include <wixel.h>
+#include <radio_registers.h>
+
+/* ================== CONFIGURATION ================== */
+
+#define THIS_SLAVE_ADDRESS      0x01    // Change to 0x02, 0x03, or 0x04 for other slaves
+
+// Commands
+#define CMD_STOP                0x10
+#define CMD_GO_TO               0x11
+#define CMD_PREP                0x12
+#define CMD_RUN                 0x13
+#define CMD_AUX                 0x14
+
+// Protocol (HARDCODED FOR 4 SLAVES)
+#define MESSAGE_DELIMITER       0xFF
+#define BYTES_PER_SLAVE         16
+#define NUM_SLAVES              4
+#define RADIO_PACKET_SIZE       64      // 4 slaves * 16 bytes
+
+// RGB Pins (CORRECTED BASED ON TEST SEQUENCE)
+#define LED_RED_PIN             2   // P1_2 = RGB Red
+#define LED_GREEN_PIN           1   // P1_1 = RGB Green
+#define LED_BLUE_PIN            7   // P1_7 = RGB Blue
+
+// Motor Pins
+#define R_PWM_PIN               3
+#define R_DIR_PIN               5
+#define L_PWM_PIN               4
+#define L_DIR_PIN               6
+
+// Timing
+#define CONNECTION_TIMEOUT      2000
+#define YELLOW_LED_PULSE        100
+
+/* ================== GLOBALS ================== */
+
+static volatile XDATA uint8 rxPacket[1 + RADIO_PACKET_SIZE + 2];
+
+// Current command/state
+uint8 currentCmd = CMD_STOP;
+
+// RGB LED values
+uint8 ledRed = 255;      // Start with RED (STOP state)
+uint8 ledGreen = 0;
+uint8 ledBlue = 0;
+
+// Timing
+uint16 lastPacketTime = 0;
+BIT dataReceivedFlag = 0;
+uint16 dataReceivedTime = 0;
+
+// Position data
+int16 posX = 0;
+int16 posY = 0;
+int8 posTheta = 0;
+
+// Loop counter
+uint8 fsi;
+
+/* ================== INITIALIZATION ================== */
+
+void failSafeBootloader()
+{
+    LED_YELLOW(0);
+    LED_YELLOW_TOGGLE();
+    delayMs(200);
+    
+    for(fsi = 0; fsi < 20; fsi++)
+    {
+        LED_YELLOW_TOGGLE();
+        boardService();
+        delayMs(100);
+    }
+    
+    LED_YELLOW(0);
+}
+
+void timer3Init()
+{
+    T3CTL = 0b01110000;
+    T3CC0 = T3CC1 = 0;
+    T3CCTL0 = T3CCTL1 = 0b00100100;
+    PERCFG &= ~(1<<5);
+    P1SEL |= (1<<R_PWM_PIN) | (1<<L_PWM_PIN);
+}
+
+void radioInit()
+{
+    radioRegistersInit();
+    
+    CHANNR = 128;
+    PKTLEN = RADIO_PACKET_SIZE;     // HARDCODED: 64 bytes for 4 slaves
+    
+    MCSM0 = 0x14;
+    MCSM1 = 0x00;
+    
+    dmaConfig.radio.DC6 = 19;
+    dmaConfig.radio.SRCADDRH = XDATA_SFR_ADDRESS(RFD) >> 8;
+    dmaConfig.radio.SRCADDRL = XDATA_SFR_ADDRESS(RFD);
+    dmaConfig.radio.DESTADDRH = (unsigned int)rxPacket >> 8;
+    dmaConfig.radio.DESTADDRL = (unsigned int)rxPacket;
+    dmaConfig.radio.LENL = 1 + RADIO_PACKET_SIZE + 2;
+    dmaConfig.radio.VLEN_LENH = 0b10000000;
+    dmaConfig.radio.DC7 = 0x10;
+    
+    DMAARM |= (1<<DMA_CHANNEL_RADIO);
+    RFST = 2;
+}
+
+void gpioInit()
+{
+    failSafeBootloader();
+    
+    P1SEL = 0x00;
+    P1DIR = 0x00;
+    P1 = 0x00;
+    
+    T1CTL = 0x00;
+    T3CTL = 0x00;
+    T4CTL = 0x00;
+    
+    P1DIR |= (1 << LED_RED_PIN) | (1 << LED_GREEN_PIN) | (1 << LED_BLUE_PIN);
+    P1DIR |= (1 << R_DIR_PIN) | (1 << L_DIR_PIN);
+    
+    P1SEL = 0x00;
+    
+    P1_1 = 1;
+    P1_2 = 1;
+    P1_7 = 1;
+    
+    T3CC0 = 0;
+    T3CC1 = 0;
+    P1_5 = 0;
+    P1_6 = 0;
+}
+
+/* ================== LED CONTROL ================== */
+
+void updateRgbLeds()
+{
+    // CORRECTED: P1_2=RED, P1_1=GREEN, P1_7=BLUE
+    P1_2 = (ledRed > 127) ? 0 : 1;      // RED on P1_2
+    P1_1 = (ledGreen > 127) ? 0 : 1;    // GREEN on P1_1
+    P1_7 = (ledBlue > 127) ? 0 : 1;     // BLUE on P1_7
+}
+
+void updateStatusLeds()
+{
+    uint16 now = (uint16)getMs();
+    BIT isConnected = ((uint16)(now - lastPacketTime) < CONNECTION_TIMEOUT);
+    
+    // RED LED: Connection status
+    LED_RED(isConnected ? 1 : 0);
+    
+    // YELLOW LED: RX pulse
+    if (dataReceivedFlag)
+    {
+        if ((uint16)(now - dataReceivedTime) < YELLOW_LED_PULSE)
+        {
+            LED_YELLOW(1);
+        }
+        else
+        {
+            LED_YELLOW(0);
+            dataReceivedFlag = 0;
+        }
+    }
+}
+
+/* ================== MOTOR CONTROL ================== */
+
+void updateMotor()
+{
+    // Motor control disabled for MVP
+    T3CC0 = 0;
+    T3CC1 = 0;
+    P1_5 = 0;
+    P1_6 = 0;
+}
+
+/* ================== PACKET PROCESSING ================== */
+
+void receiveAndProcessPackets()
+{
+    uint8 slaveAddress;
+    uint8 cmd;
+    uint8 packetOffset;
+    
+    if (RFIF & (1<<4))
+    {
+        if (radioCrcPassed())
+        {
+            // HARDCODED OFFSETS FOR 4 SLAVES
+            // rxPacket[0] = packet length (should be 64)
+            // Slave 1: bytes 1-16   (offset = 1)
+            // Slave 2: bytes 17-32  (offset = 17)
+            // Slave 3: bytes 33-48  (offset = 33)
+            // Slave 4: bytes 49-64  (offset = 49)
+            
+            if (THIS_SLAVE_ADDRESS == 0x01)
+            {
+                packetOffset = 1;
+            }
+            else if (THIS_SLAVE_ADDRESS == 0x02)
+            {
+                packetOffset = 17;
+            }
+            else if (THIS_SLAVE_ADDRESS == 0x03)
+            {
+                packetOffset = 33;
+            }
+            else if (THIS_SLAVE_ADDRESS == 0x04)
+            {
+                packetOffset = 49;
+            }
+            else
+            {
+                goto cleanup;
+            }
+            
+            // Parse packet structure:
+            // [ADD] [X_h] [X_l] [Y_h] [Y_l] [Theta] [Cmd] [Data3..Data13] [Delimiter]
+            // [0]   [1]   [2]   [3]   [4]   [5]     [6]   [7..14]         [15]
+            
+            slaveAddress = rxPacket[packetOffset + 0];
+            
+            if (slaveAddress == THIS_SLAVE_ADDRESS)
+            {
+                cmd = rxPacket[packetOffset + 6];
+                
+                // Extract position
+                posX = (int16)((rxPacket[packetOffset + 1] << 8) | rxPacket[packetOffset + 2]);
+                posY = (int16)((rxPacket[packetOffset + 3] << 8) | rxPacket[packetOffset + 4]);
+                posTheta = (int8)rxPacket[packetOffset + 5];
+                
+                // Update timing
+                lastPacketTime = (uint16)getMs();
+                dataReceivedFlag = 1;
+                dataReceivedTime = (uint16)getMs();
+                
+                // Store current command
+                currentCmd = cmd;
+                
+                // Update RGB LEDs based on command
+                switch(cmd)
+                {
+                    case CMD_STOP:
+                        ledRed = 255;
+                        ledGreen = 0;
+                        ledBlue = 0;
+                        break;
+                        
+                    case CMD_GO_TO:
+                        ledRed = 0;
+                        ledGreen = 0;
+                        ledBlue = 255;
+                        break;
+                        
+                    case CMD_PREP:
+                        ledRed = 255;
+                        ledGreen = 0;
+                        ledBlue = 255;
+                        break;
+                        
+                    case CMD_RUN:
+                        ledRed = 0;
+                        ledGreen = 255;
+                        ledBlue = 0;
+                        break;
+                        
+                    case CMD_AUX:
+                        // Don't change LED for AUX (just position update)
+                        break;
+                }
+            }
+        }
+        
+cleanup:
+        RFIF &= ~(1<<4);
+        DMAARM |= (1<<DMA_CHANNEL_RADIO);
+        RFST = 2;
+    }
+}
+
+void handlePacketTimeout()
+{
+    if ((uint16)(getMs() - lastPacketTime) > CONNECTION_TIMEOUT)
+    {
+        // Connection lost - turn off LEDs
+        ledRed = 0;
+        ledGreen = 0;
+        ledBlue = 0;
+    }
+}
+
+/* ================== MAIN ================== */
+
+void main()
+{
+    systemInit();
+    radioInit();
+    gpioInit();
+    timer3Init();
+    
+    lastPacketTime = (uint16)getMs();
+    
+    // RGB Test Sequence (CORRECTED PIN MAPPING)
+    // P1_2 = RED, P1_1 = GREEN, P1_7 = BLUE
+    
+    P1_2 = 0;  // RED on
+    P1_1 = 1;
+    P1_7 = 1;
+    delayMs(200);
+    
+    P1_2 = 1;  // GREEN on
+    P1_1 = 0;
+    P1_7 = 1;
+    delayMs(200);
+    
+    P1_2 = 1;  // BLUE on
+    P1_1 = 1;
+    P1_7 = 0;
+    delayMs(200);
+    
+    P1_2 = 1;  // All OFF
+    P1_1 = 1;
+    P1_7 = 1;
+    delayMs(500);
+    
+    // Reset timing after test sequence (this makes slave think it's "connected" for 2 seconds)
+    // After 2 seconds without real packets, onboard RED LED will turn off
+    lastPacketTime = (uint16)getMs();
+    
+    // Set initial state (RED for STOP)
+    ledRed = 255;
+    ledGreen = 0;
+    ledBlue = 0;
+    updateRgbLeds();
+    
+    while(1)
+    {
+        boardService();
+        receiveAndProcessPackets();
+        handlePacketTimeout();
+        updateRgbLeds();
+        updateMotor();
+        updateStatusLeds();
+    }
+}

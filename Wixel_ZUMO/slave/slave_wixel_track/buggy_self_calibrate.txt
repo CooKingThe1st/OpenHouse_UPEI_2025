@@ -1,0 +1,805 @@
+
+/* CONFIRM TO WORK
+ * ================= SLAVE WIXEL ROTATION TEST =================
+ *
+ * Simplified version to test rotation controller only
+ * State Machine: IDLE -> HOME (rotation only) -> IDLE
+ * * HOME state: Robot rotates in place to face the target position
+ * No forward movement, no APF, just pure rotation P-controller
+ *
+ * === CALIBRATION UPDATE ===
+ * - Implemented 3-press blocking calibration sequence.
+ * - User must press 'c' three times to complete.
+ * - Added CMD_AUX handler to fix non-responsive bug.
+ * ============================================================
+ */
+
+#include <wixel.h>
+#include <usb.h>
+#include <radio_registers.h>
+
+/* ================== CONFIGURATION CONSTANTS ================== */
+
+// --- Slave Configuration ---
+#define THIS_SLAVE_ADDRESS      0x01
+
+// --- Command Definitions ---
+#define CMD_STOP                0x10
+#define CMD_GO_TO               0x11
+#define CMD_PREP                0x12
+#define CMD_RUN                 0x13
+#define CMD_AUX                 0x14
+#define CMD_CALIBRATE           0x15
+
+// --- Protocol Definitions ---
+#define MESSAGE_DELIMITER       0xFF
+#define BYTES_PER_SLAVE         16
+#define RADIO_PACKET_SIZE       64
+
+// --- GPIO Pin Definitions (RGB Control) ---
+#define LED_RED_PIN             2
+#define LED_GREEN_PIN           1
+#define LED_BLUE_PIN            7
+
+// --- Motor Control Pins ---
+#define R_PWM_PIN               3
+#define R_DIR_PIN               5
+#define L_PWM_PIN               4
+#define L_DIR_PIN               6
+
+// --- Rotation Controller Parameters ---
+#define ROTATION_KP_NUM         3      // Numerator for 1.5 gain (3/2)
+#define ROTATION_KP_DEN         2      // Denominator
+#define MAX_ROTATION_PWM        100    // Max PWM for rotation
+#define MIN_ROTATION_PWM        50     // Min PWM to overcome friction
+#define HEADING_THRESHOLD       5      // degrees - stop when within this
+
+// --- Timing Constants ---
+#define CONNECTION_TIMEOUT      3000
+#define GO_TO_TIMEOUT           10000
+
+// --- Position Filtering ---
+#define POSITION_JUMP_THRESHOLD 500
+#define FILTER_ALPHA_HIGH       0.95
+#define FILTER_ALPHA_LOW        0.2
+
+/* ================== STATE MACHINE DEFINITIONS ================== */
+
+#define STATE_IDLE              0
+#define STATE_HOME              1
+#define STATE_CALIBRATE_VALIDATE 16 // For the final validation spin
+
+/* ================== GLOBAL VARIABLES ================== */
+
+// Radio RX packet buffer
+static volatile XDATA uint8 rxPacket[1 + RADIO_PACKET_SIZE + 2];
+
+// State machine
+uint8 currentState = STATE_IDLE;
+
+// LED timing
+uint16 lastPacketTimeCheck = 0;
+uint16 lastPacketTime = 0;
+uint16 counter_loop = 0;
+uint32 now = 0;
+uint32 rxPulseStart = 1;
+
+// Position data (from OptiTrack) - mm
+int16 posX = 0;
+int16 posY = 0;
+int16 posTheta = 0;
+
+// Filtered position
+int16 filteredX = 0;
+int16 filteredY = 0;
+int16 filteredTheta = 0;
+
+// Target location (for GO_TO)
+int16 targetX = 0;
+int16 lastTargetX = 0;
+int16 targetY = 0;
+int16 lastTargetY = 0;
+
+// State timeout tracking
+uint32 stateStartTime = 0;
+
+// Motor PWM values
+int16 pwm_left = 0;
+int16 pwm_right = 0;
+
+// --- ADDED FOR MANUAL PWM ---
+int16 manualPwmLeft = 0;
+int16 manualPwmRight = 0;
+
+// Misc
+uint8 i;
+
+// --- Calibration Data ---
+typedef struct {
+    int16 xa, ya, thetaa;
+    int16 xb, yb, thetab;
+    int16 xc, yc, thetac;
+} CalibrationData;
+
+static volatile CalibrationData calData;
+int16 orientationOffset = 0;  // degrees
+int16 cal_targetHeading = 0;
+int16 cal_headingError = 0;
+
+uint8 calib_step = 0; // <-- ADDED FOR 3-PRESS CALIBRATION
+
+/* ================== HELPER FUNCTIONS ================== */
+
+int16 abs16(int16 val)
+{
+    return (val < 0) ? -val : val;
+}
+
+
+/* ================== ROTATION FUNCTIONS ================== */
+int16 calculateTargetHeading(int16 currentX, int16 currentY, int16 goalX, int16 goalY)
+{
+    int32 dx, dy;
+    int32 absX, absY;
+    int16 angle;
+    int32 ratio;
+    
+    dx = (int32)goalX - (int32)currentX;
+    dy = (int32)goalY - (int32)currentY;
+    
+    // Handle special cases
+    if (dx == 0 && dy == 0)
+        return 0;
+    
+    if (dx == 0)
+        return (dy > 0) ? 90 : -90;
+    
+    if (dy == 0)
+        return (dx > 0) ? 0 : 180;
+    
+    absX = (dx > 0) ? dx : -dx;
+    absY = (dy > 0) ? dy : -dy;
+    
+    if (absX > absY)
+    {
+        ratio = (absY * 1000L) / absX;
+        angle = (int16)((57300L * ratio) / (1000000L + (280L * ratio * ratio) / 1000L));
+    }
+    else
+    {
+        ratio = (absX * 1000L) / absY;
+        angle = 90 - (int16)((57300L * ratio) / (1000000L + (280L * ratio * ratio) / 1000L));
+    }
+    
+    // Map to correct quadrant [-180, 180]
+    if (dx >= 0 && dy >= 0)
+        return angle;           // Q1
+    else if (dx < 0 && dy >= 0)
+        return 180 - angle;     // Q2
+    else if (dx < 0 && dy < 0)
+        return angle - 180;     // Q3
+    else
+        return -angle;          // Q4
+}
+
+
+// --- CALIBRATION CALCULATION FUNCTION ---
+void calculateAndApplyOffset()
+{
+    int16 actualHeading, reportedHeading;
+    actualHeading = calculateTargetHeading(calData.xa, calData.ya, calData.xb, calData.yb);
+    reportedHeading = calData.thetaa;
+    orientationOffset = actualHeading - reportedHeading;
+
+    if (orientationOffset > 180) { orientationOffset -= 360; }
+    if (orientationOffset < -180) { orientationOffset += 360; }
+}
+
+/* ================== POSITION FILTERING ================== */
+
+void filterPosition()
+{
+    int16 dx, dy;
+    int32 distSquared;
+    int16 alpha_num, alpha_den;
+    
+    dx = posX - filteredX;
+    dy = posY - filteredY;
+    distSquared = (int32)dx * dx + (int32)dy * dy;
+    
+    if (distSquared > (int32)POSITION_JUMP_THRESHOLD * POSITION_JUMP_THRESHOLD)
+    {
+        alpha_num = 1;
+        alpha_den = 5;
+    }
+    else
+    {
+        alpha_num = 9;
+        alpha_den = 10;
+    }
+    
+    // filteredX = (int16)((alpha_num * posX + (alpha_den - alpha_num) * filteredX) / alpha_den);
+    // filteredY = (int16)((alpha_num * posY + (alpha_den - alpha_num) * filteredY) / alpha_den);
+    filteredX = posX;
+    filteredY = posY;
+    filteredTheta = posTheta;
+}
+
+/*
+ * P-controller for rotation
+ */
+void rotationController(int16 currentHeading, int16 targetHeading)
+{
+    int16 error;
+    int16 abs_error;
+    int32 pwm_raw;
+    int16 pwm;
+    
+    error = targetHeading - currentHeading;
+    
+    if (error > 180)
+        error -= 360;
+    if (error < -180)
+        error += 360;
+    
+    abs_error = (error >= 0) ? error : -error;
+    
+    if (abs_error < HEADING_THRESHOLD)
+    {
+        pwm_left = 0;
+        pwm_right = 0;
+        return;
+    }
+    
+    pwm_raw = ((int32)error * ROTATION_KP_NUM) / ROTATION_KP_DEN;
+    
+    if (pwm_raw > MAX_ROTATION_PWM)
+        pwm = MAX_ROTATION_PWM;
+    else if (pwm_raw < -MAX_ROTATION_PWM)
+        pwm = -MAX_ROTATION_PWM;
+    else
+        pwm = (int16)pwm_raw;
+    
+    if (pwm > 0 && pwm < MIN_ROTATION_PWM)
+        pwm = MIN_ROTATION_PWM;
+    else if (pwm < 0 && pwm > -MIN_ROTATION_PWM)
+        pwm = -MIN_ROTATION_PWM;
+    
+    if (pwm > 0)
+    {
+        pwm_left = -pwm;
+        pwm_right = pwm;
+    }
+    else
+    {
+        pwm_left = -pwm;
+        pwm_right = pwm;
+    }
+}
+
+/* ================== MOTOR CONTROL ================== */
+
+void timer3Init()
+{
+    T3CTL = 0b01110000;
+    T3CC0 = T3CC1 = 0;
+    T3CCTL0 = T3CCTL1 = 0b00100100;
+    PERCFG &= ~(1<<5);
+    P1SEL |= (1<<R_PWM_PIN) | (1<<L_PWM_PIN);
+}
+
+void setMotorsPWM()
+{
+    if (pwm_left >= 0)
+    {
+        T3CC1 = pwm_left;
+        P1_6 = 0;  // Forward
+    }
+    else
+    {
+        T3CC1 = -pwm_left;
+        P1_6 = 1;  // Backward
+    }
+    
+    if (pwm_right >= 0)
+    {
+        T3CC0 = pwm_right;
+        P1_5 = 0;  // Forward
+    }
+    else
+    {
+        T3CC0 = -pwm_right;
+        P1_5 = 1;  // Backward
+    }
+}
+
+void stopMotors()
+{
+    T3CC0 = 0;
+    T3CC1 = 0;
+    P1_5 = 0;
+    P1_6 = 0;
+}
+
+/* ================== RADIO INITIALIZATION ================== */
+
+void radioInit()
+{
+    radioRegistersInit();
+    CHANNR = 128;
+    PKTLEN = RADIO_PACKET_SIZE;
+    MCSM0 = 0x14;
+    MCSM1 = 0x00;
+    dmaConfig.radio.DC6 = 19;
+    dmaConfig.radio.SRCADDRH = XDATA_SFR_ADDRESS(RFD) >> 8;
+    dmaConfig.radio.SRCADDRL = XDATA_SFR_ADDRESS(RFD);
+    dmaConfig.radio.DESTADDRH = (unsigned int)rxPacket >> 8;
+    dmaConfig.radio.DESTADDRL = (unsigned int)rxPacket;
+    dmaConfig.radio.LENL = 1 + RADIO_PACKET_SIZE + 2;
+    dmaConfig.radio.VLEN_LENH = 0b10000000;
+    dmaConfig.radio.DC7 = 0x10;
+    DMAARM |= (1<<DMA_CHANNEL_RADIO);
+    RFST = 2;
+}
+
+void gpioInit()
+{
+    P1SEL = 0x00;
+    P1DIR = 0x00;
+    P1 = 0x00;
+    T1CTL = 0x00;
+    T3CTL = 0x00;
+    T4CTL = 0x00;
+    P1DIR |= (1 << LED_RED_PIN) | (1 << LED_GREEN_PIN) | (1 << LED_BLUE_PIN);
+    P1DIR |= (1 << R_DIR_PIN) | (1 << L_DIR_PIN);
+    P1SEL = 0x00;
+    P1_1 = 1;
+    P1_2 = 1;
+    P1_7 = 1;
+    T3CC0 = 0;
+    T3CC1 = 0;
+    P1_5 = 0;
+    P1_6 = 0;
+}
+
+/* ================== LED CONTROL ================== */
+
+void updateRgbLeds()
+{
+    if (currentState == STATE_CALIBRATE_VALIDATE)
+    {
+        // CALIBRATION state: YELLOW (RED + GREEN)
+        P1_2 = 0;
+        P1_1 = 0;
+        P1_7 = 1;
+    }
+    else if (currentState == STATE_HOME)
+    {
+        // HOME state: BLUE
+        P1_2 = 1;
+        P1_1 = 1;
+        P1_7 = 0;
+    }
+    else // Default to IDLE
+    {
+        // IDLE state: RED
+        P1_2 = 0;
+        P1_1 = 1;
+        P1_7 = 1;
+    }
+}
+
+/* ================== PACKET PROCESSING ================== */
+
+void extractPositionData(uint8 offset)
+{
+    uint8 rawTheta;
+    int16 mapped_theta;
+    // int16 hardcoded_offset = 165;       // <-- Hardcoded value
+
+    posX = (int16)((rxPacket[offset + 1] << 8) | rxPacket[offset + 2]);
+    posY = (int16)((rxPacket[offset + 3] << 8) | rxPacket[offset + 4]);
+    rawTheta = rxPacket[offset + 5]; 
+    
+    mapped_theta = (int16)(((int32)rawTheta * 360L) / 256L);
+
+    // --- APPLY THE CALIBRATION OFFSET ---
+    // mapped_theta += orientationOffset;
+    // --- APPLY THE CALIBRATION OFFSET --- // <-- MODIFIED
+    mapped_theta += orientationOffset; // <-- Disabled auto-calibration
+
+    // mapped_theta += hardcoded_offset;
+    
+    // Normalize to [-180, 180]
+    if (mapped_theta > 180)
+    {
+        posTheta = mapped_theta - 360;
+    }
+    else if (mapped_theta < -180)
+    {
+        posTheta = mapped_theta + 360;
+    }
+    else
+    {
+        posTheta = mapped_theta;
+    }
+}
+
+void handleCmdStop()
+{
+    currentState = STATE_IDLE;
+    calib_step = 0; // <-- RESET CALIBRATION
+    pwm_left = 0;
+    pwm_right = 0;
+    stopMotors();
+}
+
+void handleCmdGoTo(uint8 offset)
+{
+    targetX = (int16)((rxPacket[offset + 7] << 8) | rxPacket[offset + 8]);
+    targetY = (int16)((rxPacket[offset + 9] << 8) | rxPacket[offset + 10]);
+    
+    if (currentState == STATE_HOME && targetX == lastTargetX && targetY == lastTargetY)
+    {
+        return;
+    }
+    
+    if (currentState == STATE_HOME)
+    {
+        if (targetX != lastTargetX || targetY != lastTargetY)
+        {
+            stateStartTime = (uint32)getMs();
+            lastTargetX = targetX;
+            lastTargetY = targetY;
+        }
+    }
+    else
+    {
+        stateStartTime = (uint32)getMs();
+        lastTargetX = targetX;
+        lastTargetY = targetY;
+    }
+
+    currentState = STATE_HOME;
+    calib_step = 0; // <-- RESET CALIBRATION
+}
+
+// --- ADDED BLOCKING MANUAL PWM ---
+void executeManualPwm()
+{
+    // Flash YELLOW
+    P1_2 = 0; P1_1 = 0; P1_7 = 1;
+    delayMs(100);
+    P1_2 = 1; P1_1 = 1; P1_7 = 1;
+    
+    pwm_left = manualPwmLeft;
+    pwm_right = manualPwmRight;
+    setMotorsPWM();
+    delayMs(2000); // Block for 2 seconds
+    
+    stopMotors();
+    manualPwmLeft = 0;
+    manualPwmRight = 0;
+    
+    // Flash YELLOW
+    P1_2 = 0; P1_1 = 0; P1_7 = 1;
+    delayMs(100);
+    P1_2 = 1; P1_1 = 1; P1_7 = 1;
+
+    pwm_left = 0;
+    pwm_right = 0;
+    currentState = STATE_IDLE; // Return to IDLE
+}
+
+// --- ADDED CMD_AUX HANDLER ---
+void handleCmdAux(uint8 offset)
+{
+    uint8 auxSubCmd = rxPacket[offset + 7];
+    switch(auxSubCmd)
+    {
+        case 0x9F: // Default background update
+            break; // Do nothing, just accept the packet
+            
+        case 0x1F:  // Manual PWM
+            currentState = STATE_IDLE;
+            calib_step = 0; // <-- RESET CALIBRATION
+            manualPwmLeft = (int16)((rxPacket[offset + 8] << 8) | rxPacket[offset + 9]);
+            manualPwmRight = (int16)((rxPacket[offset + 10] << 8) | rxPacket[offset + 11]);
+            executeManualPwm(); // Call the blocking function
+            break;
+            
+        default:
+            break;
+    }
+}
+
+// --- ADDED 3-PRESS CALIBRATION HANDLER ---
+void handleCmdCalibrate()
+{
+    // Set LED to YELLOW for all blocking calibration steps
+    currentState = STATE_CALIBRATE_VALIDATE;
+    updateRgbLeds(); // Force LED update
+
+    if (calib_step == 0)
+    {
+        // Step 1: Record Start, Move Forward
+        orientationOffset = 0;
+        stopMotors();
+        
+        // Record start position (data is fresh from packet just received)
+        calData.xa = posX; calData.ya = posY; 
+        
+        // --- THIS IS THE FIX ---
+        // Store the RAW angle by "un-applying" the current offset
+        calData.thetaa = posTheta - orientationOffset;
+        
+        // Move forward
+        pwm_left = 70;
+        pwm_right = 70;
+        setMotorsPWM();
+        delayMs(3000);
+        stopMotors();
+        pwm_left = 0;
+        pwm_right = 0;
+        
+        calib_step = 1; // Advance to next step
+        currentState = STATE_IDLE; // Go back to IDLE (red light) to wait
+    }
+    else if (calib_step == 1)
+    {
+        // Step 2: Record B, Rotate
+        stopMotors();
+
+        // Record pos_b (data is fresh from this packet)
+        calData.xb = posX; calData.yb = posY; calData.thetab = posTheta;
+
+        // Rotate
+        pwm_left = -60;
+        pwm_right = 60;
+        setMotorsPWM();
+        delayMs(2000);
+        stopMotors();
+        pwm_left = 0;
+        pwm_right = 0;
+        
+        calib_step = 2; // Advance to next step
+        currentState = STATE_IDLE; // Go back to IDLE (red light) to wait
+    }
+    else if (calib_step == 2)
+    {
+        // Step 3: Record C, Calculate, and Validate
+        stopMotors();
+        pwm_left = 0;
+        pwm_right = 0;
+        
+        // Record pos_c (data is fresh from this packet)
+        calData.xc = posX; calData.yc = posY; calData.thetac = posTheta;
+
+        // Calculate
+        calculateAndApplyOffset();
+        
+        // Set state for non-blocking visual validation (stays yellow)
+        currentState = STATE_CALIBRATE_VALIDATE;
+        stateStartTime = (uint32)getMs();
+        
+        calib_step = 0; // Reset for next time
+    }
+}
+
+
+void receiveAndProcessPackets()
+{
+    uint8 slaveAddress;
+    uint8 cmd;
+    uint8 packetOffset;
+    
+    if (RFIF & (1<<4))
+    {
+        if (radioCrcPassed())
+        {
+            lastPacketTime = (uint16)getMs();
+            
+            if (lastPacketTime != lastPacketTimeCheck)
+            {
+                rxPulseStart = 1;
+                lastPacketTimeCheck = lastPacketTime;
+            }
+
+            // Determine slave offset
+            if (THIS_SLAVE_ADDRESS == 0x01)
+                packetOffset = 1;
+            else if (THIS_SLAVE_ADDRESS == 0x02)
+                packetOffset = 17;
+            else if (THIS_SLAVE_ADDRESS == 0x03)
+                packetOffset = 33;
+            else if (THIS_SLAVE_ADDRESS == 0x04)
+                packetOffset = 49;
+            else
+            {
+                RFIF &= ~(1<<4);
+                DMAARM |= (1<<DMA_CHANNEL_RADIO);
+                RFST = 2;
+                return;
+            }
+            
+            slaveAddress = rxPacket[packetOffset + 0];
+            cmd = rxPacket[packetOffset + 6];
+            
+            if (slaveAddress != THIS_SLAVE_ADDRESS)
+            {
+                RFIF &= ~(1<<4);
+                DMAARM |= (1<<DMA_CHANNEL_RADIO);
+                RFST = 2;
+                return;
+            }
+            
+            // Extract and filter position
+            extractPositionData(packetOffset);
+            filterPosition();
+            
+            // Process command
+            switch(cmd)
+            {
+                case CMD_STOP:
+                    handleCmdStop();
+                    break;
+                case CMD_GO_TO:
+                    handleCmdGoTo(packetOffset);
+                    break;
+                case CMD_CALIBRATE:
+                    handleCmdCalibrate(); // <-- Call new 3-step handler
+                    break;
+                case CMD_AUX:
+                    handleCmdAux(packetOffset);
+                    break;
+            }
+        }
+        
+        RFIF &= ~(1<<4);
+        DMAARM |= (1<<DMA_CHANNEL_RADIO);
+        RFST = 2;
+    }
+}
+
+void handlePacketTimeout()
+{
+    if ((uint16)(getMs() - lastPacketTime) > CONNECTION_TIMEOUT)
+    {
+        currentState = STATE_IDLE;
+        calib_step = 0; // <-- RESET CALIBRATION
+        pwm_left = 0;
+        pwm_right = 0;
+        stopMotors();
+    }
+}
+
+/* ================== STATE MACHINE ================== */
+
+void updateHomeState()
+{
+    uint32 elapsedTime = now - stateStartTime;
+    int16 targetHeading;
+    int16 headingError;
+    int16 abs_error;
+    
+    // Timeout check
+    if (elapsedTime >= GO_TO_TIMEOUT)
+    {
+        currentState = STATE_IDLE;
+        pwm_left = 0;
+        pwm_right = 0;
+        stopMotors();
+        lastTargetX = 0;
+        lastTargetY = 0;
+        return;
+    }
+    
+    // Calculate target heading (direction to goal)
+    targetHeading = calculateTargetHeading(filteredX, filteredY, targetX, targetY);
+    
+    // Calculate heading error
+    headingError = targetHeading - filteredTheta;
+    if (headingError > 180)
+        headingError -= 360;
+    if (headingError < -180)
+        headingError += 360;
+    
+    abs_error = (headingError >= 0) ? headingError : -headingError;
+    
+    // Check if aligned
+    if (abs_error < HEADING_THRESHOLD)
+    {
+        pwm_left = 0;
+        pwm_right = 0;
+        currentState = STATE_IDLE;
+        stopMotors();
+    }
+    else
+    {
+        rotationController(filteredTheta, targetHeading);
+    }
+}
+
+void updateStateMachine()
+{
+    switch(currentState)
+    {
+        case STATE_IDLE:
+            stopMotors();
+            break;
+        case STATE_HOME:
+            updateHomeState();
+            break;
+            
+        case STATE_CALIBRATE_VALIDATE:
+            // This non-blocking state runs AFTER the 3-press
+            // sequence to provide visual feedback.
+            cal_targetHeading = calculateTargetHeading(filteredX, filteredY, 0, 0);
+            rotationController(filteredTheta, cal_targetHeading);
+            
+            cal_headingError = cal_targetHeading - filteredTheta;
+            if (cal_headingError > 180) cal_headingError -= 360;
+            if (cal_headingError < -180) cal_headingError += 360;
+            
+            if (abs16(cal_headingError) < HEADING_THRESHOLD)
+            {
+                currentState = STATE_IDLE;
+            }
+            break;
+    }
+}
+
+/* ================== MAIN FUNCTION ================== */
+
+void main()
+{
+    systemInit();
+    gpioInit();
+    timer3Init();
+    radioInit();
+    
+    lastPacketTime = (uint16)getMs();
+    
+    // RGB LED Test Sequence
+    P1_2 = 0; P1_1 = 1; P1_7 = 1; delayMs(300);  // RED
+    P1_2 = 1; P1_1 = 0; P1_7 = 1; delayMs(300);  // GREEN
+    P1_2 = 1; P1_1 = 1; P1_7 = 0; delayMs(300);  // BLUE
+    P1_2 = 1; P1_1 = 1; P1_7 = 1; delayMs(500);  // OFF
+    
+    lastPacketTime = (uint16)getMs();
+    currentState = STATE_IDLE;
+    
+    // Main Loop
+    while(1)
+    {
+        boardService();
+        
+        now = (uint32)getMs();
+        
+        // Heartbeat
+        counter_loop++;
+        counter_loop %= 5001;
+        if (counter_loop % 500 == 0)
+            LED_YELLOW_TOGGLE();
+        
+        // Process packets
+        receiveAndProcessPackets();
+        
+        // RED LED pulse on packet
+        if (rxPulseStart < 600)
+        {
+            LED_RED(1);
+            rxPulseStart += 1;
+        }
+        else
+        {
+            LED_RED(0);
+        }
+        
+        // State machine and control
+        handlePacketTimeout();
+        updateStateMachine();
+        updateRgbLeds();
+        setMotorsPWM();
+    }
+}

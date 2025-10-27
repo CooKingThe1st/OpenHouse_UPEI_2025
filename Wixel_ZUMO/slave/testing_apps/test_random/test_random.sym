@@ -1,0 +1,1300 @@
+ASxxxx Assembler V02.00 + NoICE + SDCC mods + Flat24  (Intel 8051), page 1.
+
+Symbol Table
+
+    .__.ABS.                                                    =  0000 G
+    A                                                              00E0 
+ 18 A$test_random$1000                                             009D GR
+ 18 A$test_random$1001                                             009E GR
+ 18 A$test_random$1002                                             00A0 GR
+ 18 A$test_random$1003                                             00A1 GR
+ 18 A$test_random$1007                                             00A3 GR
+ 18 A$test_random$1008                                             00A5 GR
+ 18 A$test_random$1009                                             00A8 GR
+ 18 A$test_random$1012                                             00AA GR
+ 18 A$test_random$1015                                             00AD GR
+ 18 A$test_random$1018                                             00B0 GR
+ 18 A$test_random$1021                                             00B3 GR
+ 18 A$test_random$1024                                             00B6 GR
+ 18 A$test_random$1027                                             00B9 GR
+ 18 A$test_random$1030                                             00BC GR
+ 18 A$test_random$1033                                             00BF GR
+ 18 A$test_random$1036                                             00C2 GR
+ 18 A$test_random$1039                                             00C5 GR
+ 18 A$test_random$1042                                             00C8 GR
+ 18 A$test_random$1043                                             00CB GR
+ 18 A$test_random$1046                                             00CE GR
+ 18 A$test_random$1049                                             00D1 GR
+ 18 A$test_random$1050                                             00D4 GR
+ 18 A$test_random$1053                                             00D7 GR
+ 18 A$test_random$1056                                             00DA GR
+ 18 A$test_random$1057                                             00DD GR
+ 18 A$test_random$1060                                             00E0 GR
+ 18 A$test_random$1063                                             00E3 GR
+ 18 A$test_random$1064                                             00E6 GR
+ 18 A$test_random$1067                                             00E9 GR
+ 18 A$test_random$1070                                             00EC GR
+ 18 A$test_random$1071                                             00EF GR
+ 18 A$test_random$1074                                             00F2 GR
+ 18 A$test_random$1077                                             00F5 GR
+ 18 A$test_random$1080                                             00F8 GR
+ 18 A$test_random$1083                                             00FB GR
+ 18 A$test_random$1084                                             00FE GR
+ 18 A$test_random$1087                                             0101 GR
+ 18 A$test_random$1090                                             0104 GR
+ 18 A$test_random$1091                                             0107 GR
+ 18 A$test_random$1094                                             010A GR
+ 18 A$test_random$1097                                             010D GR
+ 18 A$test_random$1100                                             0110 GR
+ 18 A$test_random$1101                                             0113 GR
+ 18 A$test_random$1104                                             0116 GR
+ 18 A$test_random$1110                                             0119 GR
+ 18 A$test_random$1113                                             011C GR
+ 18 A$test_random$1116                                             011F GR
+ 18 A$test_random$1117                                             0122 GR
+ 18 A$test_random$1118                                             0125 GR
+ 18 A$test_random$1121                                             0127 GR
+  F A$test_random$741                                              0000 GR
+  F A$test_random$742                                              0003 GR
+  F A$test_random$744                                              000B GR
+  F A$test_random$746                                              0013 GR
+  F A$test_random$748                                              001B GR
+  F A$test_random$750                                              0023 GR
+  F A$test_random$752                                              002B GR
+  F A$test_random$754                                              0033 GR
+  F A$test_random$756                                              003B GR
+  F A$test_random$758                                              0043 GR
+  F A$test_random$760                                              004B GR
+  F A$test_random$762                                              0053 GR
+  F A$test_random$764                                              005B GR
+  F A$test_random$766                                              0063 GR
+ 16 A$test_random$783                                              0000 GR
+ 16 A$test_random$784                                              0002 GR
+ 16 A$test_random$785                                              0003 GR
+ 16 A$test_random$786                                              0004 GR
+ 16 A$test_random$787                                              0005 GR
+ 16 A$test_random$788                                              0006 GR
+ 16 A$test_random$789                                              0007 GR
+ 16 A$test_random$790                                              0008 GR
+ 16 A$test_random$791                                              0009 GR
+ 16 A$test_random$795                                              000A GR
+ 16 A$test_random$796                                              000C GR
+ 16 A$test_random$797                                              000D GR
+ 16 A$test_random$798                                              000E GR
+ 16 A$test_random$799                                              000F GR
+ 16 A$test_random$800                                              0010 GR
+ 16 A$test_random$801                                              0011 GR
+ 16 A$test_random$802                                              0012 GR
+ 16 A$test_random$803                                              0013 GR
+ 16 A$test_random$807                                              0014 GR
+ 16 A$test_random$808                                              0016 GR
+ 16 A$test_random$809                                              0017 GR
+ 17 A$test_random$811                                              0000 GR
+  F A$test_random$818                                              0066 GR
+  F A$test_random$820                                              0069 GR
+ 18 A$test_random$845                                              0000 GR
+ 18 A$test_random$848                                              0003 GR
+ 18 A$test_random$849                                              0006 GR
+ 18 A$test_random$852                                              0009 GR
+ 18 A$test_random$853                                              000C GR
+ 18 A$test_random$856                                              000F GR
+ 18 A$test_random$857                                              0011 GR
+ 18 A$test_random$858                                              0014 GR
+ 18 A$test_random$861                                              0016 GR
+ 18 A$test_random$864                                              0019 GR
+ 18 A$test_random$877                                              001A GR
+ 18 A$test_random$878                                              001D GR
+ 18 A$test_random$879                                              001F GR
+ 18 A$test_random$880                                              0021 GR
+ 18 A$test_random$881                                              0023 GR
+ 18 A$test_random$882                                              0024 GR
+ 18 A$test_random$883                                              0026 GR
+ 18 A$test_random$884                                              0027 GR
+ 18 A$test_random$885                                              0028 GR
+ 18 A$test_random$886                                              0029 GR
+ 18 A$test_random$887                                              002A GR
+ 18 A$test_random$888                                              002B GR
+ 18 A$test_random$889                                              002C GR
+ 18 A$test_random$890                                              002D GR
+ 18 A$test_random$891                                              002E GR
+ 18 A$test_random$892                                              002F GR
+ 18 A$test_random$893                                              0030 GR
+ 18 A$test_random$894                                              0031 GR
+ 18 A$test_random$895                                              0032 GR
+ 18 A$test_random$896                                              0033 GR
+ 18 A$test_random$897                                              0034 GR
+ 18 A$test_random$898                                              0035 GR
+ 18 A$test_random$899                                              0036 GR
+ 18 A$test_random$900                                              0037 GR
+ 18 A$test_random$901                                              0038 GR
+ 18 A$test_random$902                                              0039 GR
+ 18 A$test_random$903                                              003A GR
+ 18 A$test_random$904                                              003B GR
+ 18 A$test_random$905                                              003C GR
+ 18 A$test_random$906                                              003D GR
+ 18 A$test_random$907                                              003E GR
+ 18 A$test_random$908                                              003F GR
+ 18 A$test_random$909                                              0040 GR
+ 18 A$test_random$910                                              0041 GR
+ 18 A$test_random$911                                              0042 GR
+ 18 A$test_random$912                                              0044 GR
+ 18 A$test_random$913                                              0045 GR
+ 18 A$test_random$914                                              0047 GR
+ 18 A$test_random$915                                              0048 GR
+ 18 A$test_random$916                                              004A GR
+ 18 A$test_random$917                                              004B GR
+ 18 A$test_random$918                                              004D GR
+ 18 A$test_random$921                                              004F GR
+ 18 A$test_random$924                                              0052 GR
+ 18 A$test_random$925                                              0055 GR
+ 18 A$test_random$926                                              0057 GR
+ 18 A$test_random$927                                              0059 GR
+ 18 A$test_random$928                                              005B GR
+ 18 A$test_random$929                                              005C GR
+ 18 A$test_random$930                                              005E GR
+ 18 A$test_random$931                                              005F GR
+ 18 A$test_random$932                                              0060 GR
+ 18 A$test_random$933                                              0061 GR
+ 18 A$test_random$934                                              0062 GR
+ 18 A$test_random$935                                              0063 GR
+ 18 A$test_random$936                                              0064 GR
+ 18 A$test_random$937                                              0065 GR
+ 18 A$test_random$938                                              0066 GR
+ 18 A$test_random$939                                              0067 GR
+ 18 A$test_random$940                                              0068 GR
+ 18 A$test_random$944                                              0069 GR
+ 18 A$test_random$957                                              006A GR
+ 18 A$test_random$960                                              006D GR
+ 18 A$test_random$963                                              0070 GR
+ 18 A$test_random$964                                              0072 GR
+ 18 A$test_random$965                                              0075 GR
+ 18 A$test_random$968                                              0077 GR
+ 18 A$test_random$971                                              007A GR
+ 18 A$test_random$972                                              007D GR
+ 18 A$test_random$975                                              0080 GR
+ 18 A$test_random$976                                              0082 GR
+ 18 A$test_random$977                                              0083 GR
+ 18 A$test_random$979                                              0084 GR
+ 18 A$test_random$980                                              0086 GR
+ 18 A$test_random$981                                              0087 GR
+ 18 A$test_random$983                                              008A GR
+ 18 A$test_random$986                                              008C GR
+ 18 A$test_random$989                                              008F GR
+ 18 A$test_random$992                                              0092 GR
+ 18 A$test_random$995                                              0095 GR
+ 18 A$test_random$996                                              0098 GR
+ 18 A$test_random$999                                              009B GR
+    A.0                                                            00E0 
+    A.1                                                            00E1 
+    A.2                                                            00E2 
+    A.3                                                            00E3 
+    A.4                                                            00E4 
+    A.5                                                            00E5 
+    A.6                                                            00E6 
+    A.7                                                            00E7 
+    AC                                                             00D6 
+    ACC                                                            00E0 
+    ACC.0                                                          00E0 
+    ACC.1                                                          00E1 
+    ACC.2                                                          00E2 
+    ACC.3                                                          00E3 
+    ACC.4                                                          00E4 
+    ACC.5                                                          00E5 
+    ACC.6                                                          00E6 
+    ACC.7                                                          00E7 
+    B                                                              00F0 
+    B.0                                                            00F0 
+    B.1                                                            00F1 
+    B.2                                                            00F2 
+    B.3                                                            00F3 
+    B.4                                                            00F4 
+    B.5                                                            00F5 
+    B.6                                                            00F6 
+    B.7                                                            00F7 
+ 18 C$test_random.c$112$2$1                                     =  006A GR
+ 18 C$test_random.c$114$1$1                                     =  006A GR
+ 18 C$test_random.c$115$1$1                                     =  006D GR
+ 18 C$test_random.c$120$2$2                                     =  0070 GR
+ 18 C$test_random.c$121$2$3                                     =  0077 GR
+ 18 C$test_random.c$123$1$1                                     =  007A GR
+ 18 C$test_random.c$126$1$1                                     =  009B GR
+ 18 C$test_random.c$127$3$5                                     =  008C GR
+ 18 C$test_random.c$128$2$4                                     =  008F GR
+ 18 C$test_random.c$129$2$4                                     =  0092 GR
+ 18 C$test_random.c$130$2$4                                     =  0095 GR
+ 18 C$test_random.c$134$2$6                                     =  00A3 GR
+ 18 C$test_random.c$140$1$1                                     =  00AA GR
+ 18 C$test_random.c$141$1$1                                     =  00AD GR
+ 18 C$test_random.c$142$1$1                                     =  00B0 GR
+ 18 C$test_random.c$145$1$1                                     =  00B3 GR
+ 18 C$test_random.c$146$1$1                                     =  00B6 GR
+ 18 C$test_random.c$147$1$1                                     =  00B9 GR
+ 18 C$test_random.c$152$1$1                                     =  00BC GR
+ 18 C$test_random.c$153$1$1                                     =  00BF GR
+ 18 C$test_random.c$156$1$1                                     =  00C2 GR
+ 18 C$test_random.c$161$1$1                                     =  00C5 GR
+ 18 C$test_random.c$162$1$1                                     =  00C8 GR
+ 18 C$test_random.c$165$1$1                                     =  00CE GR
+ 18 C$test_random.c$166$1$1                                     =  00D1 GR
+ 18 C$test_random.c$169$1$1                                     =  00D7 GR
+ 18 C$test_random.c$170$1$1                                     =  00DA GR
+ 18 C$test_random.c$173$1$1                                     =  00E0 GR
+ 18 C$test_random.c$174$1$1                                     =  00E3 GR
+ 18 C$test_random.c$177$1$1                                     =  00E9 GR
+ 18 C$test_random.c$178$1$1                                     =  00EC GR
+ 18 C$test_random.c$181$1$1                                     =  00F2 GR
+ 18 C$test_random.c$186$1$1                                     =  00F5 GR
+ 18 C$test_random.c$187$1$1                                     =  00F8 GR
+ 18 C$test_random.c$188$1$1                                     =  00FB GR
+ 18 C$test_random.c$191$1$1                                     =  0101 GR
+ 18 C$test_random.c$192$1$1                                     =  0104 GR
+ 18 C$test_random.c$195$1$1                                     =  010A GR
+ 18 C$test_random.c$196$1$1                                     =  010D GR
+ 18 C$test_random.c$197$1$1                                     =  0110 GR
+ 18 C$test_random.c$200$1$1                                     =  0116 GR
+ 18 C$test_random.c$202$1$1                                     =  0119 GR
+ 18 C$test_random.c$204$2$7                                     =  0119 GR
+ 18 C$test_random.c$205$2$7                                     =  011C GR
+ 18 C$test_random.c$206$2$7                                     =  011F GR
+ 18 C$test_random.c$208$1$1                                     =  0127 GR
+ 16 C$test_random.c$30$1$1                                      =  0000 GR
+ 16 C$test_random.c$31$1$1                                      =  000A GR
+ 16 C$test_random.c$32$1$1                                      =  0014 GR
+ 18 C$test_random.c$37$0$0                                      =  0000 GR
+ 18 C$test_random.c$39$1$1                                      =  0000 GR
+ 18 C$test_random.c$40$1$1                                      =  0003 GR
+ 18 C$test_random.c$41$1$1                                      =  0009 GR
+ 18 C$test_random.c$42$1$1                                      =  000F GR
+ 18 C$test_random.c$43$1$1                                      =  0016 GR
+ 18 C$test_random.c$44$1$1                                      =  0019 GR
+ 18 C$test_random.c$49$1$1                                      =  001A GR
+ 18 C$test_random.c$52$1$1                                      =  001A GR
+ 18 C$test_random.c$54$3$3                                      =  004F GR
+ 18 C$test_random.c$55$2$2                                      =  0052 GR
+ 18 C$test_random.c$57$2$1                                      =  0069 GR
+    CPRL2                                                          00C8 
+    CT2                                                            00C9 
+    CY                                                             00D7 
+    DPH                                                            0083 
+    DPL                                                            0082 
+    EA                                                             00AF 
+    ES                                                             00AC 
+    ET0                                                            00A9 
+    ET1                                                            00AB 
+    ET2                                                            00AD 
+    EX0                                                            00A8 
+    EX1                                                            00AA 
+    EXEN2                                                          00CB 
+    EXF2                                                           00CE 
+    F0                                                             00D5 
+    Ftest_random$AC$0$0                                         =  00D6 G
+    Ftest_random$ACC$0$0                                        =  00E0 G
+    Ftest_random$ACC_0$0$0                                      =  00E0 G
+    Ftest_random$ACC_1$0$0                                      =  00E1 G
+    Ftest_random$ACC_2$0$0                                      =  00E2 G
+    Ftest_random$ACC_3$0$0                                      =  00E3 G
+    Ftest_random$ACC_4$0$0                                      =  00E4 G
+    Ftest_random$ACC_5$0$0                                      =  00E5 G
+    Ftest_random$ACC_6$0$0                                      =  00E6 G
+    Ftest_random$ACC_7$0$0                                      =  00E7 G
+    Ftest_random$ADC$0$0                                        =  FFFFBBBA G
+    Ftest_random$ADCCFG$0$0                                     =  00F2 G
+    Ftest_random$ADCCON1$0$0                                    =  00B4 G
+    Ftest_random$ADCCON2$0$0                                    =  00B5 G
+    Ftest_random$ADCCON3$0$0                                    =  00B6 G
+    Ftest_random$ADCH$0$0                                       =  00BB G
+    Ftest_random$ADCIE$0$0                                      =  00A9 G
+    Ftest_random$ADCIF$0$0                                      =  008D G
+    Ftest_random$ADCL$0$0                                       =  00BA G
+    Ftest_random$ADDR$0$0                                       =  DF05 G
+    Ftest_random$AGCCTRL0$0$0                                   =  DF19 G
+    Ftest_random$AGCCTRL1$0$0                                   =  DF18 G
+    Ftest_random$AGCCTRL2$0$0                                   =  DF17 G
+    Ftest_random$B$0$0                                          =  00F0 G
+    Ftest_random$BSCFG$0$0                                      =  DF16 G
+    Ftest_random$B_0$0$0                                        =  00F0 G
+    Ftest_random$B_1$0$0                                        =  00F1 G
+    Ftest_random$B_2$0$0                                        =  00F2 G
+    Ftest_random$B_3$0$0                                        =  00F3 G
+    Ftest_random$B_4$0$0                                        =  00F4 G
+    Ftest_random$B_5$0$0                                        =  00F5 G
+    Ftest_random$B_6$0$0                                        =  00F6 G
+    Ftest_random$B_7$0$0                                        =  00F7 G
+    Ftest_random$CHANNR$0$0                                     =  DF06 G
+    Ftest_random$CLKCON$0$0                                     =  00C6 G
+    Ftest_random$CY$0$0                                         =  00D7 G
+    Ftest_random$DEVIATN$0$0                                    =  DF11 G
+    Ftest_random$DMA0CFG$0$0                                    =  FFFFD5D4 G
+    Ftest_random$DMA0CFGH$0$0                                   =  00D5 G
+    Ftest_random$DMA0CFGL$0$0                                   =  00D4 G
+    Ftest_random$DMA1CFG$0$0                                    =  FFFFD3D2 G
+    Ftest_random$DMA1CFGH$0$0                                   =  00D3 G
+    Ftest_random$DMA1CFGL$0$0                                   =  00D2 G
+    Ftest_random$DMAARM$0$0                                     =  00D6 G
+    Ftest_random$DMAIE$0$0                                      =  00B8 G
+    Ftest_random$DMAIF$0$0                                      =  00C0 G
+    Ftest_random$DMAIRQ$0$0                                     =  00D1 G
+    Ftest_random$DMAREQ$0$0                                     =  00D7 G
+    Ftest_random$DPH0$0$0                                       =  0083 G
+    Ftest_random$DPH1$0$0                                       =  0085 G
+    Ftest_random$DPL0$0$0                                       =  0082 G
+    Ftest_random$DPL1$0$0                                       =  0084 G
+    Ftest_random$DPS$0$0                                        =  0092 G
+    Ftest_random$EA$0$0                                         =  00AF G
+    Ftest_random$ENCCS$0$0                                      =  00B3 G
+    Ftest_random$ENCDI$0$0                                      =  00B1 G
+    Ftest_random$ENCDO$0$0                                      =  00B2 G
+    Ftest_random$ENCIE$0$0                                      =  00AC G
+    Ftest_random$ENCIF_0$0$0                                    =  0098 G
+    Ftest_random$ENCIF_1$0$0                                    =  0099 G
+    Ftest_random$ENDIAN$0$0                                     =  0095 G
+    Ftest_random$F0$0$0                                         =  00D5 G
+    Ftest_random$F1$0$0                                         =  00D1 G
+    Ftest_random$FADDR$0$0                                      =  FFFFADAC G
+    Ftest_random$FADDRH$0$0                                     =  00AD G
+    Ftest_random$FADDRL$0$0                                     =  00AC G
+    Ftest_random$FCTL$0$0                                       =  00AE G
+    Ftest_random$FOCCFG$0$0                                     =  DF15 G
+    Ftest_random$FREND0$0$0                                     =  DF1B G
+    Ftest_random$FREND1$0$0                                     =  DF1A G
+    Ftest_random$FREQ0$0$0                                      =  DF0B G
+    Ftest_random$FREQ1$0$0                                      =  DF0A G
+    Ftest_random$FREQ2$0$0                                      =  DF09 G
+    Ftest_random$FREQEST$0$0                                    =  DF38 G
+    Ftest_random$FSCAL0$0$0                                     =  DF1F G
+    Ftest_random$FSCAL1$0$0                                     =  DF1E G
+    Ftest_random$FSCAL2$0$0                                     =  DF1D G
+    Ftest_random$FSCAL3$0$0                                     =  DF1C G
+    Ftest_random$FSCTRL0$0$0                                    =  DF08 G
+    Ftest_random$FSCTRL1$0$0                                    =  DF07 G
+    Ftest_random$FWDATA$0$0                                     =  00AF G
+    Ftest_random$FWT$0$0                                        =  00AB G
+    Ftest_random$I2SCFG0$0$0                                    =  DF40 G
+    Ftest_random$I2SCFG1$0$0                                    =  DF41 G
+    Ftest_random$I2SCLKF0$0$0                                   =  DF46 G
+    Ftest_random$I2SCLKF1$0$0                                   =  DF47 G
+    Ftest_random$I2SCLKF2$0$0                                   =  DF48 G
+    Ftest_random$I2SDATH$0$0                                    =  DF43 G
+    Ftest_random$I2SDATL$0$0                                    =  DF42 G
+    Ftest_random$I2SSTAT$0$0                                    =  DF45 G
+    Ftest_random$I2SWCNT$0$0                                    =  DF44 G
+    Ftest_random$IEN0$0$0                                       =  00A8 G
+    Ftest_random$IEN1$0$0                                       =  00B8 G
+    Ftest_random$IEN2$0$0                                       =  009A G
+    Ftest_random$IOCFG0$0$0                                     =  DF31 G
+    Ftest_random$IOCFG1$0$0                                     =  DF30 G
+    Ftest_random$IOCFG2$0$0                                     =  DF2F G
+    Ftest_random$IP0$0$0                                        =  00A9 G
+    Ftest_random$IP1$0$0                                        =  00B9 G
+    Ftest_random$IRCON$0$0                                      =  00C0 G
+    Ftest_random$IRCON2$0$0                                     =  00E8 G
+    Ftest_random$LQI$0$0                                        =  DF39 G
+    Ftest_random$MARCSTATE$0$0                                  =  DF3B G
+    Ftest_random$MCSM0$0$0                                      =  DF14 G
+    Ftest_random$MCSM1$0$0                                      =  DF13 G
+    Ftest_random$MCSM2$0$0                                      =  DF12 G
+    Ftest_random$MDMCFG0$0$0                                    =  DF10 G
+    Ftest_random$MDMCFG1$0$0                                    =  DF0F G
+    Ftest_random$MDMCFG2$0$0                                    =  DF0E G
+    Ftest_random$MDMCFG3$0$0                                    =  DF0D G
+    Ftest_random$MDMCFG4$0$0                                    =  DF0C G
+    Ftest_random$MEMCTR$0$0                                     =  00C7 G
+    Ftest_random$MPAGE$0$0                                      =  0093 G
+    Ftest_random$OV$0$0                                         =  00D2 G
+    Ftest_random$OVFIM$0$0                                      =  00DE G
+    Ftest_random$P$0$0                                          =  00D0 G
+    Ftest_random$P0$0$0                                         =  0080 G
+    Ftest_random$P0DIR$0$0                                      =  00FD G
+    Ftest_random$P0IE$0$0                                       =  00BD G
+    Ftest_random$P0IF$0$0                                       =  00C5 G
+    Ftest_random$P0IFG$0$0                                      =  0089 G
+    Ftest_random$P0INP$0$0                                      =  008F G
+    Ftest_random$P0SEL$0$0                                      =  00F3 G
+    Ftest_random$P0_0$0$0                                       =  0080 G
+    Ftest_random$P0_1$0$0                                       =  0081 G
+    Ftest_random$P0_2$0$0                                       =  0082 G
+    Ftest_random$P0_3$0$0                                       =  0083 G
+    Ftest_random$P0_4$0$0                                       =  0084 G
+    Ftest_random$P0_5$0$0                                       =  0085 G
+    Ftest_random$P0_6$0$0                                       =  0086 G
+    Ftest_random$P0_7$0$0                                       =  0087 G
+    Ftest_random$P1$0$0                                         =  0090 G
+    Ftest_random$P1DIR$0$0                                      =  00FE G
+    Ftest_random$P1IEN$0$0                                      =  008D G
+    Ftest_random$P1IF$0$0                                       =  00EB G
+    Ftest_random$P1IFG$0$0                                      =  008A G
+    Ftest_random$P1INP$0$0                                      =  00F6 G
+    Ftest_random$P1SEL$0$0                                      =  00F4 G
+    Ftest_random$P1_0$0$0                                       =  0090 G
+    Ftest_random$P1_1$0$0                                       =  0091 G
+    Ftest_random$P1_2$0$0                                       =  0092 G
+    Ftest_random$P1_3$0$0                                       =  0093 G
+    Ftest_random$P1_4$0$0                                       =  0094 G
+    Ftest_random$P1_5$0$0                                       =  0095 G
+    Ftest_random$P1_6$0$0                                       =  0096 G
+    Ftest_random$P1_7$0$0                                       =  0097 G
+    Ftest_random$P2$0$0                                         =  00A0 G
+    Ftest_random$P2DIR$0$0                                      =  00FF G
+    Ftest_random$P2IF$0$0                                       =  00E8 G
+    Ftest_random$P2IFG$0$0                                      =  008B G
+    Ftest_random$P2INP$0$0                                      =  00F7 G
+    Ftest_random$P2SEL$0$0                                      =  00F5 G
+    Ftest_random$P2_0$0$0                                       =  00A0 G
+    Ftest_random$P2_1$0$0                                       =  00A1 G
+    Ftest_random$P2_2$0$0                                       =  00A2 G
+    Ftest_random$P2_3$0$0                                       =  00A3 G
+    Ftest_random$P2_4$0$0                                       =  00A4 G
+    Ftest_random$P2_5$0$0                                       =  00A5 G
+    Ftest_random$P2_6$0$0                                       =  00A6 G
+    Ftest_random$P2_7$0$0                                       =  00A7 G
+    Ftest_random$PARTNUM$0$0                                    =  DF36 G
+    Ftest_random$PA_TABLE0$0$0                                  =  DF2E G
+    Ftest_random$PCON$0$0                                       =  0087 G
+    Ftest_random$PERCFG$0$0                                     =  00F1 G
+    Ftest_random$PICTL$0$0                                      =  008C G
+    Ftest_random$PKTCTRL0$0$0                                   =  DF04 G
+    Ftest_random$PKTCTRL1$0$0                                   =  DF03 G
+    Ftest_random$PKTLEN$0$0                                     =  DF02 G
+    Ftest_random$PKTSTATUS$0$0                                  =  DF3C G
+    Ftest_random$PSW$0$0                                        =  00D0 G
+    Ftest_random$RFD$0$0                                        =  00D9 G
+    Ftest_random$RFIF$0$0                                       =  00E9 G
+    Ftest_random$RFIM$0$0                                       =  0091 G
+    Ftest_random$RFST$0$0                                       =  00E1 G
+    Ftest_random$RFTXRXIE$0$0                                   =  00A8 G
+    Ftest_random$RFTXRXIF$0$0                                   =  0089 G
+    Ftest_random$RNDH$0$0                                       =  00BD G
+    Ftest_random$RNDL$0$0                                       =  00BC G
+    Ftest_random$RS0$0$0                                        =  00D3 G
+    Ftest_random$RS1$0$0                                        =  00D4 G
+    Ftest_random$RSSI$0$0                                       =  DF3A G
+    Ftest_random$S0CON$0$0                                      =  0098 G
+    Ftest_random$S1CON$0$0                                      =  009B G
+    Ftest_random$SLEEP$0$0                                      =  00BE G
+    Ftest_random$SP$0$0                                         =  0081 G
+    Ftest_random$STIE$0$0                                       =  00AD G
+    Ftest_random$STIF$0$0                                       =  00C7 G
+    Ftest_random$SYNC0$0$0                                      =  DF01 G
+    Ftest_random$SYNC1$0$0                                      =  DF00 G
+    Ftest_random$T1CC0$0$0                                      =  FFFFDBDA G
+    Ftest_random$T1CC0H$0$0                                     =  00DB G
+    Ftest_random$T1CC0L$0$0                                     =  00DA G
+    Ftest_random$T1CC1$0$0                                      =  FFFFDDDC G
+    Ftest_random$T1CC1H$0$0                                     =  00DD G
+    Ftest_random$T1CC1L$0$0                                     =  00DC G
+    Ftest_random$T1CC2$0$0                                      =  FFFFDFDE G
+    Ftest_random$T1CC2H$0$0                                     =  00DF G
+    Ftest_random$T1CC2L$0$0                                     =  00DE G
+    Ftest_random$T1CCTL0$0$0                                    =  00E5 G
+    Ftest_random$T1CCTL1$0$0                                    =  00E6 G
+    Ftest_random$T1CCTL2$0$0                                    =  00E7 G
+    Ftest_random$T1CNTH$0$0                                     =  00E3 G
+    Ftest_random$T1CNTL$0$0                                     =  00E2 G
+    Ftest_random$T1CTL$0$0                                      =  00E4 G
+    Ftest_random$T1IE$0$0                                       =  00B9 G
+    Ftest_random$T1IF$0$0                                       =  00C1 G
+    Ftest_random$T2CT$0$0                                       =  009C G
+    Ftest_random$T2CTL$0$0                                      =  009E G
+    Ftest_random$T2IE$0$0                                       =  00BA G
+    Ftest_random$T2IF$0$0                                       =  00C2 G
+    Ftest_random$T2PR$0$0                                       =  009D G
+    Ftest_random$T3CC0$0$0                                      =  00CD G
+    Ftest_random$T3CC1$0$0                                      =  00CF G
+    Ftest_random$T3CCTL0$0$0                                    =  00CC G
+    Ftest_random$T3CCTL1$0$0                                    =  00CE G
+    Ftest_random$T3CH0IF$0$0                                    =  00D9 G
+    Ftest_random$T3CH1IF$0$0                                    =  00DA G
+    Ftest_random$T3CNT$0$0                                      =  00CA G
+    Ftest_random$T3CTL$0$0                                      =  00CB G
+    Ftest_random$T3IE$0$0                                       =  00BB G
+    Ftest_random$T3IF$0$0                                       =  00C3 G
+    Ftest_random$T3OVFIF$0$0                                    =  00D8 G
+    Ftest_random$T4CC0$0$0                                      =  00ED G
+    Ftest_random$T4CC1$0$0                                      =  00EF G
+    Ftest_random$T4CCTL0$0$0                                    =  00EC G
+    Ftest_random$T4CCTL1$0$0                                    =  00EE G
+    Ftest_random$T4CH0IF$0$0                                    =  00DC G
+    Ftest_random$T4CH1IF$0$0                                    =  00DD G
+    Ftest_random$T4CNT$0$0                                      =  00EA G
+    Ftest_random$T4CTL$0$0                                      =  00EB G
+    Ftest_random$T4IE$0$0                                       =  00BC G
+    Ftest_random$T4IF$0$0                                       =  00C4 G
+    Ftest_random$T4OVFIF$0$0                                    =  00DB G
+    Ftest_random$TCON$0$0                                       =  0088 G
+    Ftest_random$TEST0$0$0                                      =  DF25 G
+    Ftest_random$TEST1$0$0                                      =  DF24 G
+    Ftest_random$TEST2$0$0                                      =  DF23 G
+    Ftest_random$TIMIF$0$0                                      =  00D8 G
+    Ftest_random$U0BAUD$0$0                                     =  00C2 G
+    Ftest_random$U0CSR$0$0                                      =  0086 G
+    Ftest_random$U0DBUF$0$0                                     =  00C1 G
+    Ftest_random$U0GCR$0$0                                      =  00C5 G
+    Ftest_random$U0UCR$0$0                                      =  00C4 G
+    Ftest_random$U1ACTIVE$0$0                                   =  00F8 G
+    Ftest_random$U1BAUD$0$0                                     =  00FA G
+    Ftest_random$U1CSR$0$0                                      =  00F8 G
+    Ftest_random$U1DBUF$0$0                                     =  00F9 G
+    Ftest_random$U1ERR$0$0                                      =  00FB G
+    Ftest_random$U1FE$0$0                                       =  00FC G
+    Ftest_random$U1GCR$0$0                                      =  00FC G
+    Ftest_random$U1MODE$0$0                                     =  00FF G
+    Ftest_random$U1RE$0$0                                       =  00FE G
+    Ftest_random$U1RX_BYTE$0$0                                  =  00FA G
+    Ftest_random$U1SLAVE$0$0                                    =  00FD G
+    Ftest_random$U1TX_BYTE$0$0                                  =  00F9 G
+    Ftest_random$U1UCR$0$0                                      =  00FB G
+    Ftest_random$URX0IE$0$0                                     =  00AA G
+    Ftest_random$URX0IF$0$0                                     =  008B G
+    Ftest_random$URX1IE$0$0                                     =  00AB G
+    Ftest_random$URX1IF$0$0                                     =  008F G
+    Ftest_random$USBADDR$0$0                                    =  DE00 G
+    Ftest_random$USBCIE$0$0                                     =  DE0B G
+    Ftest_random$USBCIF$0$0                                     =  DE06 G
+    Ftest_random$USBCNTH$0$0                                    =  DE17 G
+    Ftest_random$USBCNTL$0$0                                    =  DE16 G
+    Ftest_random$USBCSIH$0$0                                    =  DE12 G
+    Ftest_random$USBCSIL$0$0                                    =  DE11 G
+    Ftest_random$USBCSOH$0$0                                    =  DE15 G
+    Ftest_random$USBCSOL$0$0                                    =  DE14 G
+    Ftest_random$USBF0$0$0                                      =  DE20 G
+    Ftest_random$USBF1$0$0                                      =  DE22 G
+    Ftest_random$USBF2$0$0                                      =  DE24 G
+    Ftest_random$USBF3$0$0                                      =  DE26 G
+    Ftest_random$USBF4$0$0                                      =  DE28 G
+    Ftest_random$USBF5$0$0                                      =  DE2A G
+    Ftest_random$USBFRMH$0$0                                    =  DE0D G
+    Ftest_random$USBFRML$0$0                                    =  DE0C G
+    Ftest_random$USBIIE$0$0                                     =  DE07 G
+    Ftest_random$USBIIF$0$0                                     =  DE02 G
+    Ftest_random$USBINDEX$0$0                                   =  DE0E G
+    Ftest_random$USBMAXI$0$0                                    =  DE10 G
+    Ftest_random$USBMAXO$0$0                                    =  DE13 G
+    Ftest_random$USBOIE$0$0                                     =  DE09 G
+    Ftest_random$USBOIF$0$0                                     =  DE04 G
+    Ftest_random$USBPOW$0$0                                     =  DE01 G
+    Ftest_random$UTX0IF$0$0                                     =  00E9 G
+    Ftest_random$UTX1IF$0$0                                     =  00EA G
+    Ftest_random$VCO_VC_DAC$0$0                                 =  DF3D G
+    Ftest_random$VERSION$0$0                                    =  DF37 G
+    Ftest_random$WDCTL$0$0                                      =  00C9 G
+    Ftest_random$WDTIF$0$0                                      =  00EC G
+    Ftest_random$WORCTRL$0$0                                    =  00A2 G
+    Ftest_random$WOREVT0$0$0                                    =  00A3 G
+    Ftest_random$WOREVT1$0$0                                    =  00A4 G
+    Ftest_random$WORIRQ$0$0                                     =  00A1 G
+    Ftest_random$WORTIME0$0$0                                   =  00A5 G
+    Ftest_random$WORTIME1$0$0                                   =  00A6 G
+    Ftest_random$_IEN06$0$0                                     =  00AE G
+    Ftest_random$_IEN16$0$0                                     =  00BE G
+    Ftest_random$_IEN17$0$0                                     =  00BF G
+    Ftest_random$_IRCON25$0$0                                   =  00ED G
+    Ftest_random$_IRCON26$0$0                                   =  00EE G
+    Ftest_random$_IRCON27$0$0                                   =  00EF G
+    Ftest_random$_IRCON6$0$0                                    =  00C6 G
+    Ftest_random$_SOCON2$0$0                                    =  009A G
+    Ftest_random$_SOCON3$0$0                                    =  009B G
+    Ftest_random$_SOCON4$0$0                                    =  009C G
+    Ftest_random$_SOCON5$0$0                                    =  009D G
+    Ftest_random$_SOCON6$0$0                                    =  009E G
+    Ftest_random$_SOCON7$0$0                                    =  009F G
+    Ftest_random$_TCON_0$0$0                                    =  0088 G
+    Ftest_random$_TCON_2$0$0                                    =  008A G
+    Ftest_random$_TCON_4$0$0                                    =  008C G
+    Ftest_random$_TCON_6$0$0                                    =  008E G
+    Ftest_random$_TIMIF7$0$0                                    =  00DF G
+  B G$i$0$0                                                     =  0009 GR
+  B G$lastMotorActionTime$0$0                                   =  0004 GR
+  B G$lastRedLedToggle$0$0                                      =  0000 GR
+ 18 G$main$0$0                                                  =  006A GR
+  B G$motorState$0$0                                            =  0008 GR
+ 18 G$timer3Init$0$0                                            =  0000 GR
+ 18 G$updateHeartbeatLed$0$0                                    =  001A GR
+    IE                                                             00A8 
+    IE.0                                                           00A8 
+    IE.1                                                           00A9 
+    IE.2                                                           00AA 
+    IE.3                                                           00AB 
+    IE.4                                                           00AC 
+    IE.5                                                           00AD 
+    IE.7                                                           00AF 
+    IE0                                                            0089 
+    IE1                                                            008B 
+    INT0                                                           00B2 
+    INT1                                                           00B3 
+    IP                                                             00B8 
+    IP.0                                                           00B8 
+    IP.1                                                           00B9 
+    IP.2                                                           00BA 
+    IP.3                                                           00BB 
+    IP.4                                                           00BC 
+    IP.5                                                           00BD 
+    IT0                                                            0088 
+    IT1                                                            008A 
+    OV                                                             00D2 
+    P                                                              00D0 
+    P0                                                             0080 
+    P0.0                                                           0080 
+    P0.1                                                           0081 
+    P0.2                                                           0082 
+    P0.3                                                           0083 
+    P0.4                                                           0084 
+    P0.5                                                           0085 
+    P0.6                                                           0086 
+    P0.7                                                           0087 
+    P1                                                             0090 
+    P1.0                                                           0090 
+    P1.1                                                           0091 
+    P1.2                                                           0092 
+    P1.3                                                           0093 
+    P1.4                                                           0094 
+    P1.5                                                           0095 
+    P1.6                                                           0096 
+    P1.7                                                           0097 
+    P2                                                             00A0 
+    P2.0                                                           00A0 
+    P2.1                                                           00A1 
+    P2.2                                                           00A2 
+    P2.3                                                           00A3 
+    P2.4                                                           00A4 
+    P2.5                                                           00A5 
+    P2.6                                                           00A6 
+    P2.7                                                           00A7 
+    P3                                                             00B0 
+    P3.0                                                           00B0 
+    P3.1                                                           00B1 
+    P3.2                                                           00B2 
+    P3.3                                                           00B3 
+    P3.4                                                           00B4 
+    P3.5                                                           00B5 
+    P3.6                                                           00B6 
+    P3.7                                                           00B7 
+    PCON                                                           0087 
+    PS                                                             00BC 
+    PSW                                                            00D0 
+    PSW.0                                                          00D0 
+    PSW.1                                                          00D1 
+    PSW.2                                                          00D2 
+    PSW.3                                                          00D3 
+    PSW.4                                                          00D4 
+    PSW.5                                                          00D5 
+    PSW.6                                                          00D6 
+    PSW.7                                                          00D7 
+    PT0                                                            00B9 
+    PT1                                                            00BB 
+    PT2                                                            00BD 
+    PX0                                                            00B8 
+    PX1                                                            00BA 
+    RB8                                                            009A 
+    RCAP2H                                                         00CB 
+    RCAP2L                                                         00CA 
+    RCLK                                                           00CD 
+    REN                                                            009C 
+    RI                                                             0098 
+    RS0                                                            00D3 
+    RS1                                                            00D4 
+    RXD                                                            00B0 
+    SBUF                                                           0099 
+    SCON                                                           0098 
+    SCON.0                                                         0098 
+    SCON.1                                                         0099 
+    SCON.2                                                         009A 
+    SCON.3                                                         009B 
+    SCON.4                                                         009C 
+    SCON.5                                                         009D 
+    SCON.6                                                         009E 
+    SCON.7                                                         009F 
+    SM0                                                            009F 
+    SM1                                                            009E 
+    SM2                                                            009D 
+    SP                                                             0081 
+    T2CON                                                          00C8 
+    T2CON.0                                                        00C8 
+    T2CON.1                                                        00C9 
+    T2CON.2                                                        00CA 
+    T2CON.3                                                        00CB 
+    T2CON.4                                                        00CC 
+    T2CON.5                                                        00CD 
+    T2CON.6                                                        00CE 
+    T2CON.7                                                        00CF 
+    TB8                                                            009B 
+    TCLK                                                           00CC 
+    TCON                                                           0088 
+    TCON.0                                                         0088 
+    TCON.1                                                         0089 
+    TCON.2                                                         008A 
+    TCON.3                                                         008B 
+    TCON.4                                                         008C 
+    TCON.5                                                         008D 
+    TCON.6                                                         008E 
+    TCON.7                                                         008F 
+    TF0                                                            008D 
+    TF1                                                            008F 
+    TF2                                                            00CF 
+    TH0                                                            008C 
+    TH1                                                            008D 
+    TH2                                                            00CD 
+    TI                                                             0099 
+    TL0                                                            008A 
+    TL1                                                            008B 
+    TL2                                                            00CC 
+    TMOD                                                           0089 
+    TR0                                                            008C 
+    TR1                                                            008E 
+    TR2                                                            00CA 
+    TXD                                                            00B1 
+ 18 XG$main$0$0                                                 =  0127 GR
+ 18 XG$timer3Init$0$0                                           =  0019 GR
+ 18 XG$updateHeartbeatLed$0$0                                   =  0069 GR
+    _AC                                                         =  00D6 
+    _ACC                                                        =  00E0 
+    _ACC_0                                                      =  00E0 
+    _ACC_1                                                      =  00E1 
+    _ACC_2                                                      =  00E2 
+    _ACC_3                                                      =  00E3 
+    _ACC_4                                                      =  00E4 
+    _ACC_5                                                      =  00E5 
+    _ACC_6                                                      =  00E6 
+    _ACC_7                                                      =  00E7 
+    _ADC                                                        =  FFFFBBBA 
+    _ADCCFG                                                     =  00F2 
+    _ADCCON1                                                    =  00B4 
+    _ADCCON2                                                    =  00B5 
+    _ADCCON3                                                    =  00B6 
+    _ADCH                                                       =  00BB 
+    _ADCIE                                                      =  00A9 
+    _ADCIF                                                      =  008D 
+    _ADCL                                                       =  00BA 
+    _ADDR                                                       =  DF05 
+    _AGCCTRL0                                                   =  DF19 
+    _AGCCTRL1                                                   =  DF18 
+    _AGCCTRL2                                                   =  DF17 
+    _B                                                          =  00F0 
+    _BSCFG                                                      =  DF16 
+    _B_0                                                        =  00F0 
+    _B_1                                                        =  00F1 
+    _B_2                                                        =  00F2 
+    _B_3                                                        =  00F3 
+    _B_4                                                        =  00F4 
+    _B_5                                                        =  00F5 
+    _B_6                                                        =  00F6 
+    _B_7                                                        =  00F7 
+    _CHANNR                                                     =  DF06 
+    _CLKCON                                                     =  00C6 
+    _CY                                                         =  00D7 
+    _DEVIATN                                                    =  DF11 
+    _DMA0CFG                                                    =  FFFFD5D4 
+    _DMA0CFGH                                                   =  00D5 
+    _DMA0CFGL                                                   =  00D4 
+    _DMA1CFG                                                    =  FFFFD3D2 
+    _DMA1CFGH                                                   =  00D3 
+    _DMA1CFGL                                                   =  00D2 
+    _DMAARM                                                     =  00D6 
+    _DMAIE                                                      =  00B8 
+    _DMAIF                                                      =  00C0 
+    _DMAIRQ                                                     =  00D1 
+    _DMAREQ                                                     =  00D7 
+    _DPH0                                                       =  0083 
+    _DPH1                                                       =  0085 
+    _DPL0                                                       =  0082 
+    _DPL1                                                       =  0084 
+    _DPS                                                        =  0092 
+    _EA                                                         =  00AF 
+    _ENCCS                                                      =  00B3 
+    _ENCDI                                                      =  00B1 
+    _ENCDO                                                      =  00B2 
+    _ENCIE                                                      =  00AC 
+    _ENCIF_0                                                    =  0098 
+    _ENCIF_1                                                    =  0099 
+    _ENDIAN                                                     =  0095 
+    _F0                                                         =  00D5 
+    _F1                                                         =  00D1 
+    _FADDR                                                      =  FFFFADAC 
+    _FADDRH                                                     =  00AD 
+    _FADDRL                                                     =  00AC 
+    _FCTL                                                       =  00AE 
+    _FOCCFG                                                     =  DF15 
+    _FREND0                                                     =  DF1B 
+    _FREND1                                                     =  DF1A 
+    _FREQ0                                                      =  DF0B 
+    _FREQ1                                                      =  DF0A 
+    _FREQ2                                                      =  DF09 
+    _FREQEST                                                    =  DF38 
+    _FSCAL0                                                     =  DF1F 
+    _FSCAL1                                                     =  DF1E 
+    _FSCAL2                                                     =  DF1D 
+    _FSCAL3                                                     =  DF1C 
+    _FSCTRL0                                                    =  DF08 
+    _FSCTRL1                                                    =  DF07 
+    _FWDATA                                                     =  00AF 
+    _FWT                                                        =  00AB 
+    _I2SCFG0                                                    =  DF40 
+    _I2SCFG1                                                    =  DF41 
+    _I2SCLKF0                                                   =  DF46 
+    _I2SCLKF1                                                   =  DF47 
+    _I2SCLKF2                                                   =  DF48 
+    _I2SDATH                                                    =  DF43 
+    _I2SDATL                                                    =  DF42 
+    _I2SSTAT                                                    =  DF45 
+    _I2SWCNT                                                    =  DF44 
+    _IEN0                                                       =  00A8 
+    _IEN1                                                       =  00B8 
+    _IEN2                                                       =  009A 
+    _IOCFG0                                                     =  DF31 
+    _IOCFG1                                                     =  DF30 
+    _IOCFG2                                                     =  DF2F 
+    _IP0                                                        =  00A9 
+    _IP1                                                        =  00B9 
+    _IRCON                                                      =  00C0 
+    _IRCON2                                                     =  00E8 
+    _ISR_T4                                                        **** GX
+    _LQI                                                        =  DF39 
+    _MARCSTATE                                                  =  DF3B 
+    _MCSM0                                                      =  DF14 
+    _MCSM1                                                      =  DF13 
+    _MCSM2                                                      =  DF12 
+    _MDMCFG0                                                    =  DF10 
+    _MDMCFG1                                                    =  DF0F 
+    _MDMCFG2                                                    =  DF0E 
+    _MDMCFG3                                                    =  DF0D 
+    _MDMCFG4                                                    =  DF0C 
+    _MEMCTR                                                     =  00C7 
+    _MPAGE                                                      =  0093 
+    _OV                                                         =  00D2 
+    _OVFIM                                                      =  00DE 
+    _P                                                          =  00D0 
+    _P0                                                         =  0080 
+    _P0DIR                                                      =  00FD 
+    _P0IE                                                       =  00BD 
+    _P0IF                                                       =  00C5 
+    _P0IFG                                                      =  0089 
+    _P0INP                                                      =  008F 
+    _P0SEL                                                      =  00F3 
+    _P0_0                                                       =  0080 
+    _P0_1                                                       =  0081 
+    _P0_2                                                       =  0082 
+    _P0_3                                                       =  0083 
+    _P0_4                                                       =  0084 
+    _P0_5                                                       =  0085 
+    _P0_6                                                       =  0086 
+    _P0_7                                                       =  0087 
+    _P1                                                         =  0090 
+    _P1DIR                                                      =  00FE 
+    _P1IEN                                                      =  008D 
+    _P1IF                                                       =  00EB 
+    _P1IFG                                                      =  008A 
+    _P1INP                                                      =  00F6 
+    _P1SEL                                                      =  00F4 
+    _P1_0                                                       =  0090 
+    _P1_1                                                       =  0091 
+    _P1_2                                                       =  0092 
+    _P1_3                                                       =  0093 
+    _P1_4                                                       =  0094 
+    _P1_5                                                       =  0095 
+    _P1_6                                                       =  0096 
+    _P1_7                                                       =  0097 
+    _P2                                                         =  00A0 
+    _P2DIR                                                      =  00FF 
+    _P2IF                                                       =  00E8 
+    _P2IFG                                                      =  008B 
+    _P2INP                                                      =  00F7 
+    _P2SEL                                                      =  00F5 
+    _P2_0                                                       =  00A0 
+    _P2_1                                                       =  00A1 
+    _P2_2                                                       =  00A2 
+    _P2_3                                                       =  00A3 
+    _P2_4                                                       =  00A4 
+    _P2_5                                                       =  00A5 
+    _P2_6                                                       =  00A6 
+    _P2_7                                                       =  00A7 
+    _PARTNUM                                                    =  DF36 
+    _PA_TABLE0                                                  =  DF2E 
+    _PCON                                                       =  0087 
+    _PERCFG                                                     =  00F1 
+    _PICTL                                                      =  008C 
+    _PKTCTRL0                                                   =  DF04 
+    _PKTCTRL1                                                   =  DF03 
+    _PKTLEN                                                     =  DF02 
+    _PKTSTATUS                                                  =  DF3C 
+    _PSW                                                        =  00D0 
+    _RFD                                                        =  00D9 
+    _RFIF                                                       =  00E9 
+    _RFIM                                                       =  0091 
+    _RFST                                                       =  00E1 
+    _RFTXRXIE                                                   =  00A8 
+    _RFTXRXIF                                                   =  0089 
+    _RNDH                                                       =  00BD 
+    _RNDL                                                       =  00BC 
+    _RS0                                                        =  00D3 
+    _RS1                                                        =  00D4 
+    _RSSI                                                       =  DF3A 
+    _S0CON                                                      =  0098 
+    _S1CON                                                      =  009B 
+    _SLEEP                                                      =  00BE 
+    _SP                                                         =  0081 
+    _STIE                                                       =  00AD 
+    _STIF                                                       =  00C7 
+    _SYNC0                                                      =  DF01 
+    _SYNC1                                                      =  DF00 
+    _T1CC0                                                      =  FFFFDBDA 
+    _T1CC0H                                                     =  00DB 
+    _T1CC0L                                                     =  00DA 
+    _T1CC1                                                      =  FFFFDDDC 
+    _T1CC1H                                                     =  00DD 
+    _T1CC1L                                                     =  00DC 
+    _T1CC2                                                      =  FFFFDFDE 
+    _T1CC2H                                                     =  00DF 
+    _T1CC2L                                                     =  00DE 
+    _T1CCTL0                                                    =  00E5 
+    _T1CCTL1                                                    =  00E6 
+    _T1CCTL2                                                    =  00E7 
+    _T1CNTH                                                     =  00E3 
+    _T1CNTL                                                     =  00E2 
+    _T1CTL                                                      =  00E4 
+    _T1IE                                                       =  00B9 
+    _T1IF                                                       =  00C1 
+    _T2CT                                                       =  009C 
+    _T2CTL                                                      =  009E 
+    _T2IE                                                       =  00BA 
+    _T2IF                                                       =  00C2 
+    _T2PR                                                       =  009D 
+    _T3CC0                                                      =  00CD 
+    _T3CC1                                                      =  00CF 
+    _T3CCTL0                                                    =  00CC 
+    _T3CCTL1                                                    =  00CE 
+    _T3CH0IF                                                    =  00D9 
+    _T3CH1IF                                                    =  00DA 
+    _T3CNT                                                      =  00CA 
+    _T3CTL                                                      =  00CB 
+    _T3IE                                                       =  00BB 
+    _T3IF                                                       =  00C3 
+    _T3OVFIF                                                    =  00D8 
+    _T4CC0                                                      =  00ED 
+    _T4CC1                                                      =  00EF 
+    _T4CCTL0                                                    =  00EC 
+    _T4CCTL1                                                    =  00EE 
+    _T4CH0IF                                                    =  00DC 
+    _T4CH1IF                                                    =  00DD 
+    _T4CNT                                                      =  00EA 
+    _T4CTL                                                      =  00EB 
+    _T4IE                                                       =  00BC 
+    _T4IF                                                       =  00C4 
+    _T4OVFIF                                                    =  00DB 
+    _TCON                                                       =  0088 
+    _TEST0                                                      =  DF25 
+    _TEST1                                                      =  DF24 
+    _TEST2                                                      =  DF23 
+    _TIMIF                                                      =  00D8 
+    _U0BAUD                                                     =  00C2 
+    _U0CSR                                                      =  0086 
+    _U0DBUF                                                     =  00C1 
+    _U0GCR                                                      =  00C5 
+    _U0UCR                                                      =  00C4 
+    _U1ACTIVE                                                   =  00F8 
+    _U1BAUD                                                     =  00FA 
+    _U1CSR                                                      =  00F8 
+    _U1DBUF                                                     =  00F9 
+    _U1ERR                                                      =  00FB 
+    _U1FE                                                       =  00FC 
+    _U1GCR                                                      =  00FC 
+    _U1MODE                                                     =  00FF 
+    _U1RE                                                       =  00FE 
+    _U1RX_BYTE                                                  =  00FA 
+    _U1SLAVE                                                    =  00FD 
+    _U1TX_BYTE                                                  =  00F9 
+    _U1UCR                                                      =  00FB 
+    _URX0IE                                                     =  00AA 
+    _URX0IF                                                     =  008B 
+    _URX1IE                                                     =  00AB 
+    _URX1IF                                                     =  008F 
+    _USBADDR                                                    =  DE00 
+    _USBCIE                                                     =  DE0B 
+    _USBCIF                                                     =  DE06 
+    _USBCNTH                                                    =  DE17 
+    _USBCNTL                                                    =  DE16 
+    _USBCSIH                                                    =  DE12 
+    _USBCSIL                                                    =  DE11 
+    _USBCSOH                                                    =  DE15 
+    _USBCSOL                                                    =  DE14 
+    _USBF0                                                      =  DE20 
+    _USBF1                                                      =  DE22 
+    _USBF2                                                      =  DE24 
+    _USBF3                                                      =  DE26 
+    _USBF4                                                      =  DE28 
+    _USBF5                                                      =  DE2A 
+    _USBFRMH                                                    =  DE0D 
+    _USBFRML                                                    =  DE0C 
+    _USBIIE                                                     =  DE07 
+    _USBIIF                                                     =  DE02 
+    _USBINDEX                                                   =  DE0E 
+    _USBMAXI                                                    =  DE10 
+    _USBMAXO                                                    =  DE13 
+    _USBOIE                                                     =  DE09 
+    _USBOIF                                                     =  DE04 
+    _USBPOW                                                     =  DE01 
+    _UTX0IF                                                     =  00E9 
+    _UTX1IF                                                     =  00EA 
+    _VCO_VC_DAC                                                 =  DF3D 
+    _VERSION                                                    =  DF37 
+    _WDCTL                                                      =  00C9 
+    _WDTIF                                                      =  00EC 
+    _WORCTRL                                                    =  00A2 
+    _WOREVT0                                                    =  00A3 
+    _WOREVT1                                                    =  00A4 
+    _WORIRQ                                                     =  00A1 
+    _WORTIME0                                                   =  00A5 
+    _WORTIME1                                                   =  00A6 
+    __IEN06                                                     =  00AE 
+    __IEN16                                                     =  00BE 
+    __IEN17                                                     =  00BF 
+    __IRCON25                                                   =  00ED 
+    __IRCON26                                                   =  00EE 
+    __IRCON27                                                   =  00EF 
+    __IRCON6                                                    =  00C6 
+    __SOCON2                                                    =  009A 
+    __SOCON3                                                    =  009B 
+    __SOCON4                                                    =  009C 
+    __SOCON5                                                    =  009D 
+    __SOCON6                                                    =  009E 
+    __SOCON7                                                    =  009F 
+    __TCON_0                                                    =  0088 
+    __TCON_2                                                    =  008A 
+    __TCON_4                                                    =  008C 
+    __TCON_6                                                    =  008E 
+    __TIMIF7                                                    =  00DF 
+  F __interrupt_vect                                               0000 R
+    __mcs51_genRAMCLEAR                                            **** GX
+    __mcs51_genXINIT                                               **** GX
+    __mcs51_genXRAMCLEAR                                           **** GX
+    __sdcc_gsinit_startup                                          **** GX
+  F __sdcc_program_startup                                         0066 GR
+  7 __start__stack                                                 0000 GR
+    _boardService                                                  **** GX
+    _delayMs                                                       **** GX
+    _getMs                                                         **** GX
+  B _i                                                             0009 GR
+  B _lastMotorActionTime                                           0004 GR
+  B _lastRedLedToggle                                              0000 GR
+ 18 _main                                                          006A GR
+  B _motorState                                                    0008 GR
+    _systemInit                                                    **** GX
+ 18 _timer3Init                                                    0000 GR
+ 18 _updateHeartbeatLed                                            001A GR
+    _usbComService                                                 **** GX
+    _usbInit                                                       **** GX
+    a                                                              00E0 
+    a.0                                                            00E0 
+    a.1                                                            00E1 
+    a.2                                                            00E2 
+    a.3                                                            00E3 
+    a.4                                                            00E4 
+    a.5                                                            00E5 
+    a.6                                                            00E6 
+    a.7                                                            00E7 
+    ac                                                             00D6 
+    acc                                                            00E0 
+    acc.0                                                          00E0 
+    acc.1                                                          00E1 
+    acc.2                                                          00E2 
+    acc.3                                                          00E3 
+    acc.4                                                          00E4 
+    acc.5                                                          00E5 
+    acc.6                                                          00E6 
+    acc.7                                                          00E7 
+    ar0                                                         =  0000 
+    ar1                                                         =  0001 
+    ar2                                                         =  0002 
+    ar3                                                         =  0003 
+    ar4                                                         =  0004 
+    ar5                                                         =  0005 
+    ar6                                                         =  0006 
+    ar7                                                         =  0007 
+    b                                                              00F0 
+    b.0                                                            00F0 
+    b.1                                                            00F1 
+    b.2                                                            00F2 
+    b.3                                                            00F3 
+    b.4                                                            00F4 
+    b.5                                                            00F5 
+    b.6                                                            00F6 
+    b.7                                                            00F7 
+    cprl2                                                          00C8 
+    ct2                                                            00C9 
+    cy                                                             00D7 
+    dph                                                            0083 
+    dpl                                                            0082 
+    ea                                                             00AF 
+    es                                                             00AC 
+    et0                                                            00A9 
+    et1                                                            00AB 
+    et2                                                            00AD 
+    ex0                                                            00A8 
+    ex1                                                            00AA 
+    exen2                                                          00CB 
+    exf2                                                           00CE 
+    f0                                                             00D5 
+    ie                                                             00A8 
+    ie.0                                                           00A8 
+    ie.1                                                           00A9 
+    ie.2                                                           00AA 
+    ie.3                                                           00AB 
+    ie.4                                                           00AC 
+    ie.5                                                           00AD 
+    ie.7                                                           00AF 
+    ie0                                                            0089 
+    ie1                                                            008B 
+    int0                                                           00B2 
+    int1                                                           00B3 
+    ip                                                             00B8 
+    ip.0                                                           00B8 
+    ip.1                                                           00B9 
+    ip.2                                                           00BA 
+    ip.3                                                           00BB 
+    ip.4                                                           00BC 
+    ip.5                                                           00BD 
+    it0                                                            0088 
+    it1                                                            008A 
+    ov                                                             00D2 
+    p                                                              00D0 
+    p0                                                             0080 
+    p0.0                                                           0080 
+    p0.1                                                           0081 
+    p0.2                                                           0082 
+    p0.3                                                           0083 
+    p0.4                                                           0084 
+    p0.5                                                           0085 
+    p0.6                                                           0086 
+    p0.7                                                           0087 
+    p1                                                             0090 
+    p1.0                                                           0090 
+    p1.1                                                           0091 
+    p1.2                                                           0092 
+    p1.3                                                           0093 
+    p1.4                                                           0094 
+    p1.5                                                           0095 
+    p1.6                                                           0096 
+    p1.7                                                           0097 
+    p2                                                             00A0 
+    p2.0                                                           00A0 
+    p2.1                                                           00A1 
+    p2.2                                                           00A2 
+    p2.3                                                           00A3 
+    p2.4                                                           00A4 
+    p2.5                                                           00A5 
+    p2.6                                                           00A6 
+    p2.7                                                           00A7 
+    p3                                                             00B0 
+    p3.0                                                           00B0 
+    p3.1                                                           00B1 
+    p3.2                                                           00B2 
+    p3.3                                                           00B3 
+    p3.4                                                           00B4 
+    p3.5                                                           00B5 
+    p3.6                                                           00B6 
+    p3.7                                                           00B7 
+    pcon                                                           0087 
+    ps                                                             00BC 
+    psw                                                            00D0 
+    psw.0                                                          00D0 
+    psw.1                                                          00D1 
+    psw.2                                                          00D2 
+    psw.3                                                          00D3 
+    psw.4                                                          00D4 
+    psw.5                                                          00D5 
+    psw.6                                                          00D6 
+    psw.7                                                          00D7 
+    pt0                                                            00B9 
+    pt1                                                            00BB 
+    pt2                                                            00BD 
+    px0                                                            00B8 
+    px1                                                            00BA 
+    rb8                                                            009A 
+    rcap2h                                                         00CB 
+    rcap2l                                                         00CA 
+    rclk                                                           00CD 
+    ren                                                            009C 
+    ri                                                             0098 
+    rs0                                                            00D3 
+    rs1                                                            00D4 
+    rxd                                                            00B0 
+    sbuf                                                           0099 
+    scon                                                           0098 
+    scon.0                                                         0098 
+    scon.1                                                         0099 
+    scon.2                                                         009A 
+    scon.3                                                         009B 
+    scon.4                                                         009C 
+    scon.5                                                         009D 
+    scon.6                                                         009E 
+    scon.7                                                         009F 
+    sm0                                                            009F 
+    sm1                                                            009E 
+    sm2                                                            009D 
+    sp                                                             0081 
+    t2con                                                          00C8 
+    t2con.0                                                        00C8 
+    t2con.1                                                        00C9 
+    t2con.2                                                        00CA 
+    t2con.3                                                        00CB 
+    t2con.4                                                        00CC 
+    t2con.5                                                        00CD 
+    t2con.6                                                        00CE 
+    t2con.7                                                        00CF 
+    tb8                                                            009B 
+    tclk                                                           00CC 
+    tcon                                                           0088 
+    tcon.0                                                         0088 
+    tcon.1                                                         0089 
+    tcon.2                                                         008A 
+    tcon.3                                                         008B 
+    tcon.4                                                         008C 
+    tcon.5                                                         008D 
+    tcon.6                                                         008E 
+    tcon.7                                                         008F 
+    tf0                                                            008D 
+    tf1                                                            008F 
+    tf2                                                            00CF 
+    th0                                                            008C 
+    th1                                                            008D 
+    th2                                                            00CD 
+    ti                                                             0099 
+    tl0                                                            008A 
+    tl1                                                            008B 
+    tl2                                                            00CC 
+    tmod                                                           0089 
+    tr0                                                            008C 
+    tr1                                                            008E 
+    tr2                                                            00CA 
+    txd                                                            00B1 
+
+ASxxxx Assembler V02.00 + NoICE + SDCC mods + Flat24  (Intel 8051), page 2.
+
+Area Table
+
+   0 _CODE                                      size    0   flags 0
+   1 RSEG                                       size    0   flags 8
+   2 RSEG0                                      size    0   flags 8
+   3 RSEG1                                      size    0   flags 8
+   4 REG_BANK_0                                 size    8   flags 4
+   5 DSEG                                       size    0   flags 0
+   6 OSEG                                       size    0   flags 4
+   7 SSEG                                       size    1   flags 0
+   8 ISEG                                       size    0   flags 0
+   9 IABS                                       size    0   flags 8
+   A BSEG                                       size    0   flags 80
+   B PSEG                                       size    A   flags 50
+   C XSEG                                       size    0   flags 40
+   D XABS                                       size    0   flags 48
+   E XISEG                                      size    0   flags 40
+   F HOME                                       size   6B   flags 20
+  10 GSINIT0                                    size    0   flags 20
+  11 GSINIT1                                    size    0   flags 20
+  12 GSINIT2                                    size    0   flags 20
+  13 GSINIT3                                    size    0   flags 20
+  14 GSINIT4                                    size    0   flags 20
+  15 GSINIT5                                    size    0   flags 20
+  16 GSINIT                                     size   18   flags 20
+  17 GSFINAL                                    size    3   flags 20
+  18 CSEG                                       size  128   flags 20
+  19 CONST                                      size    0   flags 20
+  1A XINIT                                      size    0   flags 20
+  1B CABS                                       size    0   flags 28

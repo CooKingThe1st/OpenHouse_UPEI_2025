@@ -1,0 +1,25 @@
+| Parameter            | Meaning                             |    Default   |
+| :------------------- | :---------------------------------- | :----------: |
+| `WHEELBASE_MM`       | robot track width                   |      100     |
+| `STEERING_GAIN`      | steering proportional gain          |      2.0     |
+| `APF_MAX_VELOCITY`   | max attractive velocity magnitude   |   400 mm/s   |
+| `APF_GOAL_THRESHOLD` | “goal reached” radius               |    100 mm    |
+| `MAX_PWM`            | safety PWM cap                      |      120     |
+| `PWM_DEADZONE`       | min PWM to overcome static friction |      30      |
+| `dt`                 | integration step (s)                |     0.05     |
+| `targetX`, `targetY` | goal coordinates (mm)               | (1000, 1000) |
+
+
+Short notes / guidance for tuning parameters
+
+APF_MAX_VELOCITY — raise to move faster toward the goal; lowering reduces overshoot.
+
+STEERING_GAIN — increases turning aggressiveness. Large values can cause oscillation or zig-zag; reduce if you see oscillations.
+
+WHEELBASE_MM — must match your robot geometry. Changing it changes turning effect of differential speeds.
+
+MAX_PWM — safety cap. You set 120, which is conservative.
+
+PWM_DEADZONE — if you measured a different deadzone, update this. Deadzone causes low-PWM commands to produce no motion; the twin uses calibrated mapping to reveal that behavior.
+
+GOAL_THRESHOLD_MM — default 100 mm (10 cm). Set smaller if you need the robot to approach more precisely, but beware of falling into the deadzone — if you pick a smaller threshold than deadzone effect permits, the controller may not physically reach it.

@@ -1,0 +1,1689 @@
+                              1 ;--------------------------------------------------------
+                              2 ; File Created by SDCC : free open source ANSI-C Compiler
+                              3 ; Version 3.1.0 #7066 (Nov 22 2011) (MINGW32)
+                              4 ; This file was generated Thu Oct 23 21:29:43 2025
+                              5 ;--------------------------------------------------------
+                              6 	.module slave_wixel
+                              7 	.optsdcc -mmcs51 --model-medium
+                              8 	
+                              9 ;--------------------------------------------------------
+                             10 ; Public variables in this module
+                             11 ;--------------------------------------------------------
+                             12 	.globl _main
+                             13 	.globl _handlePacketTimeout
+                             14 	.globl _receiveAndProcessPackets
+                             15 	.globl _updateStatusLeds
+                             16 	.globl _updateMotor
+                             17 	.globl _updateRgbLeds
+                             18 	.globl _gpioInit
+                             19 	.globl _failSafeBootloader
+                             20 	.globl _radioInit
+                             21 	.globl _timer3Init
+                             22 	.globl _radioCrcPassed
+                             23 	.globl _radioRegistersInit
+                             24 	.globl _delayMs
+                             25 	.globl _getMs
+                             26 	.globl _boardService
+                             27 	.globl _systemInit
+                             28 	.globl ___fsi__
+                             29 	.globl _dataReceivedTime
+                             30 	.globl _lastPacketTime
+                             31 	.globl _ledBlue
+                             32 	.globl _ledGreen
+                             33 	.globl _ledRed
+                             34 	.globl _dataReceivedFlag
+                             35 ;--------------------------------------------------------
+                             36 ; special function registers
+                             37 ;--------------------------------------------------------
+                             38 	.area RSEG    (ABS,DATA)
+   0000                      39 	.org 0x0000
+                    0080     40 Fslave_wixel$P0$0$0 == 0x0080
+                    0080     41 _P0	=	0x0080
+                    0081     42 Fslave_wixel$SP$0$0 == 0x0081
+                    0081     43 _SP	=	0x0081
+                    0082     44 Fslave_wixel$DPL0$0$0 == 0x0082
+                    0082     45 _DPL0	=	0x0082
+                    0083     46 Fslave_wixel$DPH0$0$0 == 0x0083
+                    0083     47 _DPH0	=	0x0083
+                    0084     48 Fslave_wixel$DPL1$0$0 == 0x0084
+                    0084     49 _DPL1	=	0x0084
+                    0085     50 Fslave_wixel$DPH1$0$0 == 0x0085
+                    0085     51 _DPH1	=	0x0085
+                    0086     52 Fslave_wixel$U0CSR$0$0 == 0x0086
+                    0086     53 _U0CSR	=	0x0086
+                    0087     54 Fslave_wixel$PCON$0$0 == 0x0087
+                    0087     55 _PCON	=	0x0087
+                    0088     56 Fslave_wixel$TCON$0$0 == 0x0088
+                    0088     57 _TCON	=	0x0088
+                    0089     58 Fslave_wixel$P0IFG$0$0 == 0x0089
+                    0089     59 _P0IFG	=	0x0089
+                    008A     60 Fslave_wixel$P1IFG$0$0 == 0x008a
+                    008A     61 _P1IFG	=	0x008a
+                    008B     62 Fslave_wixel$P2IFG$0$0 == 0x008b
+                    008B     63 _P2IFG	=	0x008b
+                    008C     64 Fslave_wixel$PICTL$0$0 == 0x008c
+                    008C     65 _PICTL	=	0x008c
+                    008D     66 Fslave_wixel$P1IEN$0$0 == 0x008d
+                    008D     67 _P1IEN	=	0x008d
+                    008F     68 Fslave_wixel$P0INP$0$0 == 0x008f
+                    008F     69 _P0INP	=	0x008f
+                    0090     70 Fslave_wixel$P1$0$0 == 0x0090
+                    0090     71 _P1	=	0x0090
+                    0091     72 Fslave_wixel$RFIM$0$0 == 0x0091
+                    0091     73 _RFIM	=	0x0091
+                    0092     74 Fslave_wixel$DPS$0$0 == 0x0092
+                    0092     75 _DPS	=	0x0092
+                    0093     76 Fslave_wixel$MPAGE$0$0 == 0x0093
+                    0093     77 _MPAGE	=	0x0093
+                    0095     78 Fslave_wixel$ENDIAN$0$0 == 0x0095
+                    0095     79 _ENDIAN	=	0x0095
+                    0098     80 Fslave_wixel$S0CON$0$0 == 0x0098
+                    0098     81 _S0CON	=	0x0098
+                    009A     82 Fslave_wixel$IEN2$0$0 == 0x009a
+                    009A     83 _IEN2	=	0x009a
+                    009B     84 Fslave_wixel$S1CON$0$0 == 0x009b
+                    009B     85 _S1CON	=	0x009b
+                    009C     86 Fslave_wixel$T2CT$0$0 == 0x009c
+                    009C     87 _T2CT	=	0x009c
+                    009D     88 Fslave_wixel$T2PR$0$0 == 0x009d
+                    009D     89 _T2PR	=	0x009d
+                    009E     90 Fslave_wixel$T2CTL$0$0 == 0x009e
+                    009E     91 _T2CTL	=	0x009e
+                    00A0     92 Fslave_wixel$P2$0$0 == 0x00a0
+                    00A0     93 _P2	=	0x00a0
+                    00A1     94 Fslave_wixel$WORIRQ$0$0 == 0x00a1
+                    00A1     95 _WORIRQ	=	0x00a1
+                    00A2     96 Fslave_wixel$WORCTRL$0$0 == 0x00a2
+                    00A2     97 _WORCTRL	=	0x00a2
+                    00A3     98 Fslave_wixel$WOREVT0$0$0 == 0x00a3
+                    00A3     99 _WOREVT0	=	0x00a3
+                    00A4    100 Fslave_wixel$WOREVT1$0$0 == 0x00a4
+                    00A4    101 _WOREVT1	=	0x00a4
+                    00A5    102 Fslave_wixel$WORTIME0$0$0 == 0x00a5
+                    00A5    103 _WORTIME0	=	0x00a5
+                    00A6    104 Fslave_wixel$WORTIME1$0$0 == 0x00a6
+                    00A6    105 _WORTIME1	=	0x00a6
+                    00A8    106 Fslave_wixel$IEN0$0$0 == 0x00a8
+                    00A8    107 _IEN0	=	0x00a8
+                    00A9    108 Fslave_wixel$IP0$0$0 == 0x00a9
+                    00A9    109 _IP0	=	0x00a9
+                    00AB    110 Fslave_wixel$FWT$0$0 == 0x00ab
+                    00AB    111 _FWT	=	0x00ab
+                    00AC    112 Fslave_wixel$FADDRL$0$0 == 0x00ac
+                    00AC    113 _FADDRL	=	0x00ac
+                    00AD    114 Fslave_wixel$FADDRH$0$0 == 0x00ad
+                    00AD    115 _FADDRH	=	0x00ad
+                    00AE    116 Fslave_wixel$FCTL$0$0 == 0x00ae
+                    00AE    117 _FCTL	=	0x00ae
+                    00AF    118 Fslave_wixel$FWDATA$0$0 == 0x00af
+                    00AF    119 _FWDATA	=	0x00af
+                    00B1    120 Fslave_wixel$ENCDI$0$0 == 0x00b1
+                    00B1    121 _ENCDI	=	0x00b1
+                    00B2    122 Fslave_wixel$ENCDO$0$0 == 0x00b2
+                    00B2    123 _ENCDO	=	0x00b2
+                    00B3    124 Fslave_wixel$ENCCS$0$0 == 0x00b3
+                    00B3    125 _ENCCS	=	0x00b3
+                    00B4    126 Fslave_wixel$ADCCON1$0$0 == 0x00b4
+                    00B4    127 _ADCCON1	=	0x00b4
+                    00B5    128 Fslave_wixel$ADCCON2$0$0 == 0x00b5
+                    00B5    129 _ADCCON2	=	0x00b5
+                    00B6    130 Fslave_wixel$ADCCON3$0$0 == 0x00b6
+                    00B6    131 _ADCCON3	=	0x00b6
+                    00B8    132 Fslave_wixel$IEN1$0$0 == 0x00b8
+                    00B8    133 _IEN1	=	0x00b8
+                    00B9    134 Fslave_wixel$IP1$0$0 == 0x00b9
+                    00B9    135 _IP1	=	0x00b9
+                    00BA    136 Fslave_wixel$ADCL$0$0 == 0x00ba
+                    00BA    137 _ADCL	=	0x00ba
+                    00BB    138 Fslave_wixel$ADCH$0$0 == 0x00bb
+                    00BB    139 _ADCH	=	0x00bb
+                    00BC    140 Fslave_wixel$RNDL$0$0 == 0x00bc
+                    00BC    141 _RNDL	=	0x00bc
+                    00BD    142 Fslave_wixel$RNDH$0$0 == 0x00bd
+                    00BD    143 _RNDH	=	0x00bd
+                    00BE    144 Fslave_wixel$SLEEP$0$0 == 0x00be
+                    00BE    145 _SLEEP	=	0x00be
+                    00C0    146 Fslave_wixel$IRCON$0$0 == 0x00c0
+                    00C0    147 _IRCON	=	0x00c0
+                    00C1    148 Fslave_wixel$U0DBUF$0$0 == 0x00c1
+                    00C1    149 _U0DBUF	=	0x00c1
+                    00C2    150 Fslave_wixel$U0BAUD$0$0 == 0x00c2
+                    00C2    151 _U0BAUD	=	0x00c2
+                    00C4    152 Fslave_wixel$U0UCR$0$0 == 0x00c4
+                    00C4    153 _U0UCR	=	0x00c4
+                    00C5    154 Fslave_wixel$U0GCR$0$0 == 0x00c5
+                    00C5    155 _U0GCR	=	0x00c5
+                    00C6    156 Fslave_wixel$CLKCON$0$0 == 0x00c6
+                    00C6    157 _CLKCON	=	0x00c6
+                    00C7    158 Fslave_wixel$MEMCTR$0$0 == 0x00c7
+                    00C7    159 _MEMCTR	=	0x00c7
+                    00C9    160 Fslave_wixel$WDCTL$0$0 == 0x00c9
+                    00C9    161 _WDCTL	=	0x00c9
+                    00CA    162 Fslave_wixel$T3CNT$0$0 == 0x00ca
+                    00CA    163 _T3CNT	=	0x00ca
+                    00CB    164 Fslave_wixel$T3CTL$0$0 == 0x00cb
+                    00CB    165 _T3CTL	=	0x00cb
+                    00CC    166 Fslave_wixel$T3CCTL0$0$0 == 0x00cc
+                    00CC    167 _T3CCTL0	=	0x00cc
+                    00CD    168 Fslave_wixel$T3CC0$0$0 == 0x00cd
+                    00CD    169 _T3CC0	=	0x00cd
+                    00CE    170 Fslave_wixel$T3CCTL1$0$0 == 0x00ce
+                    00CE    171 _T3CCTL1	=	0x00ce
+                    00CF    172 Fslave_wixel$T3CC1$0$0 == 0x00cf
+                    00CF    173 _T3CC1	=	0x00cf
+                    00D0    174 Fslave_wixel$PSW$0$0 == 0x00d0
+                    00D0    175 _PSW	=	0x00d0
+                    00D1    176 Fslave_wixel$DMAIRQ$0$0 == 0x00d1
+                    00D1    177 _DMAIRQ	=	0x00d1
+                    00D2    178 Fslave_wixel$DMA1CFGL$0$0 == 0x00d2
+                    00D2    179 _DMA1CFGL	=	0x00d2
+                    00D3    180 Fslave_wixel$DMA1CFGH$0$0 == 0x00d3
+                    00D3    181 _DMA1CFGH	=	0x00d3
+                    00D4    182 Fslave_wixel$DMA0CFGL$0$0 == 0x00d4
+                    00D4    183 _DMA0CFGL	=	0x00d4
+                    00D5    184 Fslave_wixel$DMA0CFGH$0$0 == 0x00d5
+                    00D5    185 _DMA0CFGH	=	0x00d5
+                    00D6    186 Fslave_wixel$DMAARM$0$0 == 0x00d6
+                    00D6    187 _DMAARM	=	0x00d6
+                    00D7    188 Fslave_wixel$DMAREQ$0$0 == 0x00d7
+                    00D7    189 _DMAREQ	=	0x00d7
+                    00D8    190 Fslave_wixel$TIMIF$0$0 == 0x00d8
+                    00D8    191 _TIMIF	=	0x00d8
+                    00D9    192 Fslave_wixel$RFD$0$0 == 0x00d9
+                    00D9    193 _RFD	=	0x00d9
+                    00DA    194 Fslave_wixel$T1CC0L$0$0 == 0x00da
+                    00DA    195 _T1CC0L	=	0x00da
+                    00DB    196 Fslave_wixel$T1CC0H$0$0 == 0x00db
+                    00DB    197 _T1CC0H	=	0x00db
+                    00DC    198 Fslave_wixel$T1CC1L$0$0 == 0x00dc
+                    00DC    199 _T1CC1L	=	0x00dc
+                    00DD    200 Fslave_wixel$T1CC1H$0$0 == 0x00dd
+                    00DD    201 _T1CC1H	=	0x00dd
+                    00DE    202 Fslave_wixel$T1CC2L$0$0 == 0x00de
+                    00DE    203 _T1CC2L	=	0x00de
+                    00DF    204 Fslave_wixel$T1CC2H$0$0 == 0x00df
+                    00DF    205 _T1CC2H	=	0x00df
+                    00E0    206 Fslave_wixel$ACC$0$0 == 0x00e0
+                    00E0    207 _ACC	=	0x00e0
+                    00E1    208 Fslave_wixel$RFST$0$0 == 0x00e1
+                    00E1    209 _RFST	=	0x00e1
+                    00E2    210 Fslave_wixel$T1CNTL$0$0 == 0x00e2
+                    00E2    211 _T1CNTL	=	0x00e2
+                    00E3    212 Fslave_wixel$T1CNTH$0$0 == 0x00e3
+                    00E3    213 _T1CNTH	=	0x00e3
+                    00E4    214 Fslave_wixel$T1CTL$0$0 == 0x00e4
+                    00E4    215 _T1CTL	=	0x00e4
+                    00E5    216 Fslave_wixel$T1CCTL0$0$0 == 0x00e5
+                    00E5    217 _T1CCTL0	=	0x00e5
+                    00E6    218 Fslave_wixel$T1CCTL1$0$0 == 0x00e6
+                    00E6    219 _T1CCTL1	=	0x00e6
+                    00E7    220 Fslave_wixel$T1CCTL2$0$0 == 0x00e7
+                    00E7    221 _T1CCTL2	=	0x00e7
+                    00E8    222 Fslave_wixel$IRCON2$0$0 == 0x00e8
+                    00E8    223 _IRCON2	=	0x00e8
+                    00E9    224 Fslave_wixel$RFIF$0$0 == 0x00e9
+                    00E9    225 _RFIF	=	0x00e9
+                    00EA    226 Fslave_wixel$T4CNT$0$0 == 0x00ea
+                    00EA    227 _T4CNT	=	0x00ea
+                    00EB    228 Fslave_wixel$T4CTL$0$0 == 0x00eb
+                    00EB    229 _T4CTL	=	0x00eb
+                    00EC    230 Fslave_wixel$T4CCTL0$0$0 == 0x00ec
+                    00EC    231 _T4CCTL0	=	0x00ec
+                    00ED    232 Fslave_wixel$T4CC0$0$0 == 0x00ed
+                    00ED    233 _T4CC0	=	0x00ed
+                    00EE    234 Fslave_wixel$T4CCTL1$0$0 == 0x00ee
+                    00EE    235 _T4CCTL1	=	0x00ee
+                    00EF    236 Fslave_wixel$T4CC1$0$0 == 0x00ef
+                    00EF    237 _T4CC1	=	0x00ef
+                    00F0    238 Fslave_wixel$B$0$0 == 0x00f0
+                    00F0    239 _B	=	0x00f0
+                    00F1    240 Fslave_wixel$PERCFG$0$0 == 0x00f1
+                    00F1    241 _PERCFG	=	0x00f1
+                    00F2    242 Fslave_wixel$ADCCFG$0$0 == 0x00f2
+                    00F2    243 _ADCCFG	=	0x00f2
+                    00F3    244 Fslave_wixel$P0SEL$0$0 == 0x00f3
+                    00F3    245 _P0SEL	=	0x00f3
+                    00F4    246 Fslave_wixel$P1SEL$0$0 == 0x00f4
+                    00F4    247 _P1SEL	=	0x00f4
+                    00F5    248 Fslave_wixel$P2SEL$0$0 == 0x00f5
+                    00F5    249 _P2SEL	=	0x00f5
+                    00F6    250 Fslave_wixel$P1INP$0$0 == 0x00f6
+                    00F6    251 _P1INP	=	0x00f6
+                    00F7    252 Fslave_wixel$P2INP$0$0 == 0x00f7
+                    00F7    253 _P2INP	=	0x00f7
+                    00F8    254 Fslave_wixel$U1CSR$0$0 == 0x00f8
+                    00F8    255 _U1CSR	=	0x00f8
+                    00F9    256 Fslave_wixel$U1DBUF$0$0 == 0x00f9
+                    00F9    257 _U1DBUF	=	0x00f9
+                    00FA    258 Fslave_wixel$U1BAUD$0$0 == 0x00fa
+                    00FA    259 _U1BAUD	=	0x00fa
+                    00FB    260 Fslave_wixel$U1UCR$0$0 == 0x00fb
+                    00FB    261 _U1UCR	=	0x00fb
+                    00FC    262 Fslave_wixel$U1GCR$0$0 == 0x00fc
+                    00FC    263 _U1GCR	=	0x00fc
+                    00FD    264 Fslave_wixel$P0DIR$0$0 == 0x00fd
+                    00FD    265 _P0DIR	=	0x00fd
+                    00FE    266 Fslave_wixel$P1DIR$0$0 == 0x00fe
+                    00FE    267 _P1DIR	=	0x00fe
+                    00FF    268 Fslave_wixel$P2DIR$0$0 == 0x00ff
+                    00FF    269 _P2DIR	=	0x00ff
+                    FFFFD5D4    270 Fslave_wixel$DMA0CFG$0$0 == 0xffffd5d4
+                    FFFFD5D4    271 _DMA0CFG	=	0xffffd5d4
+                    FFFFD3D2    272 Fslave_wixel$DMA1CFG$0$0 == 0xffffd3d2
+                    FFFFD3D2    273 _DMA1CFG	=	0xffffd3d2
+                    FFFFADAC    274 Fslave_wixel$FADDR$0$0 == 0xffffadac
+                    FFFFADAC    275 _FADDR	=	0xffffadac
+                    FFFFBBBA    276 Fslave_wixel$ADC$0$0 == 0xffffbbba
+                    FFFFBBBA    277 _ADC	=	0xffffbbba
+                    FFFFDBDA    278 Fslave_wixel$T1CC0$0$0 == 0xffffdbda
+                    FFFFDBDA    279 _T1CC0	=	0xffffdbda
+                    FFFFDDDC    280 Fslave_wixel$T1CC1$0$0 == 0xffffdddc
+                    FFFFDDDC    281 _T1CC1	=	0xffffdddc
+                    FFFFDFDE    282 Fslave_wixel$T1CC2$0$0 == 0xffffdfde
+                    FFFFDFDE    283 _T1CC2	=	0xffffdfde
+                            284 ;--------------------------------------------------------
+                            285 ; special function bits
+                            286 ;--------------------------------------------------------
+                            287 	.area RSEG    (ABS,DATA)
+   0000                     288 	.org 0x0000
+                    0080    289 Fslave_wixel$P0_0$0$0 == 0x0080
+                    0080    290 _P0_0	=	0x0080
+                    0081    291 Fslave_wixel$P0_1$0$0 == 0x0081
+                    0081    292 _P0_1	=	0x0081
+                    0082    293 Fslave_wixel$P0_2$0$0 == 0x0082
+                    0082    294 _P0_2	=	0x0082
+                    0083    295 Fslave_wixel$P0_3$0$0 == 0x0083
+                    0083    296 _P0_3	=	0x0083
+                    0084    297 Fslave_wixel$P0_4$0$0 == 0x0084
+                    0084    298 _P0_4	=	0x0084
+                    0085    299 Fslave_wixel$P0_5$0$0 == 0x0085
+                    0085    300 _P0_5	=	0x0085
+                    0086    301 Fslave_wixel$P0_6$0$0 == 0x0086
+                    0086    302 _P0_6	=	0x0086
+                    0087    303 Fslave_wixel$P0_7$0$0 == 0x0087
+                    0087    304 _P0_7	=	0x0087
+                    0088    305 Fslave_wixel$_TCON_0$0$0 == 0x0088
+                    0088    306 __TCON_0	=	0x0088
+                    0089    307 Fslave_wixel$RFTXRXIF$0$0 == 0x0089
+                    0089    308 _RFTXRXIF	=	0x0089
+                    008A    309 Fslave_wixel$_TCON_2$0$0 == 0x008a
+                    008A    310 __TCON_2	=	0x008a
+                    008B    311 Fslave_wixel$URX0IF$0$0 == 0x008b
+                    008B    312 _URX0IF	=	0x008b
+                    008C    313 Fslave_wixel$_TCON_4$0$0 == 0x008c
+                    008C    314 __TCON_4	=	0x008c
+                    008D    315 Fslave_wixel$ADCIF$0$0 == 0x008d
+                    008D    316 _ADCIF	=	0x008d
+                    008E    317 Fslave_wixel$_TCON_6$0$0 == 0x008e
+                    008E    318 __TCON_6	=	0x008e
+                    008F    319 Fslave_wixel$URX1IF$0$0 == 0x008f
+                    008F    320 _URX1IF	=	0x008f
+                    0090    321 Fslave_wixel$P1_0$0$0 == 0x0090
+                    0090    322 _P1_0	=	0x0090
+                    0091    323 Fslave_wixel$P1_1$0$0 == 0x0091
+                    0091    324 _P1_1	=	0x0091
+                    0092    325 Fslave_wixel$P1_2$0$0 == 0x0092
+                    0092    326 _P1_2	=	0x0092
+                    0093    327 Fslave_wixel$P1_3$0$0 == 0x0093
+                    0093    328 _P1_3	=	0x0093
+                    0094    329 Fslave_wixel$P1_4$0$0 == 0x0094
+                    0094    330 _P1_4	=	0x0094
+                    0095    331 Fslave_wixel$P1_5$0$0 == 0x0095
+                    0095    332 _P1_5	=	0x0095
+                    0096    333 Fslave_wixel$P1_6$0$0 == 0x0096
+                    0096    334 _P1_6	=	0x0096
+                    0097    335 Fslave_wixel$P1_7$0$0 == 0x0097
+                    0097    336 _P1_7	=	0x0097
+                    0098    337 Fslave_wixel$ENCIF_0$0$0 == 0x0098
+                    0098    338 _ENCIF_0	=	0x0098
+                    0099    339 Fslave_wixel$ENCIF_1$0$0 == 0x0099
+                    0099    340 _ENCIF_1	=	0x0099
+                    009A    341 Fslave_wixel$_SOCON2$0$0 == 0x009a
+                    009A    342 __SOCON2	=	0x009a
+                    009B    343 Fslave_wixel$_SOCON3$0$0 == 0x009b
+                    009B    344 __SOCON3	=	0x009b
+                    009C    345 Fslave_wixel$_SOCON4$0$0 == 0x009c
+                    009C    346 __SOCON4	=	0x009c
+                    009D    347 Fslave_wixel$_SOCON5$0$0 == 0x009d
+                    009D    348 __SOCON5	=	0x009d
+                    009E    349 Fslave_wixel$_SOCON6$0$0 == 0x009e
+                    009E    350 __SOCON6	=	0x009e
+                    009F    351 Fslave_wixel$_SOCON7$0$0 == 0x009f
+                    009F    352 __SOCON7	=	0x009f
+                    00A0    353 Fslave_wixel$P2_0$0$0 == 0x00a0
+                    00A0    354 _P2_0	=	0x00a0
+                    00A1    355 Fslave_wixel$P2_1$0$0 == 0x00a1
+                    00A1    356 _P2_1	=	0x00a1
+                    00A2    357 Fslave_wixel$P2_2$0$0 == 0x00a2
+                    00A2    358 _P2_2	=	0x00a2
+                    00A3    359 Fslave_wixel$P2_3$0$0 == 0x00a3
+                    00A3    360 _P2_3	=	0x00a3
+                    00A4    361 Fslave_wixel$P2_4$0$0 == 0x00a4
+                    00A4    362 _P2_4	=	0x00a4
+                    00A5    363 Fslave_wixel$P2_5$0$0 == 0x00a5
+                    00A5    364 _P2_5	=	0x00a5
+                    00A6    365 Fslave_wixel$P2_6$0$0 == 0x00a6
+                    00A6    366 _P2_6	=	0x00a6
+                    00A7    367 Fslave_wixel$P2_7$0$0 == 0x00a7
+                    00A7    368 _P2_7	=	0x00a7
+                    00A8    369 Fslave_wixel$RFTXRXIE$0$0 == 0x00a8
+                    00A8    370 _RFTXRXIE	=	0x00a8
+                    00A9    371 Fslave_wixel$ADCIE$0$0 == 0x00a9
+                    00A9    372 _ADCIE	=	0x00a9
+                    00AA    373 Fslave_wixel$URX0IE$0$0 == 0x00aa
+                    00AA    374 _URX0IE	=	0x00aa
+                    00AB    375 Fslave_wixel$URX1IE$0$0 == 0x00ab
+                    00AB    376 _URX1IE	=	0x00ab
+                    00AC    377 Fslave_wixel$ENCIE$0$0 == 0x00ac
+                    00AC    378 _ENCIE	=	0x00ac
+                    00AD    379 Fslave_wixel$STIE$0$0 == 0x00ad
+                    00AD    380 _STIE	=	0x00ad
+                    00AE    381 Fslave_wixel$_IEN06$0$0 == 0x00ae
+                    00AE    382 __IEN06	=	0x00ae
+                    00AF    383 Fslave_wixel$EA$0$0 == 0x00af
+                    00AF    384 _EA	=	0x00af
+                    00B8    385 Fslave_wixel$DMAIE$0$0 == 0x00b8
+                    00B8    386 _DMAIE	=	0x00b8
+                    00B9    387 Fslave_wixel$T1IE$0$0 == 0x00b9
+                    00B9    388 _T1IE	=	0x00b9
+                    00BA    389 Fslave_wixel$T2IE$0$0 == 0x00ba
+                    00BA    390 _T2IE	=	0x00ba
+                    00BB    391 Fslave_wixel$T3IE$0$0 == 0x00bb
+                    00BB    392 _T3IE	=	0x00bb
+                    00BC    393 Fslave_wixel$T4IE$0$0 == 0x00bc
+                    00BC    394 _T4IE	=	0x00bc
+                    00BD    395 Fslave_wixel$P0IE$0$0 == 0x00bd
+                    00BD    396 _P0IE	=	0x00bd
+                    00BE    397 Fslave_wixel$_IEN16$0$0 == 0x00be
+                    00BE    398 __IEN16	=	0x00be
+                    00BF    399 Fslave_wixel$_IEN17$0$0 == 0x00bf
+                    00BF    400 __IEN17	=	0x00bf
+                    00C0    401 Fslave_wixel$DMAIF$0$0 == 0x00c0
+                    00C0    402 _DMAIF	=	0x00c0
+                    00C1    403 Fslave_wixel$T1IF$0$0 == 0x00c1
+                    00C1    404 _T1IF	=	0x00c1
+                    00C2    405 Fslave_wixel$T2IF$0$0 == 0x00c2
+                    00C2    406 _T2IF	=	0x00c2
+                    00C3    407 Fslave_wixel$T3IF$0$0 == 0x00c3
+                    00C3    408 _T3IF	=	0x00c3
+                    00C4    409 Fslave_wixel$T4IF$0$0 == 0x00c4
+                    00C4    410 _T4IF	=	0x00c4
+                    00C5    411 Fslave_wixel$P0IF$0$0 == 0x00c5
+                    00C5    412 _P0IF	=	0x00c5
+                    00C6    413 Fslave_wixel$_IRCON6$0$0 == 0x00c6
+                    00C6    414 __IRCON6	=	0x00c6
+                    00C7    415 Fslave_wixel$STIF$0$0 == 0x00c7
+                    00C7    416 _STIF	=	0x00c7
+                    00D0    417 Fslave_wixel$P$0$0 == 0x00d0
+                    00D0    418 _P	=	0x00d0
+                    00D1    419 Fslave_wixel$F1$0$0 == 0x00d1
+                    00D1    420 _F1	=	0x00d1
+                    00D2    421 Fslave_wixel$OV$0$0 == 0x00d2
+                    00D2    422 _OV	=	0x00d2
+                    00D3    423 Fslave_wixel$RS0$0$0 == 0x00d3
+                    00D3    424 _RS0	=	0x00d3
+                    00D4    425 Fslave_wixel$RS1$0$0 == 0x00d4
+                    00D4    426 _RS1	=	0x00d4
+                    00D5    427 Fslave_wixel$F0$0$0 == 0x00d5
+                    00D5    428 _F0	=	0x00d5
+                    00D6    429 Fslave_wixel$AC$0$0 == 0x00d6
+                    00D6    430 _AC	=	0x00d6
+                    00D7    431 Fslave_wixel$CY$0$0 == 0x00d7
+                    00D7    432 _CY	=	0x00d7
+                    00D8    433 Fslave_wixel$T3OVFIF$0$0 == 0x00d8
+                    00D8    434 _T3OVFIF	=	0x00d8
+                    00D9    435 Fslave_wixel$T3CH0IF$0$0 == 0x00d9
+                    00D9    436 _T3CH0IF	=	0x00d9
+                    00DA    437 Fslave_wixel$T3CH1IF$0$0 == 0x00da
+                    00DA    438 _T3CH1IF	=	0x00da
+                    00DB    439 Fslave_wixel$T4OVFIF$0$0 == 0x00db
+                    00DB    440 _T4OVFIF	=	0x00db
+                    00DC    441 Fslave_wixel$T4CH0IF$0$0 == 0x00dc
+                    00DC    442 _T4CH0IF	=	0x00dc
+                    00DD    443 Fslave_wixel$T4CH1IF$0$0 == 0x00dd
+                    00DD    444 _T4CH1IF	=	0x00dd
+                    00DE    445 Fslave_wixel$OVFIM$0$0 == 0x00de
+                    00DE    446 _OVFIM	=	0x00de
+                    00DF    447 Fslave_wixel$_TIMIF7$0$0 == 0x00df
+                    00DF    448 __TIMIF7	=	0x00df
+                    00E0    449 Fslave_wixel$ACC_0$0$0 == 0x00e0
+                    00E0    450 _ACC_0	=	0x00e0
+                    00E1    451 Fslave_wixel$ACC_1$0$0 == 0x00e1
+                    00E1    452 _ACC_1	=	0x00e1
+                    00E2    453 Fslave_wixel$ACC_2$0$0 == 0x00e2
+                    00E2    454 _ACC_2	=	0x00e2
+                    00E3    455 Fslave_wixel$ACC_3$0$0 == 0x00e3
+                    00E3    456 _ACC_3	=	0x00e3
+                    00E4    457 Fslave_wixel$ACC_4$0$0 == 0x00e4
+                    00E4    458 _ACC_4	=	0x00e4
+                    00E5    459 Fslave_wixel$ACC_5$0$0 == 0x00e5
+                    00E5    460 _ACC_5	=	0x00e5
+                    00E6    461 Fslave_wixel$ACC_6$0$0 == 0x00e6
+                    00E6    462 _ACC_6	=	0x00e6
+                    00E7    463 Fslave_wixel$ACC_7$0$0 == 0x00e7
+                    00E7    464 _ACC_7	=	0x00e7
+                    00E8    465 Fslave_wixel$P2IF$0$0 == 0x00e8
+                    00E8    466 _P2IF	=	0x00e8
+                    00E9    467 Fslave_wixel$UTX0IF$0$0 == 0x00e9
+                    00E9    468 _UTX0IF	=	0x00e9
+                    00EA    469 Fslave_wixel$UTX1IF$0$0 == 0x00ea
+                    00EA    470 _UTX1IF	=	0x00ea
+                    00EB    471 Fslave_wixel$P1IF$0$0 == 0x00eb
+                    00EB    472 _P1IF	=	0x00eb
+                    00EC    473 Fslave_wixel$WDTIF$0$0 == 0x00ec
+                    00EC    474 _WDTIF	=	0x00ec
+                    00ED    475 Fslave_wixel$_IRCON25$0$0 == 0x00ed
+                    00ED    476 __IRCON25	=	0x00ed
+                    00EE    477 Fslave_wixel$_IRCON26$0$0 == 0x00ee
+                    00EE    478 __IRCON26	=	0x00ee
+                    00EF    479 Fslave_wixel$_IRCON27$0$0 == 0x00ef
+                    00EF    480 __IRCON27	=	0x00ef
+                    00F0    481 Fslave_wixel$B_0$0$0 == 0x00f0
+                    00F0    482 _B_0	=	0x00f0
+                    00F1    483 Fslave_wixel$B_1$0$0 == 0x00f1
+                    00F1    484 _B_1	=	0x00f1
+                    00F2    485 Fslave_wixel$B_2$0$0 == 0x00f2
+                    00F2    486 _B_2	=	0x00f2
+                    00F3    487 Fslave_wixel$B_3$0$0 == 0x00f3
+                    00F3    488 _B_3	=	0x00f3
+                    00F4    489 Fslave_wixel$B_4$0$0 == 0x00f4
+                    00F4    490 _B_4	=	0x00f4
+                    00F5    491 Fslave_wixel$B_5$0$0 == 0x00f5
+                    00F5    492 _B_5	=	0x00f5
+                    00F6    493 Fslave_wixel$B_6$0$0 == 0x00f6
+                    00F6    494 _B_6	=	0x00f6
+                    00F7    495 Fslave_wixel$B_7$0$0 == 0x00f7
+                    00F7    496 _B_7	=	0x00f7
+                    00F8    497 Fslave_wixel$U1ACTIVE$0$0 == 0x00f8
+                    00F8    498 _U1ACTIVE	=	0x00f8
+                    00F9    499 Fslave_wixel$U1TX_BYTE$0$0 == 0x00f9
+                    00F9    500 _U1TX_BYTE	=	0x00f9
+                    00FA    501 Fslave_wixel$U1RX_BYTE$0$0 == 0x00fa
+                    00FA    502 _U1RX_BYTE	=	0x00fa
+                    00FB    503 Fslave_wixel$U1ERR$0$0 == 0x00fb
+                    00FB    504 _U1ERR	=	0x00fb
+                    00FC    505 Fslave_wixel$U1FE$0$0 == 0x00fc
+                    00FC    506 _U1FE	=	0x00fc
+                    00FD    507 Fslave_wixel$U1SLAVE$0$0 == 0x00fd
+                    00FD    508 _U1SLAVE	=	0x00fd
+                    00FE    509 Fslave_wixel$U1RE$0$0 == 0x00fe
+                    00FE    510 _U1RE	=	0x00fe
+                    00FF    511 Fslave_wixel$U1MODE$0$0 == 0x00ff
+                    00FF    512 _U1MODE	=	0x00ff
+                            513 ;--------------------------------------------------------
+                            514 ; overlayable register banks
+                            515 ;--------------------------------------------------------
+                            516 	.area REG_BANK_0	(REL,OVR,DATA)
+   0000                     517 	.ds 8
+                            518 ;--------------------------------------------------------
+                            519 ; internal ram data
+                            520 ;--------------------------------------------------------
+                            521 	.area DSEG    (DATA)
+                    0000    522 Lslave_wixel.handlePacketTimeout$sloc0$1$0==.
+   0000                     523 _handlePacketTimeout_sloc0_1_0:
+   0000                     524 	.ds 4
+                            525 ;--------------------------------------------------------
+                            526 ; overlayable items in internal ram 
+                            527 ;--------------------------------------------------------
+                            528 	.area OSEG    (OVR,DATA)
+                            529 ;--------------------------------------------------------
+                            530 ; Stack segment in internal ram 
+                            531 ;--------------------------------------------------------
+                            532 	.area	SSEG	(DATA)
+   0000                     533 __start__stack:
+   0000                     534 	.ds	1
+                            535 
+                            536 ;--------------------------------------------------------
+                            537 ; indirectly addressable internal ram data
+                            538 ;--------------------------------------------------------
+                            539 	.area ISEG    (DATA)
+                            540 ;--------------------------------------------------------
+                            541 ; absolute internal ram data
+                            542 ;--------------------------------------------------------
+                            543 	.area IABS    (ABS,DATA)
+                            544 	.area IABS    (ABS,DATA)
+                            545 ;--------------------------------------------------------
+                            546 ; bit data
+                            547 ;--------------------------------------------------------
+                            548 	.area BSEG    (BIT)
+                    0000    549 G$dataReceivedFlag$0$0==.
+   0000                     550 _dataReceivedFlag::
+   0000                     551 	.ds 1
+                    0001    552 Lslave_wixel.updateRgbLeds$sloc0$1$0==.
+   0001                     553 _updateRgbLeds_sloc0_1_0:
+   0001                     554 	.ds 1
+                    0002    555 Lslave_wixel.updateMotor$isGreen$1$1==.
+   0002                     556 _updateMotor_isGreen_1_1:
+   0002                     557 	.ds 1
+                    0003    558 Lslave_wixel.updateMotor$isBlue$1$1==.
+   0003                     559 _updateMotor_isBlue_1_1:
+   0003                     560 	.ds 1
+                    0004    561 Lslave_wixel.updateMotor$isRed$1$1==.
+   0004                     562 _updateMotor_isRed_1_1:
+   0004                     563 	.ds 1
+                    0005    564 Lslave_wixel.updateMotor$sloc0$1$0==.
+   0005                     565 _updateMotor_sloc0_1_0:
+   0005                     566 	.ds 1
+                    0006    567 Lslave_wixel.updateStatusLeds$isConnected$1$1==.
+   0006                     568 _updateStatusLeds_isConnected_1_1:
+   0006                     569 	.ds 1
+                    0007    570 Lslave_wixel.updateStatusLeds$sloc0$1$0==.
+   0007                     571 _updateStatusLeds_sloc0_1_0:
+   0007                     572 	.ds 1
+                            573 ;--------------------------------------------------------
+                            574 ; paged external ram data
+                            575 ;--------------------------------------------------------
+                            576 	.area PSEG    (PAG,XDATA)
+                    0000    577 G$ledRed$0$0==.
+   0000                     578 _ledRed::
+   0000                     579 	.ds 1
+                    0001    580 G$ledGreen$0$0==.
+   0001                     581 _ledGreen::
+   0001                     582 	.ds 1
+                    0002    583 G$ledBlue$0$0==.
+   0002                     584 _ledBlue::
+   0002                     585 	.ds 1
+                    0003    586 G$lastPacketTime$0$0==.
+   0003                     587 _lastPacketTime::
+   0003                     588 	.ds 2
+                    0005    589 G$dataReceivedTime$0$0==.
+   0005                     590 _dataReceivedTime::
+   0005                     591 	.ds 2
+                    0007    592 G$__fsi__$0$0==.
+   0007                     593 ___fsi__::
+   0007                     594 	.ds 1
+                            595 ;--------------------------------------------------------
+                            596 ; external ram data
+                            597 ;--------------------------------------------------------
+                            598 	.area XSEG    (XDATA)
+                    DF00    599 Fslave_wixel$SYNC1$0$0 == 0xdf00
+                    DF00    600 _SYNC1	=	0xdf00
+                    DF01    601 Fslave_wixel$SYNC0$0$0 == 0xdf01
+                    DF01    602 _SYNC0	=	0xdf01
+                    DF02    603 Fslave_wixel$PKTLEN$0$0 == 0xdf02
+                    DF02    604 _PKTLEN	=	0xdf02
+                    DF03    605 Fslave_wixel$PKTCTRL1$0$0 == 0xdf03
+                    DF03    606 _PKTCTRL1	=	0xdf03
+                    DF04    607 Fslave_wixel$PKTCTRL0$0$0 == 0xdf04
+                    DF04    608 _PKTCTRL0	=	0xdf04
+                    DF05    609 Fslave_wixel$ADDR$0$0 == 0xdf05
+                    DF05    610 _ADDR	=	0xdf05
+                    DF06    611 Fslave_wixel$CHANNR$0$0 == 0xdf06
+                    DF06    612 _CHANNR	=	0xdf06
+                    DF07    613 Fslave_wixel$FSCTRL1$0$0 == 0xdf07
+                    DF07    614 _FSCTRL1	=	0xdf07
+                    DF08    615 Fslave_wixel$FSCTRL0$0$0 == 0xdf08
+                    DF08    616 _FSCTRL0	=	0xdf08
+                    DF09    617 Fslave_wixel$FREQ2$0$0 == 0xdf09
+                    DF09    618 _FREQ2	=	0xdf09
+                    DF0A    619 Fslave_wixel$FREQ1$0$0 == 0xdf0a
+                    DF0A    620 _FREQ1	=	0xdf0a
+                    DF0B    621 Fslave_wixel$FREQ0$0$0 == 0xdf0b
+                    DF0B    622 _FREQ0	=	0xdf0b
+                    DF0C    623 Fslave_wixel$MDMCFG4$0$0 == 0xdf0c
+                    DF0C    624 _MDMCFG4	=	0xdf0c
+                    DF0D    625 Fslave_wixel$MDMCFG3$0$0 == 0xdf0d
+                    DF0D    626 _MDMCFG3	=	0xdf0d
+                    DF0E    627 Fslave_wixel$MDMCFG2$0$0 == 0xdf0e
+                    DF0E    628 _MDMCFG2	=	0xdf0e
+                    DF0F    629 Fslave_wixel$MDMCFG1$0$0 == 0xdf0f
+                    DF0F    630 _MDMCFG1	=	0xdf0f
+                    DF10    631 Fslave_wixel$MDMCFG0$0$0 == 0xdf10
+                    DF10    632 _MDMCFG0	=	0xdf10
+                    DF11    633 Fslave_wixel$DEVIATN$0$0 == 0xdf11
+                    DF11    634 _DEVIATN	=	0xdf11
+                    DF12    635 Fslave_wixel$MCSM2$0$0 == 0xdf12
+                    DF12    636 _MCSM2	=	0xdf12
+                    DF13    637 Fslave_wixel$MCSM1$0$0 == 0xdf13
+                    DF13    638 _MCSM1	=	0xdf13
+                    DF14    639 Fslave_wixel$MCSM0$0$0 == 0xdf14
+                    DF14    640 _MCSM0	=	0xdf14
+                    DF15    641 Fslave_wixel$FOCCFG$0$0 == 0xdf15
+                    DF15    642 _FOCCFG	=	0xdf15
+                    DF16    643 Fslave_wixel$BSCFG$0$0 == 0xdf16
+                    DF16    644 _BSCFG	=	0xdf16
+                    DF17    645 Fslave_wixel$AGCCTRL2$0$0 == 0xdf17
+                    DF17    646 _AGCCTRL2	=	0xdf17
+                    DF18    647 Fslave_wixel$AGCCTRL1$0$0 == 0xdf18
+                    DF18    648 _AGCCTRL1	=	0xdf18
+                    DF19    649 Fslave_wixel$AGCCTRL0$0$0 == 0xdf19
+                    DF19    650 _AGCCTRL0	=	0xdf19
+                    DF1A    651 Fslave_wixel$FREND1$0$0 == 0xdf1a
+                    DF1A    652 _FREND1	=	0xdf1a
+                    DF1B    653 Fslave_wixel$FREND0$0$0 == 0xdf1b
+                    DF1B    654 _FREND0	=	0xdf1b
+                    DF1C    655 Fslave_wixel$FSCAL3$0$0 == 0xdf1c
+                    DF1C    656 _FSCAL3	=	0xdf1c
+                    DF1D    657 Fslave_wixel$FSCAL2$0$0 == 0xdf1d
+                    DF1D    658 _FSCAL2	=	0xdf1d
+                    DF1E    659 Fslave_wixel$FSCAL1$0$0 == 0xdf1e
+                    DF1E    660 _FSCAL1	=	0xdf1e
+                    DF1F    661 Fslave_wixel$FSCAL0$0$0 == 0xdf1f
+                    DF1F    662 _FSCAL0	=	0xdf1f
+                    DF23    663 Fslave_wixel$TEST2$0$0 == 0xdf23
+                    DF23    664 _TEST2	=	0xdf23
+                    DF24    665 Fslave_wixel$TEST1$0$0 == 0xdf24
+                    DF24    666 _TEST1	=	0xdf24
+                    DF25    667 Fslave_wixel$TEST0$0$0 == 0xdf25
+                    DF25    668 _TEST0	=	0xdf25
+                    DF2E    669 Fslave_wixel$PA_TABLE0$0$0 == 0xdf2e
+                    DF2E    670 _PA_TABLE0	=	0xdf2e
+                    DF2F    671 Fslave_wixel$IOCFG2$0$0 == 0xdf2f
+                    DF2F    672 _IOCFG2	=	0xdf2f
+                    DF30    673 Fslave_wixel$IOCFG1$0$0 == 0xdf30
+                    DF30    674 _IOCFG1	=	0xdf30
+                    DF31    675 Fslave_wixel$IOCFG0$0$0 == 0xdf31
+                    DF31    676 _IOCFG0	=	0xdf31
+                    DF36    677 Fslave_wixel$PARTNUM$0$0 == 0xdf36
+                    DF36    678 _PARTNUM	=	0xdf36
+                    DF37    679 Fslave_wixel$VERSION$0$0 == 0xdf37
+                    DF37    680 _VERSION	=	0xdf37
+                    DF38    681 Fslave_wixel$FREQEST$0$0 == 0xdf38
+                    DF38    682 _FREQEST	=	0xdf38
+                    DF39    683 Fslave_wixel$LQI$0$0 == 0xdf39
+                    DF39    684 _LQI	=	0xdf39
+                    DF3A    685 Fslave_wixel$RSSI$0$0 == 0xdf3a
+                    DF3A    686 _RSSI	=	0xdf3a
+                    DF3B    687 Fslave_wixel$MARCSTATE$0$0 == 0xdf3b
+                    DF3B    688 _MARCSTATE	=	0xdf3b
+                    DF3C    689 Fslave_wixel$PKTSTATUS$0$0 == 0xdf3c
+                    DF3C    690 _PKTSTATUS	=	0xdf3c
+                    DF3D    691 Fslave_wixel$VCO_VC_DAC$0$0 == 0xdf3d
+                    DF3D    692 _VCO_VC_DAC	=	0xdf3d
+                    DF40    693 Fslave_wixel$I2SCFG0$0$0 == 0xdf40
+                    DF40    694 _I2SCFG0	=	0xdf40
+                    DF41    695 Fslave_wixel$I2SCFG1$0$0 == 0xdf41
+                    DF41    696 _I2SCFG1	=	0xdf41
+                    DF42    697 Fslave_wixel$I2SDATL$0$0 == 0xdf42
+                    DF42    698 _I2SDATL	=	0xdf42
+                    DF43    699 Fslave_wixel$I2SDATH$0$0 == 0xdf43
+                    DF43    700 _I2SDATH	=	0xdf43
+                    DF44    701 Fslave_wixel$I2SWCNT$0$0 == 0xdf44
+                    DF44    702 _I2SWCNT	=	0xdf44
+                    DF45    703 Fslave_wixel$I2SSTAT$0$0 == 0xdf45
+                    DF45    704 _I2SSTAT	=	0xdf45
+                    DF46    705 Fslave_wixel$I2SCLKF0$0$0 == 0xdf46
+                    DF46    706 _I2SCLKF0	=	0xdf46
+                    DF47    707 Fslave_wixel$I2SCLKF1$0$0 == 0xdf47
+                    DF47    708 _I2SCLKF1	=	0xdf47
+                    DF48    709 Fslave_wixel$I2SCLKF2$0$0 == 0xdf48
+                    DF48    710 _I2SCLKF2	=	0xdf48
+                    DE00    711 Fslave_wixel$USBADDR$0$0 == 0xde00
+                    DE00    712 _USBADDR	=	0xde00
+                    DE01    713 Fslave_wixel$USBPOW$0$0 == 0xde01
+                    DE01    714 _USBPOW	=	0xde01
+                    DE02    715 Fslave_wixel$USBIIF$0$0 == 0xde02
+                    DE02    716 _USBIIF	=	0xde02
+                    DE04    717 Fslave_wixel$USBOIF$0$0 == 0xde04
+                    DE04    718 _USBOIF	=	0xde04
+                    DE06    719 Fslave_wixel$USBCIF$0$0 == 0xde06
+                    DE06    720 _USBCIF	=	0xde06
+                    DE07    721 Fslave_wixel$USBIIE$0$0 == 0xde07
+                    DE07    722 _USBIIE	=	0xde07
+                    DE09    723 Fslave_wixel$USBOIE$0$0 == 0xde09
+                    DE09    724 _USBOIE	=	0xde09
+                    DE0B    725 Fslave_wixel$USBCIE$0$0 == 0xde0b
+                    DE0B    726 _USBCIE	=	0xde0b
+                    DE0C    727 Fslave_wixel$USBFRML$0$0 == 0xde0c
+                    DE0C    728 _USBFRML	=	0xde0c
+                    DE0D    729 Fslave_wixel$USBFRMH$0$0 == 0xde0d
+                    DE0D    730 _USBFRMH	=	0xde0d
+                    DE0E    731 Fslave_wixel$USBINDEX$0$0 == 0xde0e
+                    DE0E    732 _USBINDEX	=	0xde0e
+                    DE10    733 Fslave_wixel$USBMAXI$0$0 == 0xde10
+                    DE10    734 _USBMAXI	=	0xde10
+                    DE11    735 Fslave_wixel$USBCSIL$0$0 == 0xde11
+                    DE11    736 _USBCSIL	=	0xde11
+                    DE12    737 Fslave_wixel$USBCSIH$0$0 == 0xde12
+                    DE12    738 _USBCSIH	=	0xde12
+                    DE13    739 Fslave_wixel$USBMAXO$0$0 == 0xde13
+                    DE13    740 _USBMAXO	=	0xde13
+                    DE14    741 Fslave_wixel$USBCSOL$0$0 == 0xde14
+                    DE14    742 _USBCSOL	=	0xde14
+                    DE15    743 Fslave_wixel$USBCSOH$0$0 == 0xde15
+                    DE15    744 _USBCSOH	=	0xde15
+                    DE16    745 Fslave_wixel$USBCNTL$0$0 == 0xde16
+                    DE16    746 _USBCNTL	=	0xde16
+                    DE17    747 Fslave_wixel$USBCNTH$0$0 == 0xde17
+                    DE17    748 _USBCNTH	=	0xde17
+                    DE20    749 Fslave_wixel$USBF0$0$0 == 0xde20
+                    DE20    750 _USBF0	=	0xde20
+                    DE22    751 Fslave_wixel$USBF1$0$0 == 0xde22
+                    DE22    752 _USBF1	=	0xde22
+                    DE24    753 Fslave_wixel$USBF2$0$0 == 0xde24
+                    DE24    754 _USBF2	=	0xde24
+                    DE26    755 Fslave_wixel$USBF3$0$0 == 0xde26
+                    DE26    756 _USBF3	=	0xde26
+                    DE28    757 Fslave_wixel$USBF4$0$0 == 0xde28
+                    DE28    758 _USBF4	=	0xde28
+                    DE2A    759 Fslave_wixel$USBF5$0$0 == 0xde2a
+                    DE2A    760 _USBF5	=	0xde2a
+                    0000    761 Fslave_wixel$rxPacket$0$0==.
+   0000                     762 _rxPacket:
+   0000                     763 	.ds 19
+                            764 ;--------------------------------------------------------
+                            765 ; absolute external ram data
+                            766 ;--------------------------------------------------------
+                            767 	.area XABS    (ABS,XDATA)
+                            768 ;--------------------------------------------------------
+                            769 ; external initialized ram data
+                            770 ;--------------------------------------------------------
+                            771 	.area XISEG   (XDATA)
+                            772 	.area HOME    (CODE)
+                            773 	.area GSINIT0 (CODE)
+                            774 	.area GSINIT1 (CODE)
+                            775 	.area GSINIT2 (CODE)
+                            776 	.area GSINIT3 (CODE)
+                            777 	.area GSINIT4 (CODE)
+                            778 	.area GSINIT5 (CODE)
+                            779 	.area GSINIT  (CODE)
+                            780 	.area GSFINAL (CODE)
+                            781 	.area CSEG    (CODE)
+                            782 ;--------------------------------------------------------
+                            783 ; interrupt vector 
+                            784 ;--------------------------------------------------------
+                            785 	.area HOME    (CODE)
+   0000                     786 __interrupt_vect:
+   0000 02s00r00            787 	ljmp	__sdcc_gsinit_startup
+   0003 32                  788 	reti
+   0004                     789 	.ds	7
+   000B 32                  790 	reti
+   000C                     791 	.ds	7
+   0013 32                  792 	reti
+   0014                     793 	.ds	7
+   001B 32                  794 	reti
+   001C                     795 	.ds	7
+   0023 32                  796 	reti
+   0024                     797 	.ds	7
+   002B 32                  798 	reti
+   002C                     799 	.ds	7
+   0033 32                  800 	reti
+   0034                     801 	.ds	7
+   003B 32                  802 	reti
+   003C                     803 	.ds	7
+   0043 32                  804 	reti
+   0044                     805 	.ds	7
+   004B 32                  806 	reti
+   004C                     807 	.ds	7
+   0053 32                  808 	reti
+   0054                     809 	.ds	7
+   005B 32                  810 	reti
+   005C                     811 	.ds	7
+   0063 02s00r00            812 	ljmp	_ISR_T4
+                            813 ;--------------------------------------------------------
+                            814 ; global & static initialisations
+                            815 ;--------------------------------------------------------
+                            816 	.area HOME    (CODE)
+                            817 	.area GSINIT  (CODE)
+                            818 	.area GSFINAL (CODE)
+                            819 	.area GSINIT  (CODE)
+                            820 	.globl __sdcc_gsinit_startup
+                            821 	.globl __sdcc_program_startup
+                            822 	.globl __start__stack
+                            823 	.globl __mcs51_genXINIT
+                            824 	.globl __mcs51_genXRAMCLEAR
+                            825 	.globl __mcs51_genRAMCLEAR
+                    0000    826 	G$main$0$0 ==.
+                    0000    827 	C$slave_wixel.c$72$1$1 ==.
+                            828 ;	apps/slave_wixel/slave_wixel.c:72: BIT dataReceivedFlag = 0;
+   0000 C2*00               829 	clr	_dataReceivedFlag
+                    0002    830 	G$main$0$0 ==.
+                    0002    831 	C$slave_wixel.c$64$1$1 ==.
+                            832 ;	apps/slave_wixel/slave_wixel.c:64: uint8 ledRed = 0;
+   0002 78r00               833 	mov	r0,#_ledRed
+   0004 E4                  834 	clr	a
+   0005 F2                  835 	movx	@r0,a
+                    0006    836 	G$main$0$0 ==.
+                    0006    837 	C$slave_wixel.c$65$1$1 ==.
+                            838 ;	apps/slave_wixel/slave_wixel.c:65: uint8 ledGreen = 0;
+   0006 78r01               839 	mov	r0,#_ledGreen
+   0008 E4                  840 	clr	a
+   0009 F2                  841 	movx	@r0,a
+                    000A    842 	G$main$0$0 ==.
+                    000A    843 	C$slave_wixel.c$66$1$1 ==.
+                            844 ;	apps/slave_wixel/slave_wixel.c:66: uint8 ledBlue = 0;
+   000A 78r02               845 	mov	r0,#_ledBlue
+   000C E4                  846 	clr	a
+   000D F2                  847 	movx	@r0,a
+                    000E    848 	G$main$0$0 ==.
+                    000E    849 	C$slave_wixel.c$69$1$1 ==.
+                            850 ;	apps/slave_wixel/slave_wixel.c:69: uint16 lastPacketTime = 0;
+   000E 78r03               851 	mov	r0,#_lastPacketTime
+   0010 E4                  852 	clr	a
+   0011 F2                  853 	movx	@r0,a
+   0012 08                  854 	inc	r0
+   0013 F2                  855 	movx	@r0,a
+                    0014    856 	G$main$0$0 ==.
+                    0014    857 	C$slave_wixel.c$73$1$1 ==.
+                            858 ;	apps/slave_wixel/slave_wixel.c:73: uint16 dataReceivedTime = 0;
+   0014 78r05               859 	mov	r0,#_dataReceivedTime
+   0016 E4                  860 	clr	a
+   0017 F2                  861 	movx	@r0,a
+   0018 08                  862 	inc	r0
+   0019 F2                  863 	movx	@r0,a
+                            864 	.area GSFINAL (CODE)
+   0000 02s00r66            865 	ljmp	__sdcc_program_startup
+                            866 ;--------------------------------------------------------
+                            867 ; Home
+                            868 ;--------------------------------------------------------
+                            869 	.area HOME    (CODE)
+                            870 	.area HOME    (CODE)
+   0066                     871 __sdcc_program_startup:
+   0066 12s02r73            872 	lcall	_main
+                            873 ;	return from main will lock up
+   0069 80 FE               874 	sjmp .
+                            875 ;--------------------------------------------------------
+                            876 ; code
+                            877 ;--------------------------------------------------------
+                            878 	.area CSEG    (CODE)
+                            879 ;------------------------------------------------------------
+                            880 ;Allocation info for local variables in function 'timer3Init'
+                            881 ;------------------------------------------------------------
+                    0000    882 	G$timer3Init$0$0 ==.
+                    0000    883 	C$slave_wixel.c$78$0$0 ==.
+                            884 ;	apps/slave_wixel/slave_wixel.c:78: void timer3Init()
+                            885 ;	-----------------------------------------
+                            886 ;	 function timer3Init
+                            887 ;	-----------------------------------------
+   0000                     888 _timer3Init:
+                    0007    889 	ar7 = 0x07
+                    0006    890 	ar6 = 0x06
+                    0005    891 	ar5 = 0x05
+                    0004    892 	ar4 = 0x04
+                    0003    893 	ar3 = 0x03
+                    0002    894 	ar2 = 0x02
+                    0001    895 	ar1 = 0x01
+                    0000    896 	ar0 = 0x00
+                    0000    897 	C$slave_wixel.c$80$1$1 ==.
+                            898 ;	apps/slave_wixel/slave_wixel.c:80: T3CTL = 0b01110000;      // Prescaler 1:8, frequency = 11.7 kHz (matches alpha.c)
+   0000 75 CB 70            899 	mov	_T3CTL,#0x70
+                    0003    900 	C$slave_wixel.c$81$1$1 ==.
+                            901 ;	apps/slave_wixel/slave_wixel.c:81: T3CC0 = T3CC1 = 0;       // Set duty cycles to zero
+   0003 75 CF 00            902 	mov	_T3CC1,#0x00
+   0006 75 CD 00            903 	mov	_T3CC0,#0x00
+                    0009    904 	C$slave_wixel.c$82$1$1 ==.
+                            905 ;	apps/slave_wixel/slave_wixel.c:82: T3CCTL0 = T3CCTL1 = 0b00100100;    // Compare mode
+   0009 75 CE 24            906 	mov	_T3CCTL1,#0x24
+   000C 75 CC 24            907 	mov	_T3CCTL0,#0x24
+                    000F    908 	C$slave_wixel.c$83$1$1 ==.
+                            909 ;	apps/slave_wixel/slave_wixel.c:83: PERCFG &= ~(1<<5);       // Alternate location (matches alpha.c)
+   000F AF F1               910 	mov	r7,_PERCFG
+   0011 53 07 DF            911 	anl	ar7,#0xDF
+   0014 8F F1               912 	mov	_PERCFG,r7
+                    0016    913 	C$slave_wixel.c$84$1$1 ==.
+                            914 ;	apps/slave_wixel/slave_wixel.c:84: P1SEL |= (1<<R_PWM_PIN) | (1<<L_PWM_PIN);  // P1_3 and P1_4 as PWM
+   0016 43 F4 18            915 	orl	_P1SEL,#0x18
+                    0019    916 	C$slave_wixel.c$85$1$1 ==.
+                    0019    917 	XG$timer3Init$0$0 ==.
+   0019 22                  918 	ret
+                            919 ;------------------------------------------------------------
+                            920 ;Allocation info for local variables in function 'radioInit'
+                            921 ;------------------------------------------------------------
+                    001A    922 	G$radioInit$0$0 ==.
+                    001A    923 	C$slave_wixel.c$90$1$1 ==.
+                            924 ;	apps/slave_wixel/slave_wixel.c:90: void radioInit()
+                            925 ;	-----------------------------------------
+                            926 ;	 function radioInit
+                            927 ;	-----------------------------------------
+   001A                     928 _radioInit:
+                    001A    929 	C$slave_wixel.c$92$1$1 ==.
+                            930 ;	apps/slave_wixel/slave_wixel.c:92: radioRegistersInit();
+   001A 12s00r00            931 	lcall	_radioRegistersInit
+                    001D    932 	C$slave_wixel.c$94$1$1 ==.
+                            933 ;	apps/slave_wixel/slave_wixel.c:94: CHANNR = 128;
+   001D 90 DF 06            934 	mov	dptr,#_CHANNR
+   0020 74 80               935 	mov	a,#0x80
+   0022 F0                  936 	movx	@dptr,a
+                    0023    937 	C$slave_wixel.c$95$1$1 ==.
+                            938 ;	apps/slave_wixel/slave_wixel.c:95: PKTLEN = RADIO_PACKET_SIZE;
+   0023 90 DF 02            939 	mov	dptr,#_PKTLEN
+   0026 74 10               940 	mov	a,#0x10
+   0028 F0                  941 	movx	@dptr,a
+                    0029    942 	C$slave_wixel.c$97$1$1 ==.
+                            943 ;	apps/slave_wixel/slave_wixel.c:97: MCSM0 = 0x14;
+   0029 90 DF 14            944 	mov	dptr,#_MCSM0
+   002C 74 14               945 	mov	a,#0x14
+   002E F0                  946 	movx	@dptr,a
+                    002F    947 	C$slave_wixel.c$98$1$1 ==.
+                            948 ;	apps/slave_wixel/slave_wixel.c:98: MCSM1 = 0x00;
+   002F 90 DF 13            949 	mov	dptr,#_MCSM1
+   0032 E4                  950 	clr	a
+   0033 F0                  951 	movx	@dptr,a
+                    0034    952 	C$slave_wixel.c$100$1$1 ==.
+                            953 ;	apps/slave_wixel/slave_wixel.c:100: dmaConfig.radio.DC6 = 19;
+   0034 90s00r06            954 	mov	dptr,#(_dmaConfig + 0x0006)
+   0037 74 13               955 	mov	a,#0x13
+   0039 F0                  956 	movx	@dptr,a
+                    003A    957 	C$slave_wixel.c$102$1$1 ==.
+                            958 ;	apps/slave_wixel/slave_wixel.c:102: dmaConfig.radio.SRCADDRH = XDATA_SFR_ADDRESS(RFD) >> 8;
+   003A 7E D9               959 	mov	r6,#_RFD
+   003C 7F 00               960 	mov	r7,#0x00
+   003E 74 DF               961 	mov	a,#0xDF
+   0040 2F                  962 	add	a,r7
+   0041 FE                  963 	mov	r6,a
+   0042 90s00r00            964 	mov	dptr,#_dmaConfig
+   0045 EE                  965 	mov	a,r6
+   0046 F0                  966 	movx	@dptr,a
+                    0047    967 	C$slave_wixel.c$103$1$1 ==.
+                            968 ;	apps/slave_wixel/slave_wixel.c:103: dmaConfig.radio.SRCADDRL = XDATA_SFR_ADDRESS(RFD);
+   0047 7E D9               969 	mov	r6,#_RFD
+   0049 90s00r01            970 	mov	dptr,#(_dmaConfig + 0x0001)
+   004C EE                  971 	mov	a,r6
+   004D F0                  972 	movx	@dptr,a
+                    004E    973 	C$slave_wixel.c$104$1$1 ==.
+                            974 ;	apps/slave_wixel/slave_wixel.c:104: dmaConfig.radio.DESTADDRH = (unsigned int)rxPacket >> 8;
+   004E 7Er00               975 	mov	r6,#_rxPacket
+   0050 7Fs00               976 	mov	r7,#(_rxPacket >> 8)
+   0052 8F 06               977 	mov	ar6,r7
+   0054 90s00r02            978 	mov	dptr,#(_dmaConfig + 0x0002)
+   0057 EE                  979 	mov	a,r6
+   0058 F0                  980 	movx	@dptr,a
+                    0059    981 	C$slave_wixel.c$105$1$1 ==.
+                            982 ;	apps/slave_wixel/slave_wixel.c:105: dmaConfig.radio.DESTADDRL = (unsigned int)rxPacket;
+   0059 7Er00               983 	mov	r6,#_rxPacket
+   005B 7Fs00               984 	mov	r7,#(_rxPacket >> 8)
+   005D 90s00r03            985 	mov	dptr,#(_dmaConfig + 0x0003)
+   0060 EE                  986 	mov	a,r6
+   0061 F0                  987 	movx	@dptr,a
+                    0062    988 	C$slave_wixel.c$106$1$1 ==.
+                            989 ;	apps/slave_wixel/slave_wixel.c:106: dmaConfig.radio.LENL = 1 + PKTLEN + 2;
+   0062 90 DF 02            990 	mov	dptr,#_PKTLEN
+   0065 E0                  991 	movx	a,@dptr
+   0066 FF                  992 	mov	r7,a
+   0067 0F                  993 	inc	r7
+   0068 0F                  994 	inc	r7
+   0069 0F                  995 	inc	r7
+   006A 90s00r05            996 	mov	dptr,#(_dmaConfig + 0x0005)
+   006D EF                  997 	mov	a,r7
+   006E F0                  998 	movx	@dptr,a
+                    006F    999 	C$slave_wixel.c$107$1$1 ==.
+                           1000 ;	apps/slave_wixel/slave_wixel.c:107: dmaConfig.radio.VLEN_LENH = 0b10000000;
+   006F 90s00r04           1001 	mov	dptr,#(_dmaConfig + 0x0004)
+   0072 74 80              1002 	mov	a,#0x80
+   0074 F0                 1003 	movx	@dptr,a
+                    0075   1004 	C$slave_wixel.c$108$1$1 ==.
+                           1005 ;	apps/slave_wixel/slave_wixel.c:108: dmaConfig.radio.DC7 = 0x10;
+   0075 90s00r07           1006 	mov	dptr,#(_dmaConfig + 0x0007)
+   0078 74 10              1007 	mov	a,#0x10
+   007A F0                 1008 	movx	@dptr,a
+                    007B   1009 	C$slave_wixel.c$110$1$1 ==.
+                           1010 ;	apps/slave_wixel/slave_wixel.c:110: DMAARM |= (1<<DMA_CHANNEL_RADIO);
+   007B 43 D6 02           1011 	orl	_DMAARM,#0x02
+                    007E   1012 	C$slave_wixel.c$111$1$1 ==.
+                           1013 ;	apps/slave_wixel/slave_wixel.c:111: RFST = 2;
+   007E 75 E1 02           1014 	mov	_RFST,#0x02
+                    0081   1015 	C$slave_wixel.c$112$1$1 ==.
+                    0081   1016 	XG$radioInit$0$0 ==.
+   0081 22                 1017 	ret
+                           1018 ;------------------------------------------------------------
+                           1019 ;Allocation info for local variables in function 'failSafeBootloader'
+                           1020 ;------------------------------------------------------------
+                    0082   1021 	G$failSafeBootloader$0$0 ==.
+                    0082   1022 	C$slave_wixel.c$120$1$1 ==.
+                           1023 ;	apps/slave_wixel/slave_wixel.c:120: void failSafeBootloader(){
+                           1024 ;	-----------------------------------------
+                           1025 ;	 function failSafeBootloader
+                           1026 ;	-----------------------------------------
+   0082                    1027 _failSafeBootloader:
+                    0082   1028 	C$slave_wixel.c$123$2$2 ==.
+                           1029 ;	apps/slave_wixel/slave_wixel.c:123: LED_RED(0);
+   0082 AF FF              1030 	mov	r7,_P2DIR
+   0084 53 07 FD           1031 	anl	ar7,#0xFD
+   0087 8F FF              1032 	mov	_P2DIR,r7
+                    0089   1033 	C$slave_wixel.c$124$2$3 ==.
+                           1034 ;	apps/slave_wixel/slave_wixel.c:124: LED_RED_TOGGLE();
+   0089 63 FF 02           1035 	xrl	_P2DIR,#0x02
+                    008C   1036 	C$slave_wixel.c$126$1$1 ==.
+                           1037 ;	apps/slave_wixel/slave_wixel.c:126: delayMs(200);
+   008C 90 00 C8           1038 	mov	dptr,#0x00C8
+   008F 12s00r00           1039 	lcall	_delayMs
+                    0092   1040 	C$slave_wixel.c$129$1$1 ==.
+                           1041 ;	apps/slave_wixel/slave_wixel.c:129: for(__fsi__ = 0; __fsi__ < 70; __fsi__++) {
+   0092 78r07              1042 	mov	r0,#___fsi__
+   0094 E4                 1043 	clr	a
+   0095 F2                 1044 	movx	@r0,a
+   0096                    1045 00101$:
+   0096 78r07              1046 	mov	r0,#___fsi__
+   0098 E2                 1047 	movx	a,@r0
+   0099 B4 46 00           1048 	cjne	a,#0x46,00109$
+   009C                    1049 00109$:
+   009C 50 17              1050 	jnc	00104$
+                    009E   1051 	C$slave_wixel.c$130$3$5 ==.
+                           1052 ;	apps/slave_wixel/slave_wixel.c:130: LED_RED_TOGGLE();
+   009E 63 FF 02           1053 	xrl	_P2DIR,#0x02
+                    00A1   1054 	C$slave_wixel.c$131$2$4 ==.
+                           1055 ;	apps/slave_wixel/slave_wixel.c:131: boardService();
+   00A1 12s00r00           1056 	lcall	_boardService
+                    00A4   1057 	C$slave_wixel.c$132$2$4 ==.
+                           1058 ;	apps/slave_wixel/slave_wixel.c:132: usbComService();
+   00A4 12s00r00           1059 	lcall	_usbComService
+                    00A7   1060 	C$slave_wixel.c$133$2$4 ==.
+                           1061 ;	apps/slave_wixel/slave_wixel.c:133: delayMs(100);
+   00A7 90 00 64           1062 	mov	dptr,#0x0064
+   00AA 12s00r00           1063 	lcall	_delayMs
+                    00AD   1064 	C$slave_wixel.c$129$1$1 ==.
+                           1065 ;	apps/slave_wixel/slave_wixel.c:129: for(__fsi__ = 0; __fsi__ < 70; __fsi__++) {
+   00AD 78r07              1066 	mov	r0,#___fsi__
+   00AF E2                 1067 	movx	a,@r0
+   00B0 24 01              1068 	add	a,#0x01
+   00B2 F2                 1069 	movx	@r0,a
+   00B3 80 E1              1070 	sjmp	00101$
+   00B5                    1071 00104$:
+                    00B5   1072 	C$slave_wixel.c$137$2$6 ==.
+                           1073 ;	apps/slave_wixel/slave_wixel.c:137: LED_RED(0);
+   00B5 AF FF              1074 	mov	r7,_P2DIR
+   00B7 53 07 FD           1075 	anl	ar7,#0xFD
+   00BA 8F FF              1076 	mov	_P2DIR,r7
+                    00BC   1077 	C$slave_wixel.c$138$2$6 ==.
+                    00BC   1078 	XG$failSafeBootloader$0$0 ==.
+   00BC 22                 1079 	ret
+                           1080 ;------------------------------------------------------------
+                           1081 ;Allocation info for local variables in function 'gpioInit'
+                           1082 ;------------------------------------------------------------
+                    00BD   1083 	G$gpioInit$0$0 ==.
+                    00BD   1084 	C$slave_wixel.c$140$2$6 ==.
+                           1085 ;	apps/slave_wixel/slave_wixel.c:140: void gpioInit()
+                           1086 ;	-----------------------------------------
+                           1087 ;	 function gpioInit
+                           1088 ;	-----------------------------------------
+   00BD                    1089 _gpioInit:
+                    00BD   1090 	C$slave_wixel.c$142$1$1 ==.
+                           1091 ;	apps/slave_wixel/slave_wixel.c:142: failSafeBootloader();
+   00BD 12s00r82           1092 	lcall	_failSafeBootloader
+                    00C0   1093 	C$slave_wixel.c$144$1$1 ==.
+                           1094 ;	apps/slave_wixel/slave_wixel.c:144: P1SEL = 0x00;     // Force ALL P1 pins to GPIO mode
+   00C0 75 F4 00           1095 	mov	_P1SEL,#0x00
+                    00C3   1096 	C$slave_wixel.c$145$1$1 ==.
+                           1097 ;	apps/slave_wixel/slave_wixel.c:145: P1DIR = 0x00;     // Start with all inputs
+   00C3 75 FE 00           1098 	mov	_P1DIR,#0x00
+                    00C6   1099 	C$slave_wixel.c$146$1$1 ==.
+                           1100 ;	apps/slave_wixel/slave_wixel.c:146: P1 = 0x00;        // Clear all output values
+   00C6 75 90 00           1101 	mov	_P1,#0x00
+                    00C9   1102 	C$slave_wixel.c$149$1$1 ==.
+                           1103 ;	apps/slave_wixel/slave_wixel.c:149: T1CTL = 0x00;
+   00C9 75 E4 00           1104 	mov	_T1CTL,#0x00
+                    00CC   1105 	C$slave_wixel.c$150$1$1 ==.
+                           1106 ;	apps/slave_wixel/slave_wixel.c:150: T3CTL = 0x00;
+   00CC 75 CB 00           1107 	mov	_T3CTL,#0x00
+                    00CF   1108 	C$slave_wixel.c$151$1$1 ==.
+                           1109 ;	apps/slave_wixel/slave_wixel.c:151: T4CTL = 0x00;
+   00CF 75 EB 00           1110 	mov	_T4CTL,#0x00
+                    00D2   1111 	C$slave_wixel.c$154$1$1 ==.
+                           1112 ;	apps/slave_wixel/slave_wixel.c:154: P1DIR |= (1 << LED_RED_PIN) | (1 << LED_GREEN_PIN) | (1 << LED_BLUE_PIN);  // RGB pins
+   00D2 43 FE 86           1113 	orl	_P1DIR,#0x86
+                    00D5   1114 	C$slave_wixel.c$155$1$1 ==.
+                           1115 ;	apps/slave_wixel/slave_wixel.c:155: P1DIR |= (1 << R_DIR_PIN) | (1 << L_DIR_PIN);  // Motor direction pins (both wheels)
+   00D5 43 FE 60           1116 	orl	_P1DIR,#0x60
+                    00D8   1117 	C$slave_wixel.c$158$1$1 ==.
+                           1118 ;	apps/slave_wixel/slave_wixel.c:158: P1SEL = 0x00;
+   00D8 75 F4 00           1119 	mov	_P1SEL,#0x00
+                    00DB   1120 	C$slave_wixel.c$161$1$1 ==.
+                           1121 ;	apps/slave_wixel/slave_wixel.c:161: P1_1 = 1;
+   00DB D2 91              1122 	setb	_P1_1
+                    00DD   1123 	C$slave_wixel.c$162$1$1 ==.
+                           1124 ;	apps/slave_wixel/slave_wixel.c:162: P1_2 = 1;
+   00DD D2 92              1125 	setb	_P1_2
+                    00DF   1126 	C$slave_wixel.c$163$1$1 ==.
+                           1127 ;	apps/slave_wixel/slave_wixel.c:163: P1_7 = 1;
+   00DF D2 97              1128 	setb	_P1_7
+                    00E1   1129 	C$slave_wixel.c$166$1$1 ==.
+                           1130 ;	apps/slave_wixel/slave_wixel.c:166: T3CC0 = 0;
+   00E1 75 CD 00           1131 	mov	_T3CC0,#0x00
+                    00E4   1132 	C$slave_wixel.c$167$1$1 ==.
+                           1133 ;	apps/slave_wixel/slave_wixel.c:167: T3CC1 = 0;
+   00E4 75 CF 00           1134 	mov	_T3CC1,#0x00
+                    00E7   1135 	C$slave_wixel.c$168$1$1 ==.
+                           1136 ;	apps/slave_wixel/slave_wixel.c:168: P1_5 = 0;
+   00E7 C2 95              1137 	clr	_P1_5
+                    00E9   1138 	C$slave_wixel.c$169$1$1 ==.
+                           1139 ;	apps/slave_wixel/slave_wixel.c:169: P1_6 = 0;
+   00E9 C2 96              1140 	clr	_P1_6
+                    00EB   1141 	C$slave_wixel.c$170$1$1 ==.
+                    00EB   1142 	XG$gpioInit$0$0 ==.
+   00EB 22                 1143 	ret
+                           1144 ;------------------------------------------------------------
+                           1145 ;Allocation info for local variables in function 'updateRgbLeds'
+                           1146 ;------------------------------------------------------------
+                    00EC   1147 	G$updateRgbLeds$0$0 ==.
+                    00EC   1148 	C$slave_wixel.c$175$1$1 ==.
+                           1149 ;	apps/slave_wixel/slave_wixel.c:175: void updateRgbLeds()
+                           1150 ;	-----------------------------------------
+                           1151 ;	 function updateRgbLeds
+                           1152 ;	-----------------------------------------
+   00EC                    1153 _updateRgbLeds:
+                    00EC   1154 	C$slave_wixel.c$177$1$1 ==.
+                           1155 ;	apps/slave_wixel/slave_wixel.c:177: P1_1 = (ledRed > 127) ? 0 : 1;
+   00EC 78r00              1156 	mov	r0,#_ledRed
+   00EE C3                 1157 	clr	c
+   00EF E2                 1158 	movx	a,@r0
+   00F0 F5 F0              1159 	mov	b,a
+   00F2 74 7F              1160 	mov	a,#0x7F
+   00F4 95 F0              1161 	subb	a,b
+   00F6 B3                 1162 	cpl	c
+   00F7 92*01              1163 	mov	_updateRgbLeds_sloc0_1_0,c
+   00F9 92 91              1164 	mov	_P1_1,c
+                    00FB   1165 	C$slave_wixel.c$178$1$1 ==.
+                           1166 ;	apps/slave_wixel/slave_wixel.c:178: P1_2 = (ledGreen > 127) ? 0 : 1;
+   00FB 78r01              1167 	mov	r0,#_ledGreen
+   00FD C3                 1168 	clr	c
+   00FE E2                 1169 	movx	a,@r0
+   00FF F5 F0              1170 	mov	b,a
+   0101 74 7F              1171 	mov	a,#0x7F
+   0103 95 F0              1172 	subb	a,b
+   0105 B3                 1173 	cpl	c
+   0106 92*01              1174 	mov	_updateRgbLeds_sloc0_1_0,c
+   0108 92 92              1175 	mov	_P1_2,c
+                    010A   1176 	C$slave_wixel.c$179$1$1 ==.
+                           1177 ;	apps/slave_wixel/slave_wixel.c:179: P1_7 = (ledBlue > 127) ? 0 : 1;
+   010A 78r02              1178 	mov	r0,#_ledBlue
+   010C C3                 1179 	clr	c
+   010D E2                 1180 	movx	a,@r0
+   010E F5 F0              1181 	mov	b,a
+   0110 74 7F              1182 	mov	a,#0x7F
+   0112 95 F0              1183 	subb	a,b
+   0114 B3                 1184 	cpl	c
+   0115 92*01              1185 	mov	_updateRgbLeds_sloc0_1_0,c
+   0117 92 97              1186 	mov	_P1_7,c
+                    0119   1187 	C$slave_wixel.c$180$1$1 ==.
+                    0119   1188 	XG$updateRgbLeds$0$0 ==.
+   0119 22                 1189 	ret
+                           1190 ;------------------------------------------------------------
+                           1191 ;Allocation info for local variables in function 'updateMotor'
+                           1192 ;------------------------------------------------------------
+                    011A   1193 	G$updateMotor$0$0 ==.
+                    011A   1194 	C$slave_wixel.c$188$1$1 ==.
+                           1195 ;	apps/slave_wixel/slave_wixel.c:188: void updateMotor()
+                           1196 ;	-----------------------------------------
+                           1197 ;	 function updateMotor
+                           1198 ;	-----------------------------------------
+   011A                    1199 _updateMotor:
+                    011A   1200 	C$slave_wixel.c$190$1$1 ==.
+                           1201 ;	apps/slave_wixel/slave_wixel.c:190: BIT isGreen = (ledGreen > 127);
+   011A 78r01              1202 	mov	r0,#_ledGreen
+   011C C3                 1203 	clr	c
+   011D E2                 1204 	movx	a,@r0
+   011E F5 F0              1205 	mov	b,a
+   0120 74 7F              1206 	mov	a,#0x7F
+   0122 95 F0              1207 	subb	a,b
+   0124 92*05              1208 	mov  _updateMotor_sloc0_1_0,c
+   0126 92*02              1209 	mov	_updateMotor_isGreen_1_1,c
+                    0128   1210 	C$slave_wixel.c$191$1$1 ==.
+                           1211 ;	apps/slave_wixel/slave_wixel.c:191: BIT isBlue = (ledBlue > 127);
+   0128 78r02              1212 	mov	r0,#_ledBlue
+   012A C3                 1213 	clr	c
+   012B E2                 1214 	movx	a,@r0
+   012C F5 F0              1215 	mov	b,a
+   012E 74 7F              1216 	mov	a,#0x7F
+   0130 95 F0              1217 	subb	a,b
+   0132 92*05              1218 	mov  _updateMotor_sloc0_1_0,c
+   0134 92*03              1219 	mov	_updateMotor_isBlue_1_1,c
+                    0136   1220 	C$slave_wixel.c$192$1$1 ==.
+                           1221 ;	apps/slave_wixel/slave_wixel.c:192: BIT isRed = (ledRed > 127);
+   0136 78r00              1222 	mov	r0,#_ledRed
+   0138 C3                 1223 	clr	c
+   0139 E2                 1224 	movx	a,@r0
+   013A F5 F0              1225 	mov	b,a
+   013C 74 7F              1226 	mov	a,#0x7F
+   013E 95 F0              1227 	subb	a,b
+   0140 92*05              1228 	mov  _updateMotor_sloc0_1_0,c
+   0142 92*04              1229 	mov	_updateMotor_isRed_1_1,c
+                    0144   1230 	C$slave_wixel.c$194$1$1 ==.
+                           1231 ;	apps/slave_wixel/slave_wixel.c:194: if (isGreen || isBlue)
+   0144 20*02 03           1232 	jb	_updateMotor_isGreen_1_1,00104$
+   0147 30*03 0C           1233 	jnb	_updateMotor_isBlue_1_1,00105$
+   014A                    1234 00104$:
+                    014A   1235 	C$slave_wixel.c$197$2$2 ==.
+                           1236 ;	apps/slave_wixel/slave_wixel.c:197: P1_5 = 0;  // Right motor forward
+   014A C2 95              1237 	clr	_P1_5
+                    014C   1238 	C$slave_wixel.c$198$2$2 ==.
+                           1239 ;	apps/slave_wixel/slave_wixel.c:198: P1_6 = 0;  // Left motor forward
+   014C C2 96              1240 	clr	_P1_6
+                    014E   1241 	C$slave_wixel.c$199$2$2 ==.
+                           1242 ;	apps/slave_wixel/slave_wixel.c:199: T3CC0 = MOTOR_SPEED;  // Right motor PWM
+   014E 75 CD 64           1243 	mov	_T3CC0,#0x64
+                    0151   1244 	C$slave_wixel.c$200$2$2 ==.
+                           1245 ;	apps/slave_wixel/slave_wixel.c:200: T3CC1 = MOTOR_SPEED;  // Left motor PWM
+   0151 75 CF 64           1246 	mov	_T3CC1,#0x64
+   0154 80 19              1247 	sjmp	00108$
+   0156                    1248 00105$:
+                    0156   1249 	C$slave_wixel.c$202$1$1 ==.
+                           1250 ;	apps/slave_wixel/slave_wixel.c:202: else if (isRed)
+   0156 30*04 0C           1251 	jnb	_updateMotor_isRed_1_1,00102$
+                    0159   1252 	C$slave_wixel.c$205$2$3 ==.
+                           1253 ;	apps/slave_wixel/slave_wixel.c:205: P1_5 = 1;  // Right motor reverse
+   0159 D2 95              1254 	setb	_P1_5
+                    015B   1255 	C$slave_wixel.c$206$2$3 ==.
+                           1256 ;	apps/slave_wixel/slave_wixel.c:206: P1_6 = 1;  // Left motor reverse
+   015B D2 96              1257 	setb	_P1_6
+                    015D   1258 	C$slave_wixel.c$207$2$3 ==.
+                           1259 ;	apps/slave_wixel/slave_wixel.c:207: T3CC0 = MOTOR_SPEED;  // Right motor PWM
+   015D 75 CD 64           1260 	mov	_T3CC0,#0x64
+                    0160   1261 	C$slave_wixel.c$208$2$3 ==.
+                           1262 ;	apps/slave_wixel/slave_wixel.c:208: T3CC1 = MOTOR_SPEED;  // Left motor PWM
+   0160 75 CF 64           1263 	mov	_T3CC1,#0x64
+   0163 80 0A              1264 	sjmp	00108$
+   0165                    1265 00102$:
+                    0165   1266 	C$slave_wixel.c$213$2$4 ==.
+                           1267 ;	apps/slave_wixel/slave_wixel.c:213: T3CC0 = 0;
+   0165 75 CD 00           1268 	mov	_T3CC0,#0x00
+                    0168   1269 	C$slave_wixel.c$214$2$4 ==.
+                           1270 ;	apps/slave_wixel/slave_wixel.c:214: T3CC1 = 0;
+   0168 75 CF 00           1271 	mov	_T3CC1,#0x00
+                    016B   1272 	C$slave_wixel.c$215$2$4 ==.
+                           1273 ;	apps/slave_wixel/slave_wixel.c:215: P1_5 = 0;
+   016B C2 95              1274 	clr	_P1_5
+                    016D   1275 	C$slave_wixel.c$216$2$4 ==.
+                           1276 ;	apps/slave_wixel/slave_wixel.c:216: P1_6 = 0;
+   016D C2 96              1277 	clr	_P1_6
+   016F                    1278 00108$:
+                    016F   1279 	C$slave_wixel.c$218$1$1 ==.
+                    016F   1280 	XG$updateMotor$0$0 ==.
+   016F 22                 1281 	ret
+                           1282 ;------------------------------------------------------------
+                           1283 ;Allocation info for local variables in function 'updateStatusLeds'
+                           1284 ;------------------------------------------------------------
+                    0170   1285 	G$updateStatusLeds$0$0 ==.
+                    0170   1286 	C$slave_wixel.c$223$1$1 ==.
+                           1287 ;	apps/slave_wixel/slave_wixel.c:223: void updateStatusLeds()
+                           1288 ;	-----------------------------------------
+                           1289 ;	 function updateStatusLeds
+                           1290 ;	-----------------------------------------
+   0170                    1291 _updateStatusLeds:
+                    0170   1292 	C$slave_wixel.c$225$1$1 ==.
+                           1293 ;	apps/slave_wixel/slave_wixel.c:225: uint16 now = (uint16)getMs();
+   0170 12s00r00           1294 	lcall	_getMs
+   0173 AC 82              1295 	mov	r4,dpl
+   0175 AD 83              1296 	mov	r5,dph
+                    0177   1297 	C$slave_wixel.c$226$1$1 ==.
+                           1298 ;	apps/slave_wixel/slave_wixel.c:226: BIT isConnected = ((uint16)(now - lastPacketTime) < CONNECTION_TIMEOUT);
+   0177 78r03              1299 	mov	r0,#_lastPacketTime
+   0179 D3                 1300 	setb	c
+   017A E2                 1301 	movx	a,@r0
+   017B 9C                 1302 	subb	a,r4
+   017C F4                 1303 	cpl	a
+   017D B3                 1304 	cpl	c
+   017E FE                 1305 	mov	r6,a
+   017F B3                 1306 	cpl	c
+   0180 08                 1307 	inc	r0
+   0181 E2                 1308 	movx	a,@r0
+   0182 9D                 1309 	subb	a,r5
+   0183 F4                 1310 	cpl	a
+   0184 FF                 1311 	mov	r7,a
+   0185 C3                 1312 	clr	c
+   0186 EE                 1313 	mov	a,r6
+   0187 94 D0              1314 	subb	a,#0xD0
+   0189 EF                 1315 	mov	a,r7
+   018A 94 07              1316 	subb	a,#0x07
+   018C 92*07              1317 	mov  _updateStatusLeds_sloc0_1_0,c
+                    018E   1318 	C$slave_wixel.c$229$1$1 ==.
+                           1319 ;	apps/slave_wixel/slave_wixel.c:229: if (isConnected)
+   018E 92*06              1320 	mov	_updateStatusLeds_isConnected_1_1,c
+   0190 50 05              1321 	jnc	00102$
+                    0192   1322 	C$slave_wixel.c$231$3$3 ==.
+                           1323 ;	apps/slave_wixel/slave_wixel.c:231: LED_RED(1);
+   0192 43 FF 02           1324 	orl	_P2DIR,#0x02
+   0195 80 07              1325 	sjmp	00103$
+   0197                    1326 00102$:
+                    0197   1327 	C$slave_wixel.c$235$3$5 ==.
+                           1328 ;	apps/slave_wixel/slave_wixel.c:235: LED_RED(0);
+   0197 AF FF              1329 	mov	r7,_P2DIR
+   0199 53 07 FD           1330 	anl	ar7,#0xFD
+   019C 8F FF              1331 	mov	_P2DIR,r7
+   019E                    1332 00103$:
+                    019E   1333 	C$slave_wixel.c$239$1$1 ==.
+                           1334 ;	apps/slave_wixel/slave_wixel.c:239: if (dataReceivedFlag)
+   019E 30*00 27           1335 	jnb	_dataReceivedFlag,00108$
+                    01A1   1336 	C$slave_wixel.c$241$2$6 ==.
+                           1337 ;	apps/slave_wixel/slave_wixel.c:241: if ((uint16)(now - dataReceivedTime) < YELLOW_LED_PULSE)
+   01A1 78r05              1338 	mov	r0,#_dataReceivedTime
+   01A3 D3                 1339 	setb	c
+   01A4 E2                 1340 	movx	a,@r0
+   01A5 9C                 1341 	subb	a,r4
+   01A6 F4                 1342 	cpl	a
+   01A7 B3                 1343 	cpl	c
+   01A8 FC                 1344 	mov	r4,a
+   01A9 B3                 1345 	cpl	c
+   01AA 08                 1346 	inc	r0
+   01AB E2                 1347 	movx	a,@r0
+   01AC 9D                 1348 	subb	a,r5
+   01AD F4                 1349 	cpl	a
+   01AE FD                 1350 	mov	r5,a
+   01AF C3                 1351 	clr	c
+   01B0 EC                 1352 	mov	a,r4
+   01B1 94 64              1353 	subb	a,#0x64
+   01B3 ED                 1354 	mov	a,r5
+   01B4 94 00              1355 	subb	a,#0x00
+   01B6 50 05              1356 	jnc	00105$
+                    01B8   1357 	C$slave_wixel.c$243$4$8 ==.
+                           1358 ;	apps/slave_wixel/slave_wixel.c:243: LED_YELLOW(1);
+   01B8 43 FF 04           1359 	orl	_P2DIR,#0x04
+   01BB 80 12              1360 	sjmp	00110$
+   01BD                    1361 00105$:
+                    01BD   1362 	C$slave_wixel.c$247$4$10 ==.
+                           1363 ;	apps/slave_wixel/slave_wixel.c:247: LED_YELLOW(0);
+   01BD AF FF              1364 	mov	r7,_P2DIR
+   01BF 53 07 FB           1365 	anl	ar7,#0xFB
+   01C2 8F FF              1366 	mov	_P2DIR,r7
+                    01C4   1367 	C$slave_wixel.c$248$3$9 ==.
+                           1368 ;	apps/slave_wixel/slave_wixel.c:248: dataReceivedFlag = 0;
+   01C4 C2*00              1369 	clr	_dataReceivedFlag
+   01C6 80 07              1370 	sjmp	00110$
+   01C8                    1371 00108$:
+                    01C8   1372 	C$slave_wixel.c$253$3$12 ==.
+                           1373 ;	apps/slave_wixel/slave_wixel.c:253: LED_YELLOW(0);
+   01C8 AF FF              1374 	mov	r7,_P2DIR
+   01CA 53 07 FB           1375 	anl	ar7,#0xFB
+   01CD 8F FF              1376 	mov	_P2DIR,r7
+   01CF                    1377 00110$:
+                    01CF   1378 	C$slave_wixel.c$255$1$1 ==.
+                    01CF   1379 	XG$updateStatusLeds$0$0 ==.
+   01CF 22                 1380 	ret
+                           1381 ;------------------------------------------------------------
+                           1382 ;Allocation info for local variables in function 'receiveAndProcessPackets'
+                           1383 ;------------------------------------------------------------
+                    01D0   1384 	G$receiveAndProcessPackets$0$0 ==.
+                    01D0   1385 	C$slave_wixel.c$260$1$1 ==.
+                           1386 ;	apps/slave_wixel/slave_wixel.c:260: void receiveAndProcessPackets()
+                           1387 ;	-----------------------------------------
+                           1388 ;	 function receiveAndProcessPackets
+                           1389 ;	-----------------------------------------
+   01D0                    1390 _receiveAndProcessPackets:
+                    01D0   1391 	C$slave_wixel.c$262$1$1 ==.
+                           1392 ;	apps/slave_wixel/slave_wixel.c:262: if (RFIF & (1<<4))
+   01D0 E5 E9              1393 	mov	a,_RFIF
+   01D2 30 E4 5E           1394 	jnb	acc.4,00111$
+                    01D5   1395 	C$slave_wixel.c$264$2$2 ==.
+                           1396 ;	apps/slave_wixel/slave_wixel.c:264: if (radioCrcPassed())
+   01D5 12s00r00           1397 	lcall	_radioCrcPassed
+   01D8 50 4C              1398 	jnc	00108$
+                    01DA   1399 	C$slave_wixel.c$274$4$4 ==.
+                           1400 ;	apps/slave_wixel/slave_wixel.c:274: slaveAddress = rxPacket[1];
+   01DA 90s00r01           1401 	mov	dptr,#(_rxPacket + 0x0001)
+   01DD E0                 1402 	movx	a,@dptr
+   01DE FF                 1403 	mov	r7,a
+                    01DF   1404 	C$slave_wixel.c$275$4$4 ==.
+                           1405 ;	apps/slave_wixel/slave_wixel.c:275: slaveCmd = rxPacket[4];
+   01DF 90s00r04           1406 	mov	dptr,#(_rxPacket + 0x0004)
+   01E2 E0                 1407 	movx	a,@dptr
+   01E3 FE                 1408 	mov	r6,a
+                    01E4   1409 	C$slave_wixel.c$276$4$4 ==.
+                           1410 ;	apps/slave_wixel/slave_wixel.c:276: slaveRed = rxPacket[5];
+   01E4 90s00r05           1411 	mov	dptr,#(_rxPacket + 0x0005)
+   01E7 E0                 1412 	movx	a,@dptr
+   01E8 FD                 1413 	mov	r5,a
+                    01E9   1414 	C$slave_wixel.c$277$4$4 ==.
+                           1415 ;	apps/slave_wixel/slave_wixel.c:277: slaveGreen = rxPacket[6];
+   01E9 90s00r06           1416 	mov	dptr,#(_rxPacket + 0x0006)
+   01EC E0                 1417 	movx	a,@dptr
+   01ED FC                 1418 	mov	r4,a
+                    01EE   1419 	C$slave_wixel.c$278$4$4 ==.
+                           1420 ;	apps/slave_wixel/slave_wixel.c:278: slaveBlue = rxPacket[7];
+   01EE 90s00r07           1421 	mov	dptr,#(_rxPacket + 0x0007)
+   01F1 E0                 1422 	movx	a,@dptr
+   01F2 FB                 1423 	mov	r3,a
+                    01F3   1424 	C$slave_wixel.c$289$3$3 ==.
+                           1425 ;	apps/slave_wixel/slave_wixel.c:289: if (slaveAddress == THIS_SLAVE_ADDRESS && slaveCmd == CMD_SET_LED)
+   01F3 BF 01 30           1426 	cjne	r7,#0x01,00108$
+   01F6 BE 01 2D           1427 	cjne	r6,#0x01,00108$
+                    01F9   1428 	C$slave_wixel.c$291$4$6 ==.
+                           1429 ;	apps/slave_wixel/slave_wixel.c:291: ledRed = slaveRed;
+   01F9 78r00              1430 	mov	r0,#_ledRed
+   01FB ED                 1431 	mov	a,r5
+   01FC F2                 1432 	movx	@r0,a
+                    01FD   1433 	C$slave_wixel.c$292$4$6 ==.
+                           1434 ;	apps/slave_wixel/slave_wixel.c:292: ledGreen = slaveGreen;
+   01FD 78r01              1435 	mov	r0,#_ledGreen
+   01FF EC                 1436 	mov	a,r4
+   0200 F2                 1437 	movx	@r0,a
+                    0201   1438 	C$slave_wixel.c$293$4$6 ==.
+                           1439 ;	apps/slave_wixel/slave_wixel.c:293: ledBlue = slaveBlue;
+   0201 78r02              1440 	mov	r0,#_ledBlue
+   0203 EB                 1441 	mov	a,r3
+   0204 F2                 1442 	movx	@r0,a
+                    0205   1443 	C$slave_wixel.c$294$4$6 ==.
+                           1444 ;	apps/slave_wixel/slave_wixel.c:294: lastPacketTime = (uint16)getMs();
+   0205 12s00r00           1445 	lcall	_getMs
+   0208 AC 82              1446 	mov	r4,dpl
+   020A AD 83              1447 	mov	r5,dph
+   020C 78r03              1448 	mov	r0,#_lastPacketTime
+   020E EC                 1449 	mov	a,r4
+   020F F2                 1450 	movx	@r0,a
+   0210 08                 1451 	inc	r0
+   0211 ED                 1452 	mov	a,r5
+   0212 F2                 1453 	movx	@r0,a
+                    0213   1454 	C$slave_wixel.c$296$4$6 ==.
+                           1455 ;	apps/slave_wixel/slave_wixel.c:296: dataReceivedFlag = 1;
+   0213 D2*00              1456 	setb	_dataReceivedFlag
+                    0215   1457 	C$slave_wixel.c$297$4$6 ==.
+                           1458 ;	apps/slave_wixel/slave_wixel.c:297: dataReceivedTime = (uint16)getMs();
+   0215 12s00r00           1459 	lcall	_getMs
+   0218 AC 82              1460 	mov	r4,dpl
+   021A AD 83              1461 	mov	r5,dph
+   021C AE F0              1462 	mov	r6,b
+   021E FF                 1463 	mov	r7,a
+   021F 78r05              1464 	mov	r0,#_dataReceivedTime
+   0221 EC                 1465 	mov	a,r4
+   0222 F2                 1466 	movx	@r0,a
+   0223 08                 1467 	inc	r0
+   0224 ED                 1468 	mov	a,r5
+   0225 F2                 1469 	movx	@r0,a
+   0226                    1470 00108$:
+                    0226   1471 	C$slave_wixel.c$301$2$2 ==.
+                           1472 ;	apps/slave_wixel/slave_wixel.c:301: RFIF &= ~(1<<4);
+   0226 AF E9              1473 	mov	r7,_RFIF
+   0228 53 07 EF           1474 	anl	ar7,#0xEF
+   022B 8F E9              1475 	mov	_RFIF,r7
+                    022D   1476 	C$slave_wixel.c$302$2$2 ==.
+                           1477 ;	apps/slave_wixel/slave_wixel.c:302: DMAARM |= (1<<DMA_CHANNEL_RADIO);
+   022D 43 D6 02           1478 	orl	_DMAARM,#0x02
+                    0230   1479 	C$slave_wixel.c$303$2$2 ==.
+                           1480 ;	apps/slave_wixel/slave_wixel.c:303: RFST = 2;
+   0230 75 E1 02           1481 	mov	_RFST,#0x02
+   0233                    1482 00111$:
+                    0233   1483 	C$slave_wixel.c$305$2$1 ==.
+                    0233   1484 	XG$receiveAndProcessPackets$0$0 ==.
+   0233 22                 1485 	ret
+                           1486 ;------------------------------------------------------------
+                           1487 ;Allocation info for local variables in function 'handlePacketTimeout'
+                           1488 ;------------------------------------------------------------
+                           1489 ;sloc0                     Allocated with name '_handlePacketTimeout_sloc0_1_0'
+                           1490 ;------------------------------------------------------------
+                    0234   1491 	G$handlePacketTimeout$0$0 ==.
+                    0234   1492 	C$slave_wixel.c$310$2$1 ==.
+                           1493 ;	apps/slave_wixel/slave_wixel.c:310: void handlePacketTimeout()
+                           1494 ;	-----------------------------------------
+                           1495 ;	 function handlePacketTimeout
+                           1496 ;	-----------------------------------------
+   0234                    1497 _handlePacketTimeout:
+                    0234   1498 	C$slave_wixel.c$312$1$1 ==.
+                           1499 ;	apps/slave_wixel/slave_wixel.c:312: if ((uint16)(getMs() - lastPacketTime) > CONNECTION_TIMEOUT)
+   0234 12s00r00           1500 	lcall	_getMs
+   0237 85 82*00           1501 	mov	_handlePacketTimeout_sloc0_1_0,dpl
+   023A 85 83*01           1502 	mov	(_handlePacketTimeout_sloc0_1_0 + 1),dph
+   023D 85 F0*02           1503 	mov	(_handlePacketTimeout_sloc0_1_0 + 2),b
+   0240 F5*03              1504 	mov	(_handlePacketTimeout_sloc0_1_0 + 3),a
+   0242 78r03              1505 	mov	r0,#_lastPacketTime
+   0244 E2                 1506 	movx	a,@r0
+   0245 FA                 1507 	mov	r2,a
+   0246 08                 1508 	inc	r0
+   0247 E2                 1509 	movx	a,@r0
+   0248 FB                 1510 	mov	r3,a
+   0249 E4                 1511 	clr	a
+   024A FE                 1512 	mov	r6,a
+   024B FF                 1513 	mov	r7,a
+   024C E5*00              1514 	mov	a,_handlePacketTimeout_sloc0_1_0
+   024E C3                 1515 	clr	c
+   024F 9A                 1516 	subb	a,r2
+   0250 FA                 1517 	mov	r2,a
+   0251 E5*01              1518 	mov	a,(_handlePacketTimeout_sloc0_1_0 + 1)
+   0253 9B                 1519 	subb	a,r3
+   0254 FB                 1520 	mov	r3,a
+   0255 E5*02              1521 	mov	a,(_handlePacketTimeout_sloc0_1_0 + 2)
+   0257 9E                 1522 	subb	a,r6
+   0258 FE                 1523 	mov	r6,a
+   0259 E5*03              1524 	mov	a,(_handlePacketTimeout_sloc0_1_0 + 3)
+   025B 9F                 1525 	subb	a,r7
+   025C FF                 1526 	mov	r7,a
+   025D C3                 1527 	clr	c
+   025E 74 D0              1528 	mov	a,#0xD0
+   0260 9A                 1529 	subb	a,r2
+   0261 74 07              1530 	mov	a,#0x07
+   0263 9B                 1531 	subb	a,r3
+   0264 50 0C              1532 	jnc	00103$
+                    0266   1533 	C$slave_wixel.c$314$2$2 ==.
+                           1534 ;	apps/slave_wixel/slave_wixel.c:314: ledRed = 0;
+   0266 78r00              1535 	mov	r0,#_ledRed
+   0268 E4                 1536 	clr	a
+   0269 F2                 1537 	movx	@r0,a
+                    026A   1538 	C$slave_wixel.c$315$2$2 ==.
+                           1539 ;	apps/slave_wixel/slave_wixel.c:315: ledGreen = 0;
+   026A 78r01              1540 	mov	r0,#_ledGreen
+   026C E4                 1541 	clr	a
+   026D F2                 1542 	movx	@r0,a
+                    026E   1543 	C$slave_wixel.c$316$2$2 ==.
+                           1544 ;	apps/slave_wixel/slave_wixel.c:316: ledBlue = 0;
+   026E 78r02              1545 	mov	r0,#_ledBlue
+   0270 E4                 1546 	clr	a
+   0271 F2                 1547 	movx	@r0,a
+   0272                    1548 00103$:
+                    0272   1549 	C$slave_wixel.c$318$2$1 ==.
+                    0272   1550 	XG$handlePacketTimeout$0$0 ==.
+   0272 22                 1551 	ret
+                           1552 ;------------------------------------------------------------
+                           1553 ;Allocation info for local variables in function 'main'
+                           1554 ;------------------------------------------------------------
+                    0273   1555 	G$main$0$0 ==.
+                    0273   1556 	C$slave_wixel.c$323$2$1 ==.
+                           1557 ;	apps/slave_wixel/slave_wixel.c:323: void main()
+                           1558 ;	-----------------------------------------
+                           1559 ;	 function main
+                           1560 ;	-----------------------------------------
+   0273                    1561 _main:
+                    0273   1562 	C$slave_wixel.c$325$1$1 ==.
+                           1563 ;	apps/slave_wixel/slave_wixel.c:325: systemInit();
+   0273 12s00r00           1564 	lcall	_systemInit
+                    0276   1565 	C$slave_wixel.c$326$1$1 ==.
+                           1566 ;	apps/slave_wixel/slave_wixel.c:326: radioInit();
+   0276 12s00r1A           1567 	lcall	_radioInit
+                    0279   1568 	C$slave_wixel.c$327$1$1 ==.
+                           1569 ;	apps/slave_wixel/slave_wixel.c:327: gpioInit();
+   0279 12s00rBD           1570 	lcall	_gpioInit
+                    027C   1571 	C$slave_wixel.c$329$1$1 ==.
+                           1572 ;	apps/slave_wixel/slave_wixel.c:329: lastPacketTime = (uint16)getMs();
+   027C 12s00r00           1573 	lcall	_getMs
+   027F AC 82              1574 	mov	r4,dpl
+   0281 AD 83              1575 	mov	r5,dph
+   0283 78r03              1576 	mov	r0,#_lastPacketTime
+   0285 EC                 1577 	mov	a,r4
+   0286 F2                 1578 	movx	@r0,a
+   0287 08                 1579 	inc	r0
+   0288 ED                 1580 	mov	a,r5
+   0289 F2                 1581 	movx	@r0,a
+                    028A   1582 	C$slave_wixel.c$332$1$1 ==.
+                           1583 ;	apps/slave_wixel/slave_wixel.c:332: P1_1 = 0;  // Red on
+   028A C2 91              1584 	clr	_P1_1
+                    028C   1585 	C$slave_wixel.c$333$1$1 ==.
+                           1586 ;	apps/slave_wixel/slave_wixel.c:333: P1_2 = 1;
+   028C D2 92              1587 	setb	_P1_2
+                    028E   1588 	C$slave_wixel.c$334$1$1 ==.
+                           1589 ;	apps/slave_wixel/slave_wixel.c:334: P1_7 = 1;
+   028E D2 97              1590 	setb	_P1_7
+                    0290   1591 	C$slave_wixel.c$335$1$1 ==.
+                           1592 ;	apps/slave_wixel/slave_wixel.c:335: delayMs(500);
+   0290 90 01 F4           1593 	mov	dptr,#0x01F4
+   0293 12s00r00           1594 	lcall	_delayMs
+                    0296   1595 	C$slave_wixel.c$337$1$1 ==.
+                           1596 ;	apps/slave_wixel/slave_wixel.c:337: P1_1 = 1;
+   0296 D2 91              1597 	setb	_P1_1
+                    0298   1598 	C$slave_wixel.c$338$1$1 ==.
+                           1599 ;	apps/slave_wixel/slave_wixel.c:338: P1_2 = 0;  // Green on
+   0298 C2 92              1600 	clr	_P1_2
+                    029A   1601 	C$slave_wixel.c$339$1$1 ==.
+                           1602 ;	apps/slave_wixel/slave_wixel.c:339: P1_7 = 1;
+   029A D2 97              1603 	setb	_P1_7
+                    029C   1604 	C$slave_wixel.c$340$1$1 ==.
+                           1605 ;	apps/slave_wixel/slave_wixel.c:340: delayMs(500);
+   029C 90 01 F4           1606 	mov	dptr,#0x01F4
+   029F 12s00r00           1607 	lcall	_delayMs
+                    02A2   1608 	C$slave_wixel.c$342$1$1 ==.
+                           1609 ;	apps/slave_wixel/slave_wixel.c:342: P1_1 = 1;
+   02A2 D2 91              1610 	setb	_P1_1
+                    02A4   1611 	C$slave_wixel.c$343$1$1 ==.
+                           1612 ;	apps/slave_wixel/slave_wixel.c:343: P1_2 = 1;
+   02A4 D2 92              1613 	setb	_P1_2
+                    02A6   1614 	C$slave_wixel.c$344$1$1 ==.
+                           1615 ;	apps/slave_wixel/slave_wixel.c:344: P1_7 = 0;  // Blue on
+   02A6 C2 97              1616 	clr	_P1_7
+                    02A8   1617 	C$slave_wixel.c$345$1$1 ==.
+                           1618 ;	apps/slave_wixel/slave_wixel.c:345: delayMs(500);
+   02A8 90 01 F4           1619 	mov	dptr,#0x01F4
+   02AB 12s00r00           1620 	lcall	_delayMs
+                    02AE   1621 	C$slave_wixel.c$347$1$1 ==.
+                           1622 ;	apps/slave_wixel/slave_wixel.c:347: P1_1 = 0;
+   02AE C2 91              1623 	clr	_P1_1
+                    02B0   1624 	C$slave_wixel.c$348$1$1 ==.
+                           1625 ;	apps/slave_wixel/slave_wixel.c:348: P1_2 = 0;
+   02B0 C2 92              1626 	clr	_P1_2
+                    02B2   1627 	C$slave_wixel.c$349$1$1 ==.
+                           1628 ;	apps/slave_wixel/slave_wixel.c:349: P1_7 = 0;  // All on
+   02B2 C2 97              1629 	clr	_P1_7
+                    02B4   1630 	C$slave_wixel.c$350$1$1 ==.
+                           1631 ;	apps/slave_wixel/slave_wixel.c:350: delayMs(500);
+   02B4 90 01 F4           1632 	mov	dptr,#0x01F4
+   02B7 12s00r00           1633 	lcall	_delayMs
+                    02BA   1634 	C$slave_wixel.c$352$1$1 ==.
+                           1635 ;	apps/slave_wixel/slave_wixel.c:352: P1_1 = 1;
+   02BA D2 91              1636 	setb	_P1_1
+                    02BC   1637 	C$slave_wixel.c$353$1$1 ==.
+                           1638 ;	apps/slave_wixel/slave_wixel.c:353: P1_2 = 1;
+   02BC D2 92              1639 	setb	_P1_2
+                    02BE   1640 	C$slave_wixel.c$354$1$1 ==.
+                           1641 ;	apps/slave_wixel/slave_wixel.c:354: P1_7 = 1;  // All off
+   02BE D2 97              1642 	setb	_P1_7
+                    02C0   1643 	C$slave_wixel.c$355$1$1 ==.
+                           1644 ;	apps/slave_wixel/slave_wixel.c:355: delayMs(500);
+   02C0 90 01 F4           1645 	mov	dptr,#0x01F4
+   02C3 12s00r00           1646 	lcall	_delayMs
+                    02C6   1647 	C$slave_wixel.c$357$1$1 ==.
+                           1648 ;	apps/slave_wixel/slave_wixel.c:357: lastPacketTime = (uint16)getMs();
+   02C6 12s00r00           1649 	lcall	_getMs
+   02C9 AC 82              1650 	mov	r4,dpl
+   02CB AD 83              1651 	mov	r5,dph
+   02CD 78r03              1652 	mov	r0,#_lastPacketTime
+   02CF EC                 1653 	mov	a,r4
+   02D0 F2                 1654 	movx	@r0,a
+   02D1 08                 1655 	inc	r0
+   02D2 ED                 1656 	mov	a,r5
+   02D3 F2                 1657 	movx	@r0,a
+                    02D4   1658 	C$slave_wixel.c$360$1$1 ==.
+                           1659 ;	apps/slave_wixel/slave_wixel.c:360: timer3Init();
+   02D4 12s00r00           1660 	lcall	_timer3Init
+                    02D7   1661 	C$slave_wixel.c$362$1$1 ==.
+                           1662 ;	apps/slave_wixel/slave_wixel.c:362: while(1)
+   02D7                    1663 00102$:
+                    02D7   1664 	C$slave_wixel.c$364$2$2 ==.
+                           1665 ;	apps/slave_wixel/slave_wixel.c:364: boardService();
+   02D7 12s00r00           1666 	lcall	_boardService
+                    02DA   1667 	C$slave_wixel.c$365$2$2 ==.
+                           1668 ;	apps/slave_wixel/slave_wixel.c:365: receiveAndProcessPackets();
+   02DA 12s01rD0           1669 	lcall	_receiveAndProcessPackets
+                    02DD   1670 	C$slave_wixel.c$366$2$2 ==.
+                           1671 ;	apps/slave_wixel/slave_wixel.c:366: handlePacketTimeout();
+   02DD 12s02r34           1672 	lcall	_handlePacketTimeout
+                    02E0   1673 	C$slave_wixel.c$367$2$2 ==.
+                           1674 ;	apps/slave_wixel/slave_wixel.c:367: updateRgbLeds();
+   02E0 12s00rEC           1675 	lcall	_updateRgbLeds
+                    02E3   1676 	C$slave_wixel.c$368$2$2 ==.
+                           1677 ;	apps/slave_wixel/slave_wixel.c:368: updateMotor();
+   02E3 12s01r1A           1678 	lcall	_updateMotor
+                    02E6   1679 	C$slave_wixel.c$369$2$2 ==.
+                           1680 ;	apps/slave_wixel/slave_wixel.c:369: updateStatusLeds();
+   02E6 12s01r70           1681 	lcall	_updateStatusLeds
+   02E9 80 EC              1682 	sjmp	00102$
+                    02EB   1683 	C$slave_wixel.c$371$1$1 ==.
+                    02EB   1684 	XG$main$0$0 ==.
+   02EB 22                 1685 	ret
+                           1686 	.area CSEG    (CODE)
+                           1687 	.area CONST   (CODE)
+                           1688 	.area XINIT   (CODE)
+                           1689 	.area CABS    (ABS,CODE)

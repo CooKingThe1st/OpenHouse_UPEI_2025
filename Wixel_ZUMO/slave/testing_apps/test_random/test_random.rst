@@ -1,0 +1,1125 @@
+                              1 ;--------------------------------------------------------
+                              2 ; File Created by SDCC : free open source ANSI-C Compiler
+                              3 ; Version 3.1.0 #7066 (Nov 22 2011) (MINGW32)
+                              4 ; This file was generated Thu Oct 23 16:11:01 2025
+                              5 ;--------------------------------------------------------
+                              6 	.module test_random
+                              7 	.optsdcc -mmcs51 --model-medium
+                              8 	
+                              9 ;--------------------------------------------------------
+                             10 ; Public variables in this module
+                             11 ;--------------------------------------------------------
+                             12 	.globl _main
+                             13 	.globl _updateHeartbeatLed
+                             14 	.globl _timer3Init
+                             15 	.globl _usbComService
+                             16 	.globl _usbInit
+                             17 	.globl _delayMs
+                             18 	.globl _getMs
+                             19 	.globl _boardService
+                             20 	.globl _systemInit
+                             21 	.globl _i
+                             22 	.globl _motorState
+                             23 	.globl _lastMotorActionTime
+                             24 	.globl _lastRedLedToggle
+                             25 ;--------------------------------------------------------
+                             26 ; special function registers
+                             27 ;--------------------------------------------------------
+                             28 	.area RSEG    (ABS,DATA)
+   0000                      29 	.org 0x0000
+                    0080     30 Ftest_random$P0$0$0 == 0x0080
+                    0080     31 _P0	=	0x0080
+                    0081     32 Ftest_random$SP$0$0 == 0x0081
+                    0081     33 _SP	=	0x0081
+                    0082     34 Ftest_random$DPL0$0$0 == 0x0082
+                    0082     35 _DPL0	=	0x0082
+                    0083     36 Ftest_random$DPH0$0$0 == 0x0083
+                    0083     37 _DPH0	=	0x0083
+                    0084     38 Ftest_random$DPL1$0$0 == 0x0084
+                    0084     39 _DPL1	=	0x0084
+                    0085     40 Ftest_random$DPH1$0$0 == 0x0085
+                    0085     41 _DPH1	=	0x0085
+                    0086     42 Ftest_random$U0CSR$0$0 == 0x0086
+                    0086     43 _U0CSR	=	0x0086
+                    0087     44 Ftest_random$PCON$0$0 == 0x0087
+                    0087     45 _PCON	=	0x0087
+                    0088     46 Ftest_random$TCON$0$0 == 0x0088
+                    0088     47 _TCON	=	0x0088
+                    0089     48 Ftest_random$P0IFG$0$0 == 0x0089
+                    0089     49 _P0IFG	=	0x0089
+                    008A     50 Ftest_random$P1IFG$0$0 == 0x008a
+                    008A     51 _P1IFG	=	0x008a
+                    008B     52 Ftest_random$P2IFG$0$0 == 0x008b
+                    008B     53 _P2IFG	=	0x008b
+                    008C     54 Ftest_random$PICTL$0$0 == 0x008c
+                    008C     55 _PICTL	=	0x008c
+                    008D     56 Ftest_random$P1IEN$0$0 == 0x008d
+                    008D     57 _P1IEN	=	0x008d
+                    008F     58 Ftest_random$P0INP$0$0 == 0x008f
+                    008F     59 _P0INP	=	0x008f
+                    0090     60 Ftest_random$P1$0$0 == 0x0090
+                    0090     61 _P1	=	0x0090
+                    0091     62 Ftest_random$RFIM$0$0 == 0x0091
+                    0091     63 _RFIM	=	0x0091
+                    0092     64 Ftest_random$DPS$0$0 == 0x0092
+                    0092     65 _DPS	=	0x0092
+                    0093     66 Ftest_random$MPAGE$0$0 == 0x0093
+                    0093     67 _MPAGE	=	0x0093
+                    0095     68 Ftest_random$ENDIAN$0$0 == 0x0095
+                    0095     69 _ENDIAN	=	0x0095
+                    0098     70 Ftest_random$S0CON$0$0 == 0x0098
+                    0098     71 _S0CON	=	0x0098
+                    009A     72 Ftest_random$IEN2$0$0 == 0x009a
+                    009A     73 _IEN2	=	0x009a
+                    009B     74 Ftest_random$S1CON$0$0 == 0x009b
+                    009B     75 _S1CON	=	0x009b
+                    009C     76 Ftest_random$T2CT$0$0 == 0x009c
+                    009C     77 _T2CT	=	0x009c
+                    009D     78 Ftest_random$T2PR$0$0 == 0x009d
+                    009D     79 _T2PR	=	0x009d
+                    009E     80 Ftest_random$T2CTL$0$0 == 0x009e
+                    009E     81 _T2CTL	=	0x009e
+                    00A0     82 Ftest_random$P2$0$0 == 0x00a0
+                    00A0     83 _P2	=	0x00a0
+                    00A1     84 Ftest_random$WORIRQ$0$0 == 0x00a1
+                    00A1     85 _WORIRQ	=	0x00a1
+                    00A2     86 Ftest_random$WORCTRL$0$0 == 0x00a2
+                    00A2     87 _WORCTRL	=	0x00a2
+                    00A3     88 Ftest_random$WOREVT0$0$0 == 0x00a3
+                    00A3     89 _WOREVT0	=	0x00a3
+                    00A4     90 Ftest_random$WOREVT1$0$0 == 0x00a4
+                    00A4     91 _WOREVT1	=	0x00a4
+                    00A5     92 Ftest_random$WORTIME0$0$0 == 0x00a5
+                    00A5     93 _WORTIME0	=	0x00a5
+                    00A6     94 Ftest_random$WORTIME1$0$0 == 0x00a6
+                    00A6     95 _WORTIME1	=	0x00a6
+                    00A8     96 Ftest_random$IEN0$0$0 == 0x00a8
+                    00A8     97 _IEN0	=	0x00a8
+                    00A9     98 Ftest_random$IP0$0$0 == 0x00a9
+                    00A9     99 _IP0	=	0x00a9
+                    00AB    100 Ftest_random$FWT$0$0 == 0x00ab
+                    00AB    101 _FWT	=	0x00ab
+                    00AC    102 Ftest_random$FADDRL$0$0 == 0x00ac
+                    00AC    103 _FADDRL	=	0x00ac
+                    00AD    104 Ftest_random$FADDRH$0$0 == 0x00ad
+                    00AD    105 _FADDRH	=	0x00ad
+                    00AE    106 Ftest_random$FCTL$0$0 == 0x00ae
+                    00AE    107 _FCTL	=	0x00ae
+                    00AF    108 Ftest_random$FWDATA$0$0 == 0x00af
+                    00AF    109 _FWDATA	=	0x00af
+                    00B1    110 Ftest_random$ENCDI$0$0 == 0x00b1
+                    00B1    111 _ENCDI	=	0x00b1
+                    00B2    112 Ftest_random$ENCDO$0$0 == 0x00b2
+                    00B2    113 _ENCDO	=	0x00b2
+                    00B3    114 Ftest_random$ENCCS$0$0 == 0x00b3
+                    00B3    115 _ENCCS	=	0x00b3
+                    00B4    116 Ftest_random$ADCCON1$0$0 == 0x00b4
+                    00B4    117 _ADCCON1	=	0x00b4
+                    00B5    118 Ftest_random$ADCCON2$0$0 == 0x00b5
+                    00B5    119 _ADCCON2	=	0x00b5
+                    00B6    120 Ftest_random$ADCCON3$0$0 == 0x00b6
+                    00B6    121 _ADCCON3	=	0x00b6
+                    00B8    122 Ftest_random$IEN1$0$0 == 0x00b8
+                    00B8    123 _IEN1	=	0x00b8
+                    00B9    124 Ftest_random$IP1$0$0 == 0x00b9
+                    00B9    125 _IP1	=	0x00b9
+                    00BA    126 Ftest_random$ADCL$0$0 == 0x00ba
+                    00BA    127 _ADCL	=	0x00ba
+                    00BB    128 Ftest_random$ADCH$0$0 == 0x00bb
+                    00BB    129 _ADCH	=	0x00bb
+                    00BC    130 Ftest_random$RNDL$0$0 == 0x00bc
+                    00BC    131 _RNDL	=	0x00bc
+                    00BD    132 Ftest_random$RNDH$0$0 == 0x00bd
+                    00BD    133 _RNDH	=	0x00bd
+                    00BE    134 Ftest_random$SLEEP$0$0 == 0x00be
+                    00BE    135 _SLEEP	=	0x00be
+                    00C0    136 Ftest_random$IRCON$0$0 == 0x00c0
+                    00C0    137 _IRCON	=	0x00c0
+                    00C1    138 Ftest_random$U0DBUF$0$0 == 0x00c1
+                    00C1    139 _U0DBUF	=	0x00c1
+                    00C2    140 Ftest_random$U0BAUD$0$0 == 0x00c2
+                    00C2    141 _U0BAUD	=	0x00c2
+                    00C4    142 Ftest_random$U0UCR$0$0 == 0x00c4
+                    00C4    143 _U0UCR	=	0x00c4
+                    00C5    144 Ftest_random$U0GCR$0$0 == 0x00c5
+                    00C5    145 _U0GCR	=	0x00c5
+                    00C6    146 Ftest_random$CLKCON$0$0 == 0x00c6
+                    00C6    147 _CLKCON	=	0x00c6
+                    00C7    148 Ftest_random$MEMCTR$0$0 == 0x00c7
+                    00C7    149 _MEMCTR	=	0x00c7
+                    00C9    150 Ftest_random$WDCTL$0$0 == 0x00c9
+                    00C9    151 _WDCTL	=	0x00c9
+                    00CA    152 Ftest_random$T3CNT$0$0 == 0x00ca
+                    00CA    153 _T3CNT	=	0x00ca
+                    00CB    154 Ftest_random$T3CTL$0$0 == 0x00cb
+                    00CB    155 _T3CTL	=	0x00cb
+                    00CC    156 Ftest_random$T3CCTL0$0$0 == 0x00cc
+                    00CC    157 _T3CCTL0	=	0x00cc
+                    00CD    158 Ftest_random$T3CC0$0$0 == 0x00cd
+                    00CD    159 _T3CC0	=	0x00cd
+                    00CE    160 Ftest_random$T3CCTL1$0$0 == 0x00ce
+                    00CE    161 _T3CCTL1	=	0x00ce
+                    00CF    162 Ftest_random$T3CC1$0$0 == 0x00cf
+                    00CF    163 _T3CC1	=	0x00cf
+                    00D0    164 Ftest_random$PSW$0$0 == 0x00d0
+                    00D0    165 _PSW	=	0x00d0
+                    00D1    166 Ftest_random$DMAIRQ$0$0 == 0x00d1
+                    00D1    167 _DMAIRQ	=	0x00d1
+                    00D2    168 Ftest_random$DMA1CFGL$0$0 == 0x00d2
+                    00D2    169 _DMA1CFGL	=	0x00d2
+                    00D3    170 Ftest_random$DMA1CFGH$0$0 == 0x00d3
+                    00D3    171 _DMA1CFGH	=	0x00d3
+                    00D4    172 Ftest_random$DMA0CFGL$0$0 == 0x00d4
+                    00D4    173 _DMA0CFGL	=	0x00d4
+                    00D5    174 Ftest_random$DMA0CFGH$0$0 == 0x00d5
+                    00D5    175 _DMA0CFGH	=	0x00d5
+                    00D6    176 Ftest_random$DMAARM$0$0 == 0x00d6
+                    00D6    177 _DMAARM	=	0x00d6
+                    00D7    178 Ftest_random$DMAREQ$0$0 == 0x00d7
+                    00D7    179 _DMAREQ	=	0x00d7
+                    00D8    180 Ftest_random$TIMIF$0$0 == 0x00d8
+                    00D8    181 _TIMIF	=	0x00d8
+                    00D9    182 Ftest_random$RFD$0$0 == 0x00d9
+                    00D9    183 _RFD	=	0x00d9
+                    00DA    184 Ftest_random$T1CC0L$0$0 == 0x00da
+                    00DA    185 _T1CC0L	=	0x00da
+                    00DB    186 Ftest_random$T1CC0H$0$0 == 0x00db
+                    00DB    187 _T1CC0H	=	0x00db
+                    00DC    188 Ftest_random$T1CC1L$0$0 == 0x00dc
+                    00DC    189 _T1CC1L	=	0x00dc
+                    00DD    190 Ftest_random$T1CC1H$0$0 == 0x00dd
+                    00DD    191 _T1CC1H	=	0x00dd
+                    00DE    192 Ftest_random$T1CC2L$0$0 == 0x00de
+                    00DE    193 _T1CC2L	=	0x00de
+                    00DF    194 Ftest_random$T1CC2H$0$0 == 0x00df
+                    00DF    195 _T1CC2H	=	0x00df
+                    00E0    196 Ftest_random$ACC$0$0 == 0x00e0
+                    00E0    197 _ACC	=	0x00e0
+                    00E1    198 Ftest_random$RFST$0$0 == 0x00e1
+                    00E1    199 _RFST	=	0x00e1
+                    00E2    200 Ftest_random$T1CNTL$0$0 == 0x00e2
+                    00E2    201 _T1CNTL	=	0x00e2
+                    00E3    202 Ftest_random$T1CNTH$0$0 == 0x00e3
+                    00E3    203 _T1CNTH	=	0x00e3
+                    00E4    204 Ftest_random$T1CTL$0$0 == 0x00e4
+                    00E4    205 _T1CTL	=	0x00e4
+                    00E5    206 Ftest_random$T1CCTL0$0$0 == 0x00e5
+                    00E5    207 _T1CCTL0	=	0x00e5
+                    00E6    208 Ftest_random$T1CCTL1$0$0 == 0x00e6
+                    00E6    209 _T1CCTL1	=	0x00e6
+                    00E7    210 Ftest_random$T1CCTL2$0$0 == 0x00e7
+                    00E7    211 _T1CCTL2	=	0x00e7
+                    00E8    212 Ftest_random$IRCON2$0$0 == 0x00e8
+                    00E8    213 _IRCON2	=	0x00e8
+                    00E9    214 Ftest_random$RFIF$0$0 == 0x00e9
+                    00E9    215 _RFIF	=	0x00e9
+                    00EA    216 Ftest_random$T4CNT$0$0 == 0x00ea
+                    00EA    217 _T4CNT	=	0x00ea
+                    00EB    218 Ftest_random$T4CTL$0$0 == 0x00eb
+                    00EB    219 _T4CTL	=	0x00eb
+                    00EC    220 Ftest_random$T4CCTL0$0$0 == 0x00ec
+                    00EC    221 _T4CCTL0	=	0x00ec
+                    00ED    222 Ftest_random$T4CC0$0$0 == 0x00ed
+                    00ED    223 _T4CC0	=	0x00ed
+                    00EE    224 Ftest_random$T4CCTL1$0$0 == 0x00ee
+                    00EE    225 _T4CCTL1	=	0x00ee
+                    00EF    226 Ftest_random$T4CC1$0$0 == 0x00ef
+                    00EF    227 _T4CC1	=	0x00ef
+                    00F0    228 Ftest_random$B$0$0 == 0x00f0
+                    00F0    229 _B	=	0x00f0
+                    00F1    230 Ftest_random$PERCFG$0$0 == 0x00f1
+                    00F1    231 _PERCFG	=	0x00f1
+                    00F2    232 Ftest_random$ADCCFG$0$0 == 0x00f2
+                    00F2    233 _ADCCFG	=	0x00f2
+                    00F3    234 Ftest_random$P0SEL$0$0 == 0x00f3
+                    00F3    235 _P0SEL	=	0x00f3
+                    00F4    236 Ftest_random$P1SEL$0$0 == 0x00f4
+                    00F4    237 _P1SEL	=	0x00f4
+                    00F5    238 Ftest_random$P2SEL$0$0 == 0x00f5
+                    00F5    239 _P2SEL	=	0x00f5
+                    00F6    240 Ftest_random$P1INP$0$0 == 0x00f6
+                    00F6    241 _P1INP	=	0x00f6
+                    00F7    242 Ftest_random$P2INP$0$0 == 0x00f7
+                    00F7    243 _P2INP	=	0x00f7
+                    00F8    244 Ftest_random$U1CSR$0$0 == 0x00f8
+                    00F8    245 _U1CSR	=	0x00f8
+                    00F9    246 Ftest_random$U1DBUF$0$0 == 0x00f9
+                    00F9    247 _U1DBUF	=	0x00f9
+                    00FA    248 Ftest_random$U1BAUD$0$0 == 0x00fa
+                    00FA    249 _U1BAUD	=	0x00fa
+                    00FB    250 Ftest_random$U1UCR$0$0 == 0x00fb
+                    00FB    251 _U1UCR	=	0x00fb
+                    00FC    252 Ftest_random$U1GCR$0$0 == 0x00fc
+                    00FC    253 _U1GCR	=	0x00fc
+                    00FD    254 Ftest_random$P0DIR$0$0 == 0x00fd
+                    00FD    255 _P0DIR	=	0x00fd
+                    00FE    256 Ftest_random$P1DIR$0$0 == 0x00fe
+                    00FE    257 _P1DIR	=	0x00fe
+                    00FF    258 Ftest_random$P2DIR$0$0 == 0x00ff
+                    00FF    259 _P2DIR	=	0x00ff
+                    FFFFD5D4    260 Ftest_random$DMA0CFG$0$0 == 0xffffd5d4
+                    FFFFD5D4    261 _DMA0CFG	=	0xffffd5d4
+                    FFFFD3D2    262 Ftest_random$DMA1CFG$0$0 == 0xffffd3d2
+                    FFFFD3D2    263 _DMA1CFG	=	0xffffd3d2
+                    FFFFADAC    264 Ftest_random$FADDR$0$0 == 0xffffadac
+                    FFFFADAC    265 _FADDR	=	0xffffadac
+                    FFFFBBBA    266 Ftest_random$ADC$0$0 == 0xffffbbba
+                    FFFFBBBA    267 _ADC	=	0xffffbbba
+                    FFFFDBDA    268 Ftest_random$T1CC0$0$0 == 0xffffdbda
+                    FFFFDBDA    269 _T1CC0	=	0xffffdbda
+                    FFFFDDDC    270 Ftest_random$T1CC1$0$0 == 0xffffdddc
+                    FFFFDDDC    271 _T1CC1	=	0xffffdddc
+                    FFFFDFDE    272 Ftest_random$T1CC2$0$0 == 0xffffdfde
+                    FFFFDFDE    273 _T1CC2	=	0xffffdfde
+                            274 ;--------------------------------------------------------
+                            275 ; special function bits
+                            276 ;--------------------------------------------------------
+                            277 	.area RSEG    (ABS,DATA)
+   0000                     278 	.org 0x0000
+                    0080    279 Ftest_random$P0_0$0$0 == 0x0080
+                    0080    280 _P0_0	=	0x0080
+                    0081    281 Ftest_random$P0_1$0$0 == 0x0081
+                    0081    282 _P0_1	=	0x0081
+                    0082    283 Ftest_random$P0_2$0$0 == 0x0082
+                    0082    284 _P0_2	=	0x0082
+                    0083    285 Ftest_random$P0_3$0$0 == 0x0083
+                    0083    286 _P0_3	=	0x0083
+                    0084    287 Ftest_random$P0_4$0$0 == 0x0084
+                    0084    288 _P0_4	=	0x0084
+                    0085    289 Ftest_random$P0_5$0$0 == 0x0085
+                    0085    290 _P0_5	=	0x0085
+                    0086    291 Ftest_random$P0_6$0$0 == 0x0086
+                    0086    292 _P0_6	=	0x0086
+                    0087    293 Ftest_random$P0_7$0$0 == 0x0087
+                    0087    294 _P0_7	=	0x0087
+                    0088    295 Ftest_random$_TCON_0$0$0 == 0x0088
+                    0088    296 __TCON_0	=	0x0088
+                    0089    297 Ftest_random$RFTXRXIF$0$0 == 0x0089
+                    0089    298 _RFTXRXIF	=	0x0089
+                    008A    299 Ftest_random$_TCON_2$0$0 == 0x008a
+                    008A    300 __TCON_2	=	0x008a
+                    008B    301 Ftest_random$URX0IF$0$0 == 0x008b
+                    008B    302 _URX0IF	=	0x008b
+                    008C    303 Ftest_random$_TCON_4$0$0 == 0x008c
+                    008C    304 __TCON_4	=	0x008c
+                    008D    305 Ftest_random$ADCIF$0$0 == 0x008d
+                    008D    306 _ADCIF	=	0x008d
+                    008E    307 Ftest_random$_TCON_6$0$0 == 0x008e
+                    008E    308 __TCON_6	=	0x008e
+                    008F    309 Ftest_random$URX1IF$0$0 == 0x008f
+                    008F    310 _URX1IF	=	0x008f
+                    0090    311 Ftest_random$P1_0$0$0 == 0x0090
+                    0090    312 _P1_0	=	0x0090
+                    0091    313 Ftest_random$P1_1$0$0 == 0x0091
+                    0091    314 _P1_1	=	0x0091
+                    0092    315 Ftest_random$P1_2$0$0 == 0x0092
+                    0092    316 _P1_2	=	0x0092
+                    0093    317 Ftest_random$P1_3$0$0 == 0x0093
+                    0093    318 _P1_3	=	0x0093
+                    0094    319 Ftest_random$P1_4$0$0 == 0x0094
+                    0094    320 _P1_4	=	0x0094
+                    0095    321 Ftest_random$P1_5$0$0 == 0x0095
+                    0095    322 _P1_5	=	0x0095
+                    0096    323 Ftest_random$P1_6$0$0 == 0x0096
+                    0096    324 _P1_6	=	0x0096
+                    0097    325 Ftest_random$P1_7$0$0 == 0x0097
+                    0097    326 _P1_7	=	0x0097
+                    0098    327 Ftest_random$ENCIF_0$0$0 == 0x0098
+                    0098    328 _ENCIF_0	=	0x0098
+                    0099    329 Ftest_random$ENCIF_1$0$0 == 0x0099
+                    0099    330 _ENCIF_1	=	0x0099
+                    009A    331 Ftest_random$_SOCON2$0$0 == 0x009a
+                    009A    332 __SOCON2	=	0x009a
+                    009B    333 Ftest_random$_SOCON3$0$0 == 0x009b
+                    009B    334 __SOCON3	=	0x009b
+                    009C    335 Ftest_random$_SOCON4$0$0 == 0x009c
+                    009C    336 __SOCON4	=	0x009c
+                    009D    337 Ftest_random$_SOCON5$0$0 == 0x009d
+                    009D    338 __SOCON5	=	0x009d
+                    009E    339 Ftest_random$_SOCON6$0$0 == 0x009e
+                    009E    340 __SOCON6	=	0x009e
+                    009F    341 Ftest_random$_SOCON7$0$0 == 0x009f
+                    009F    342 __SOCON7	=	0x009f
+                    00A0    343 Ftest_random$P2_0$0$0 == 0x00a0
+                    00A0    344 _P2_0	=	0x00a0
+                    00A1    345 Ftest_random$P2_1$0$0 == 0x00a1
+                    00A1    346 _P2_1	=	0x00a1
+                    00A2    347 Ftest_random$P2_2$0$0 == 0x00a2
+                    00A2    348 _P2_2	=	0x00a2
+                    00A3    349 Ftest_random$P2_3$0$0 == 0x00a3
+                    00A3    350 _P2_3	=	0x00a3
+                    00A4    351 Ftest_random$P2_4$0$0 == 0x00a4
+                    00A4    352 _P2_4	=	0x00a4
+                    00A5    353 Ftest_random$P2_5$0$0 == 0x00a5
+                    00A5    354 _P2_5	=	0x00a5
+                    00A6    355 Ftest_random$P2_6$0$0 == 0x00a6
+                    00A6    356 _P2_6	=	0x00a6
+                    00A7    357 Ftest_random$P2_7$0$0 == 0x00a7
+                    00A7    358 _P2_7	=	0x00a7
+                    00A8    359 Ftest_random$RFTXRXIE$0$0 == 0x00a8
+                    00A8    360 _RFTXRXIE	=	0x00a8
+                    00A9    361 Ftest_random$ADCIE$0$0 == 0x00a9
+                    00A9    362 _ADCIE	=	0x00a9
+                    00AA    363 Ftest_random$URX0IE$0$0 == 0x00aa
+                    00AA    364 _URX0IE	=	0x00aa
+                    00AB    365 Ftest_random$URX1IE$0$0 == 0x00ab
+                    00AB    366 _URX1IE	=	0x00ab
+                    00AC    367 Ftest_random$ENCIE$0$0 == 0x00ac
+                    00AC    368 _ENCIE	=	0x00ac
+                    00AD    369 Ftest_random$STIE$0$0 == 0x00ad
+                    00AD    370 _STIE	=	0x00ad
+                    00AE    371 Ftest_random$_IEN06$0$0 == 0x00ae
+                    00AE    372 __IEN06	=	0x00ae
+                    00AF    373 Ftest_random$EA$0$0 == 0x00af
+                    00AF    374 _EA	=	0x00af
+                    00B8    375 Ftest_random$DMAIE$0$0 == 0x00b8
+                    00B8    376 _DMAIE	=	0x00b8
+                    00B9    377 Ftest_random$T1IE$0$0 == 0x00b9
+                    00B9    378 _T1IE	=	0x00b9
+                    00BA    379 Ftest_random$T2IE$0$0 == 0x00ba
+                    00BA    380 _T2IE	=	0x00ba
+                    00BB    381 Ftest_random$T3IE$0$0 == 0x00bb
+                    00BB    382 _T3IE	=	0x00bb
+                    00BC    383 Ftest_random$T4IE$0$0 == 0x00bc
+                    00BC    384 _T4IE	=	0x00bc
+                    00BD    385 Ftest_random$P0IE$0$0 == 0x00bd
+                    00BD    386 _P0IE	=	0x00bd
+                    00BE    387 Ftest_random$_IEN16$0$0 == 0x00be
+                    00BE    388 __IEN16	=	0x00be
+                    00BF    389 Ftest_random$_IEN17$0$0 == 0x00bf
+                    00BF    390 __IEN17	=	0x00bf
+                    00C0    391 Ftest_random$DMAIF$0$0 == 0x00c0
+                    00C0    392 _DMAIF	=	0x00c0
+                    00C1    393 Ftest_random$T1IF$0$0 == 0x00c1
+                    00C1    394 _T1IF	=	0x00c1
+                    00C2    395 Ftest_random$T2IF$0$0 == 0x00c2
+                    00C2    396 _T2IF	=	0x00c2
+                    00C3    397 Ftest_random$T3IF$0$0 == 0x00c3
+                    00C3    398 _T3IF	=	0x00c3
+                    00C4    399 Ftest_random$T4IF$0$0 == 0x00c4
+                    00C4    400 _T4IF	=	0x00c4
+                    00C5    401 Ftest_random$P0IF$0$0 == 0x00c5
+                    00C5    402 _P0IF	=	0x00c5
+                    00C6    403 Ftest_random$_IRCON6$0$0 == 0x00c6
+                    00C6    404 __IRCON6	=	0x00c6
+                    00C7    405 Ftest_random$STIF$0$0 == 0x00c7
+                    00C7    406 _STIF	=	0x00c7
+                    00D0    407 Ftest_random$P$0$0 == 0x00d0
+                    00D0    408 _P	=	0x00d0
+                    00D1    409 Ftest_random$F1$0$0 == 0x00d1
+                    00D1    410 _F1	=	0x00d1
+                    00D2    411 Ftest_random$OV$0$0 == 0x00d2
+                    00D2    412 _OV	=	0x00d2
+                    00D3    413 Ftest_random$RS0$0$0 == 0x00d3
+                    00D3    414 _RS0	=	0x00d3
+                    00D4    415 Ftest_random$RS1$0$0 == 0x00d4
+                    00D4    416 _RS1	=	0x00d4
+                    00D5    417 Ftest_random$F0$0$0 == 0x00d5
+                    00D5    418 _F0	=	0x00d5
+                    00D6    419 Ftest_random$AC$0$0 == 0x00d6
+                    00D6    420 _AC	=	0x00d6
+                    00D7    421 Ftest_random$CY$0$0 == 0x00d7
+                    00D7    422 _CY	=	0x00d7
+                    00D8    423 Ftest_random$T3OVFIF$0$0 == 0x00d8
+                    00D8    424 _T3OVFIF	=	0x00d8
+                    00D9    425 Ftest_random$T3CH0IF$0$0 == 0x00d9
+                    00D9    426 _T3CH0IF	=	0x00d9
+                    00DA    427 Ftest_random$T3CH1IF$0$0 == 0x00da
+                    00DA    428 _T3CH1IF	=	0x00da
+                    00DB    429 Ftest_random$T4OVFIF$0$0 == 0x00db
+                    00DB    430 _T4OVFIF	=	0x00db
+                    00DC    431 Ftest_random$T4CH0IF$0$0 == 0x00dc
+                    00DC    432 _T4CH0IF	=	0x00dc
+                    00DD    433 Ftest_random$T4CH1IF$0$0 == 0x00dd
+                    00DD    434 _T4CH1IF	=	0x00dd
+                    00DE    435 Ftest_random$OVFIM$0$0 == 0x00de
+                    00DE    436 _OVFIM	=	0x00de
+                    00DF    437 Ftest_random$_TIMIF7$0$0 == 0x00df
+                    00DF    438 __TIMIF7	=	0x00df
+                    00E0    439 Ftest_random$ACC_0$0$0 == 0x00e0
+                    00E0    440 _ACC_0	=	0x00e0
+                    00E1    441 Ftest_random$ACC_1$0$0 == 0x00e1
+                    00E1    442 _ACC_1	=	0x00e1
+                    00E2    443 Ftest_random$ACC_2$0$0 == 0x00e2
+                    00E2    444 _ACC_2	=	0x00e2
+                    00E3    445 Ftest_random$ACC_3$0$0 == 0x00e3
+                    00E3    446 _ACC_3	=	0x00e3
+                    00E4    447 Ftest_random$ACC_4$0$0 == 0x00e4
+                    00E4    448 _ACC_4	=	0x00e4
+                    00E5    449 Ftest_random$ACC_5$0$0 == 0x00e5
+                    00E5    450 _ACC_5	=	0x00e5
+                    00E6    451 Ftest_random$ACC_6$0$0 == 0x00e6
+                    00E6    452 _ACC_6	=	0x00e6
+                    00E7    453 Ftest_random$ACC_7$0$0 == 0x00e7
+                    00E7    454 _ACC_7	=	0x00e7
+                    00E8    455 Ftest_random$P2IF$0$0 == 0x00e8
+                    00E8    456 _P2IF	=	0x00e8
+                    00E9    457 Ftest_random$UTX0IF$0$0 == 0x00e9
+                    00E9    458 _UTX0IF	=	0x00e9
+                    00EA    459 Ftest_random$UTX1IF$0$0 == 0x00ea
+                    00EA    460 _UTX1IF	=	0x00ea
+                    00EB    461 Ftest_random$P1IF$0$0 == 0x00eb
+                    00EB    462 _P1IF	=	0x00eb
+                    00EC    463 Ftest_random$WDTIF$0$0 == 0x00ec
+                    00EC    464 _WDTIF	=	0x00ec
+                    00ED    465 Ftest_random$_IRCON25$0$0 == 0x00ed
+                    00ED    466 __IRCON25	=	0x00ed
+                    00EE    467 Ftest_random$_IRCON26$0$0 == 0x00ee
+                    00EE    468 __IRCON26	=	0x00ee
+                    00EF    469 Ftest_random$_IRCON27$0$0 == 0x00ef
+                    00EF    470 __IRCON27	=	0x00ef
+                    00F0    471 Ftest_random$B_0$0$0 == 0x00f0
+                    00F0    472 _B_0	=	0x00f0
+                    00F1    473 Ftest_random$B_1$0$0 == 0x00f1
+                    00F1    474 _B_1	=	0x00f1
+                    00F2    475 Ftest_random$B_2$0$0 == 0x00f2
+                    00F2    476 _B_2	=	0x00f2
+                    00F3    477 Ftest_random$B_3$0$0 == 0x00f3
+                    00F3    478 _B_3	=	0x00f3
+                    00F4    479 Ftest_random$B_4$0$0 == 0x00f4
+                    00F4    480 _B_4	=	0x00f4
+                    00F5    481 Ftest_random$B_5$0$0 == 0x00f5
+                    00F5    482 _B_5	=	0x00f5
+                    00F6    483 Ftest_random$B_6$0$0 == 0x00f6
+                    00F6    484 _B_6	=	0x00f6
+                    00F7    485 Ftest_random$B_7$0$0 == 0x00f7
+                    00F7    486 _B_7	=	0x00f7
+                    00F8    487 Ftest_random$U1ACTIVE$0$0 == 0x00f8
+                    00F8    488 _U1ACTIVE	=	0x00f8
+                    00F9    489 Ftest_random$U1TX_BYTE$0$0 == 0x00f9
+                    00F9    490 _U1TX_BYTE	=	0x00f9
+                    00FA    491 Ftest_random$U1RX_BYTE$0$0 == 0x00fa
+                    00FA    492 _U1RX_BYTE	=	0x00fa
+                    00FB    493 Ftest_random$U1ERR$0$0 == 0x00fb
+                    00FB    494 _U1ERR	=	0x00fb
+                    00FC    495 Ftest_random$U1FE$0$0 == 0x00fc
+                    00FC    496 _U1FE	=	0x00fc
+                    00FD    497 Ftest_random$U1SLAVE$0$0 == 0x00fd
+                    00FD    498 _U1SLAVE	=	0x00fd
+                    00FE    499 Ftest_random$U1RE$0$0 == 0x00fe
+                    00FE    500 _U1RE	=	0x00fe
+                    00FF    501 Ftest_random$U1MODE$0$0 == 0x00ff
+                    00FF    502 _U1MODE	=	0x00ff
+                            503 ;--------------------------------------------------------
+                            504 ; overlayable register banks
+                            505 ;--------------------------------------------------------
+                            506 	.area REG_BANK_0	(REL,OVR,DATA)
+   0000                     507 	.ds 8
+                            508 ;--------------------------------------------------------
+                            509 ; internal ram data
+                            510 ;--------------------------------------------------------
+                            511 	.area DSEG    (DATA)
+                            512 ;--------------------------------------------------------
+                            513 ; overlayable items in internal ram 
+                            514 ;--------------------------------------------------------
+                            515 	.area OSEG    (OVR,DATA)
+                            516 ;--------------------------------------------------------
+                            517 ; Stack segment in internal ram 
+                            518 ;--------------------------------------------------------
+                            519 	.area	SSEG	(DATA)
+   0021                     520 __start__stack:
+   0021                     521 	.ds	1
+                            522 
+                            523 ;--------------------------------------------------------
+                            524 ; indirectly addressable internal ram data
+                            525 ;--------------------------------------------------------
+                            526 	.area ISEG    (DATA)
+                            527 ;--------------------------------------------------------
+                            528 ; absolute internal ram data
+                            529 ;--------------------------------------------------------
+                            530 	.area IABS    (ABS,DATA)
+                            531 	.area IABS    (ABS,DATA)
+                            532 ;--------------------------------------------------------
+                            533 ; bit data
+                            534 ;--------------------------------------------------------
+                            535 	.area BSEG    (BIT)
+                            536 ;--------------------------------------------------------
+                            537 ; paged external ram data
+                            538 ;--------------------------------------------------------
+                            539 	.area PSEG    (PAG,XDATA)
+                    0000    540 G$lastRedLedToggle$0$0==.
+   F000                     541 _lastRedLedToggle::
+   F000                     542 	.ds 4
+                    0004    543 G$lastMotorActionTime$0$0==.
+   F004                     544 _lastMotorActionTime::
+   F004                     545 	.ds 4
+                    0008    546 G$motorState$0$0==.
+   F008                     547 _motorState::
+   F008                     548 	.ds 1
+                    0009    549 G$i$0$0==.
+   F009                     550 _i::
+   F009                     551 	.ds 1
+                            552 ;--------------------------------------------------------
+                            553 ; external ram data
+                            554 ;--------------------------------------------------------
+                            555 	.area XSEG    (XDATA)
+                    DF00    556 Ftest_random$SYNC1$0$0 == 0xdf00
+                    DF00    557 _SYNC1	=	0xdf00
+                    DF01    558 Ftest_random$SYNC0$0$0 == 0xdf01
+                    DF01    559 _SYNC0	=	0xdf01
+                    DF02    560 Ftest_random$PKTLEN$0$0 == 0xdf02
+                    DF02    561 _PKTLEN	=	0xdf02
+                    DF03    562 Ftest_random$PKTCTRL1$0$0 == 0xdf03
+                    DF03    563 _PKTCTRL1	=	0xdf03
+                    DF04    564 Ftest_random$PKTCTRL0$0$0 == 0xdf04
+                    DF04    565 _PKTCTRL0	=	0xdf04
+                    DF05    566 Ftest_random$ADDR$0$0 == 0xdf05
+                    DF05    567 _ADDR	=	0xdf05
+                    DF06    568 Ftest_random$CHANNR$0$0 == 0xdf06
+                    DF06    569 _CHANNR	=	0xdf06
+                    DF07    570 Ftest_random$FSCTRL1$0$0 == 0xdf07
+                    DF07    571 _FSCTRL1	=	0xdf07
+                    DF08    572 Ftest_random$FSCTRL0$0$0 == 0xdf08
+                    DF08    573 _FSCTRL0	=	0xdf08
+                    DF09    574 Ftest_random$FREQ2$0$0 == 0xdf09
+                    DF09    575 _FREQ2	=	0xdf09
+                    DF0A    576 Ftest_random$FREQ1$0$0 == 0xdf0a
+                    DF0A    577 _FREQ1	=	0xdf0a
+                    DF0B    578 Ftest_random$FREQ0$0$0 == 0xdf0b
+                    DF0B    579 _FREQ0	=	0xdf0b
+                    DF0C    580 Ftest_random$MDMCFG4$0$0 == 0xdf0c
+                    DF0C    581 _MDMCFG4	=	0xdf0c
+                    DF0D    582 Ftest_random$MDMCFG3$0$0 == 0xdf0d
+                    DF0D    583 _MDMCFG3	=	0xdf0d
+                    DF0E    584 Ftest_random$MDMCFG2$0$0 == 0xdf0e
+                    DF0E    585 _MDMCFG2	=	0xdf0e
+                    DF0F    586 Ftest_random$MDMCFG1$0$0 == 0xdf0f
+                    DF0F    587 _MDMCFG1	=	0xdf0f
+                    DF10    588 Ftest_random$MDMCFG0$0$0 == 0xdf10
+                    DF10    589 _MDMCFG0	=	0xdf10
+                    DF11    590 Ftest_random$DEVIATN$0$0 == 0xdf11
+                    DF11    591 _DEVIATN	=	0xdf11
+                    DF12    592 Ftest_random$MCSM2$0$0 == 0xdf12
+                    DF12    593 _MCSM2	=	0xdf12
+                    DF13    594 Ftest_random$MCSM1$0$0 == 0xdf13
+                    DF13    595 _MCSM1	=	0xdf13
+                    DF14    596 Ftest_random$MCSM0$0$0 == 0xdf14
+                    DF14    597 _MCSM0	=	0xdf14
+                    DF15    598 Ftest_random$FOCCFG$0$0 == 0xdf15
+                    DF15    599 _FOCCFG	=	0xdf15
+                    DF16    600 Ftest_random$BSCFG$0$0 == 0xdf16
+                    DF16    601 _BSCFG	=	0xdf16
+                    DF17    602 Ftest_random$AGCCTRL2$0$0 == 0xdf17
+                    DF17    603 _AGCCTRL2	=	0xdf17
+                    DF18    604 Ftest_random$AGCCTRL1$0$0 == 0xdf18
+                    DF18    605 _AGCCTRL1	=	0xdf18
+                    DF19    606 Ftest_random$AGCCTRL0$0$0 == 0xdf19
+                    DF19    607 _AGCCTRL0	=	0xdf19
+                    DF1A    608 Ftest_random$FREND1$0$0 == 0xdf1a
+                    DF1A    609 _FREND1	=	0xdf1a
+                    DF1B    610 Ftest_random$FREND0$0$0 == 0xdf1b
+                    DF1B    611 _FREND0	=	0xdf1b
+                    DF1C    612 Ftest_random$FSCAL3$0$0 == 0xdf1c
+                    DF1C    613 _FSCAL3	=	0xdf1c
+                    DF1D    614 Ftest_random$FSCAL2$0$0 == 0xdf1d
+                    DF1D    615 _FSCAL2	=	0xdf1d
+                    DF1E    616 Ftest_random$FSCAL1$0$0 == 0xdf1e
+                    DF1E    617 _FSCAL1	=	0xdf1e
+                    DF1F    618 Ftest_random$FSCAL0$0$0 == 0xdf1f
+                    DF1F    619 _FSCAL0	=	0xdf1f
+                    DF23    620 Ftest_random$TEST2$0$0 == 0xdf23
+                    DF23    621 _TEST2	=	0xdf23
+                    DF24    622 Ftest_random$TEST1$0$0 == 0xdf24
+                    DF24    623 _TEST1	=	0xdf24
+                    DF25    624 Ftest_random$TEST0$0$0 == 0xdf25
+                    DF25    625 _TEST0	=	0xdf25
+                    DF2E    626 Ftest_random$PA_TABLE0$0$0 == 0xdf2e
+                    DF2E    627 _PA_TABLE0	=	0xdf2e
+                    DF2F    628 Ftest_random$IOCFG2$0$0 == 0xdf2f
+                    DF2F    629 _IOCFG2	=	0xdf2f
+                    DF30    630 Ftest_random$IOCFG1$0$0 == 0xdf30
+                    DF30    631 _IOCFG1	=	0xdf30
+                    DF31    632 Ftest_random$IOCFG0$0$0 == 0xdf31
+                    DF31    633 _IOCFG0	=	0xdf31
+                    DF36    634 Ftest_random$PARTNUM$0$0 == 0xdf36
+                    DF36    635 _PARTNUM	=	0xdf36
+                    DF37    636 Ftest_random$VERSION$0$0 == 0xdf37
+                    DF37    637 _VERSION	=	0xdf37
+                    DF38    638 Ftest_random$FREQEST$0$0 == 0xdf38
+                    DF38    639 _FREQEST	=	0xdf38
+                    DF39    640 Ftest_random$LQI$0$0 == 0xdf39
+                    DF39    641 _LQI	=	0xdf39
+                    DF3A    642 Ftest_random$RSSI$0$0 == 0xdf3a
+                    DF3A    643 _RSSI	=	0xdf3a
+                    DF3B    644 Ftest_random$MARCSTATE$0$0 == 0xdf3b
+                    DF3B    645 _MARCSTATE	=	0xdf3b
+                    DF3C    646 Ftest_random$PKTSTATUS$0$0 == 0xdf3c
+                    DF3C    647 _PKTSTATUS	=	0xdf3c
+                    DF3D    648 Ftest_random$VCO_VC_DAC$0$0 == 0xdf3d
+                    DF3D    649 _VCO_VC_DAC	=	0xdf3d
+                    DF40    650 Ftest_random$I2SCFG0$0$0 == 0xdf40
+                    DF40    651 _I2SCFG0	=	0xdf40
+                    DF41    652 Ftest_random$I2SCFG1$0$0 == 0xdf41
+                    DF41    653 _I2SCFG1	=	0xdf41
+                    DF42    654 Ftest_random$I2SDATL$0$0 == 0xdf42
+                    DF42    655 _I2SDATL	=	0xdf42
+                    DF43    656 Ftest_random$I2SDATH$0$0 == 0xdf43
+                    DF43    657 _I2SDATH	=	0xdf43
+                    DF44    658 Ftest_random$I2SWCNT$0$0 == 0xdf44
+                    DF44    659 _I2SWCNT	=	0xdf44
+                    DF45    660 Ftest_random$I2SSTAT$0$0 == 0xdf45
+                    DF45    661 _I2SSTAT	=	0xdf45
+                    DF46    662 Ftest_random$I2SCLKF0$0$0 == 0xdf46
+                    DF46    663 _I2SCLKF0	=	0xdf46
+                    DF47    664 Ftest_random$I2SCLKF1$0$0 == 0xdf47
+                    DF47    665 _I2SCLKF1	=	0xdf47
+                    DF48    666 Ftest_random$I2SCLKF2$0$0 == 0xdf48
+                    DF48    667 _I2SCLKF2	=	0xdf48
+                    DE00    668 Ftest_random$USBADDR$0$0 == 0xde00
+                    DE00    669 _USBADDR	=	0xde00
+                    DE01    670 Ftest_random$USBPOW$0$0 == 0xde01
+                    DE01    671 _USBPOW	=	0xde01
+                    DE02    672 Ftest_random$USBIIF$0$0 == 0xde02
+                    DE02    673 _USBIIF	=	0xde02
+                    DE04    674 Ftest_random$USBOIF$0$0 == 0xde04
+                    DE04    675 _USBOIF	=	0xde04
+                    DE06    676 Ftest_random$USBCIF$0$0 == 0xde06
+                    DE06    677 _USBCIF	=	0xde06
+                    DE07    678 Ftest_random$USBIIE$0$0 == 0xde07
+                    DE07    679 _USBIIE	=	0xde07
+                    DE09    680 Ftest_random$USBOIE$0$0 == 0xde09
+                    DE09    681 _USBOIE	=	0xde09
+                    DE0B    682 Ftest_random$USBCIE$0$0 == 0xde0b
+                    DE0B    683 _USBCIE	=	0xde0b
+                    DE0C    684 Ftest_random$USBFRML$0$0 == 0xde0c
+                    DE0C    685 _USBFRML	=	0xde0c
+                    DE0D    686 Ftest_random$USBFRMH$0$0 == 0xde0d
+                    DE0D    687 _USBFRMH	=	0xde0d
+                    DE0E    688 Ftest_random$USBINDEX$0$0 == 0xde0e
+                    DE0E    689 _USBINDEX	=	0xde0e
+                    DE10    690 Ftest_random$USBMAXI$0$0 == 0xde10
+                    DE10    691 _USBMAXI	=	0xde10
+                    DE11    692 Ftest_random$USBCSIL$0$0 == 0xde11
+                    DE11    693 _USBCSIL	=	0xde11
+                    DE12    694 Ftest_random$USBCSIH$0$0 == 0xde12
+                    DE12    695 _USBCSIH	=	0xde12
+                    DE13    696 Ftest_random$USBMAXO$0$0 == 0xde13
+                    DE13    697 _USBMAXO	=	0xde13
+                    DE14    698 Ftest_random$USBCSOL$0$0 == 0xde14
+                    DE14    699 _USBCSOL	=	0xde14
+                    DE15    700 Ftest_random$USBCSOH$0$0 == 0xde15
+                    DE15    701 _USBCSOH	=	0xde15
+                    DE16    702 Ftest_random$USBCNTL$0$0 == 0xde16
+                    DE16    703 _USBCNTL	=	0xde16
+                    DE17    704 Ftest_random$USBCNTH$0$0 == 0xde17
+                    DE17    705 _USBCNTH	=	0xde17
+                    DE20    706 Ftest_random$USBF0$0$0 == 0xde20
+                    DE20    707 _USBF0	=	0xde20
+                    DE22    708 Ftest_random$USBF1$0$0 == 0xde22
+                    DE22    709 _USBF1	=	0xde22
+                    DE24    710 Ftest_random$USBF2$0$0 == 0xde24
+                    DE24    711 _USBF2	=	0xde24
+                    DE26    712 Ftest_random$USBF3$0$0 == 0xde26
+                    DE26    713 _USBF3	=	0xde26
+                    DE28    714 Ftest_random$USBF4$0$0 == 0xde28
+                    DE28    715 _USBF4	=	0xde28
+                    DE2A    716 Ftest_random$USBF5$0$0 == 0xde2a
+                    DE2A    717 _USBF5	=	0xde2a
+                            718 ;--------------------------------------------------------
+                            719 ; absolute external ram data
+                            720 ;--------------------------------------------------------
+                            721 	.area XABS    (ABS,XDATA)
+                            722 ;--------------------------------------------------------
+                            723 ; external initialized ram data
+                            724 ;--------------------------------------------------------
+                            725 	.area XISEG   (XDATA)
+                            726 	.area HOME    (CODE)
+                            727 	.area GSINIT0 (CODE)
+                            728 	.area GSINIT1 (CODE)
+                            729 	.area GSINIT2 (CODE)
+                            730 	.area GSINIT3 (CODE)
+                            731 	.area GSINIT4 (CODE)
+                            732 	.area GSINIT5 (CODE)
+                            733 	.area GSINIT  (CODE)
+                            734 	.area GSFINAL (CODE)
+                            735 	.area CSEG    (CODE)
+                            736 ;--------------------------------------------------------
+                            737 ; interrupt vector 
+                            738 ;--------------------------------------------------------
+                            739 	.area HOME    (CODE)
+   0400                     740 __interrupt_vect:
+   0400 02 04 6D            741 	ljmp	__sdcc_gsinit_startup
+   0403 32                  742 	reti
+   0404                     743 	.ds	7
+   040B 32                  744 	reti
+   040C                     745 	.ds	7
+   0413 32                  746 	reti
+   0414                     747 	.ds	7
+   041B 32                  748 	reti
+   041C                     749 	.ds	7
+   0423 32                  750 	reti
+   0424                     751 	.ds	7
+   042B 32                  752 	reti
+   042C                     753 	.ds	7
+   0433 32                  754 	reti
+   0434                     755 	.ds	7
+   043B 32                  756 	reti
+   043C                     757 	.ds	7
+   0443 32                  758 	reti
+   0444                     759 	.ds	7
+   044B 32                  760 	reti
+   044C                     761 	.ds	7
+   0453 32                  762 	reti
+   0454                     763 	.ds	7
+   045B 32                  764 	reti
+   045C                     765 	.ds	7
+   0463 02 09 C4            766 	ljmp	_ISR_T4
+                            767 ;--------------------------------------------------------
+                            768 ; global & static initialisations
+                            769 ;--------------------------------------------------------
+                            770 	.area HOME    (CODE)
+                            771 	.area GSINIT  (CODE)
+                            772 	.area GSFINAL (CODE)
+                            773 	.area GSINIT  (CODE)
+                            774 	.globl __sdcc_gsinit_startup
+                            775 	.globl __sdcc_program_startup
+                            776 	.globl __start__stack
+                            777 	.globl __mcs51_genXINIT
+                            778 	.globl __mcs51_genXRAMCLEAR
+                            779 	.globl __mcs51_genRAMCLEAR
+                    0000    780 	G$main$0$0 ==.
+                    0000    781 	C$test_random.c$30$1$1 ==.
+                            782 ;	apps/test_random/test_random.c:30: uint32 lastRedLedToggle = 0;
+   04C6 78 00               783 	mov	r0,#_lastRedLedToggle
+   04C8 E4                  784 	clr	a
+   04C9 F2                  785 	movx	@r0,a
+   04CA 08                  786 	inc	r0
+   04CB F2                  787 	movx	@r0,a
+   04CC 08                  788 	inc	r0
+   04CD F2                  789 	movx	@r0,a
+   04CE 08                  790 	inc	r0
+   04CF F2                  791 	movx	@r0,a
+                    000A    792 	G$main$0$0 ==.
+                    000A    793 	C$test_random.c$31$1$1 ==.
+                            794 ;	apps/test_random/test_random.c:31: uint32 lastMotorActionTime = 0;
+   04D0 78 04               795 	mov	r0,#_lastMotorActionTime
+   04D2 E4                  796 	clr	a
+   04D3 F2                  797 	movx	@r0,a
+   04D4 08                  798 	inc	r0
+   04D5 F2                  799 	movx	@r0,a
+   04D6 08                  800 	inc	r0
+   04D7 F2                  801 	movx	@r0,a
+   04D8 08                  802 	inc	r0
+   04D9 F2                  803 	movx	@r0,a
+                    0014    804 	G$main$0$0 ==.
+                    0014    805 	C$test_random.c$32$1$1 ==.
+                            806 ;	apps/test_random/test_random.c:32: uint8 motorState = 0; // 0=Stop, 1=Forward, 2=Stop, 3=Reverse
+   04DA 78 08               807 	mov	r0,#_motorState
+   04DC E4                  808 	clr	a
+   04DD F2                  809 	movx	@r0,a
+                            810 	.area GSFINAL (CODE)
+   0506 02 04 66            811 	ljmp	__sdcc_program_startup
+                            812 ;--------------------------------------------------------
+                            813 ; Home
+                            814 ;--------------------------------------------------------
+                            815 	.area HOME    (CODE)
+                            816 	.area HOME    (CODE)
+   0466                     817 __sdcc_program_startup:
+   0466 12 05 73            818 	lcall	_main
+                            819 ;	return from main will lock up
+   0469 80 FE               820 	sjmp .
+                            821 ;--------------------------------------------------------
+                            822 ; code
+                            823 ;--------------------------------------------------------
+                            824 	.area CSEG    (CODE)
+                            825 ;------------------------------------------------------------
+                            826 ;Allocation info for local variables in function 'timer3Init'
+                            827 ;------------------------------------------------------------
+                    0000    828 	G$timer3Init$0$0 ==.
+                    0000    829 	C$test_random.c$37$0$0 ==.
+                            830 ;	apps/test_random/test_random.c:37: void timer3Init()
+                            831 ;	-----------------------------------------
+                            832 ;	 function timer3Init
+                            833 ;	-----------------------------------------
+   0509                     834 _timer3Init:
+                    0007    835 	ar7 = 0x07
+                    0006    836 	ar6 = 0x06
+                    0005    837 	ar5 = 0x05
+                    0004    838 	ar4 = 0x04
+                    0003    839 	ar3 = 0x03
+                    0002    840 	ar2 = 0x02
+                    0001    841 	ar1 = 0x01
+                    0000    842 	ar0 = 0x00
+                    0000    843 	C$test_random.c$39$1$1 ==.
+                            844 ;	apps/test_random/test_random.c:39: T3CTL = 0b01110000;   // Prescaler 1:8, frequency = 11.7 kHz
+   0509 75 CB 70            845 	mov	_T3CTL,#0x70
+                    0003    846 	C$test_random.c$40$1$1 ==.
+                            847 ;	apps/test_random/test_random.c:40: T3CC0 = T3CC1 = 0;    // Set duty cycles to zero
+   050C 75 CF 00            848 	mov	_T3CC1,#0x00
+   050F 75 CD 00            849 	mov	_T3CC0,#0x00
+                    0009    850 	C$test_random.c$41$1$1 ==.
+                            851 ;	apps/test_random/test_random.c:41: T3CCTL0 = T3CCTL1 = 0b00100100;
+   0512 75 CE 24            852 	mov	_T3CCTL1,#0x24
+   0515 75 CC 24            853 	mov	_T3CCTL0,#0x24
+                    000F    854 	C$test_random.c$42$1$1 ==.
+                            855 ;	apps/test_random/test_random.c:42: PERCFG &= ~(1<<5);
+   0518 AF F1               856 	mov	r7,_PERCFG
+   051A 53 07 DF            857 	anl	ar7,#0xDF
+   051D 8F F1               858 	mov	_PERCFG,r7
+                    0016    859 	C$test_random.c$43$1$1 ==.
+                            860 ;	apps/test_random/test_random.c:43: P1SEL |= (1<<3) | (1<<4);
+   051F 43 F4 18            861 	orl	_P1SEL,#0x18
+                    0019    862 	C$test_random.c$44$1$1 ==.
+                    0019    863 	XG$timer3Init$0$0 ==.
+   0522 22                  864 	ret
+                            865 ;------------------------------------------------------------
+                            866 ;Allocation info for local variables in function 'updateHeartbeatLed'
+                            867 ;------------------------------------------------------------
+                    001A    868 	G$updateHeartbeatLed$0$0 ==.
+                    001A    869 	C$test_random.c$49$1$1 ==.
+                            870 ;	apps/test_random/test_random.c:49: void updateHeartbeatLed()
+                            871 ;	-----------------------------------------
+                            872 ;	 function updateHeartbeatLed
+                            873 ;	-----------------------------------------
+   0523                     874 _updateHeartbeatLed:
+                    001A    875 	C$test_random.c$52$1$1 ==.
+                            876 ;	apps/test_random/test_random.c:52: if (getMs() - lastRedLedToggle >= 500)
+   0523 12 09 E9            877 	lcall	_getMs
+   0526 AC 82               878 	mov	r4,dpl
+   0528 AD 83               879 	mov	r5,dph
+   052A AE F0               880 	mov	r6,b
+   052C FF                  881 	mov	r7,a
+   052D 78 00               882 	mov	r0,#_lastRedLedToggle
+   052F D3                  883 	setb	c
+   0530 E2                  884 	movx	a,@r0
+   0531 9C                  885 	subb	a,r4
+   0532 F4                  886 	cpl	a
+   0533 B3                  887 	cpl	c
+   0534 FC                  888 	mov	r4,a
+   0535 B3                  889 	cpl	c
+   0536 08                  890 	inc	r0
+   0537 E2                  891 	movx	a,@r0
+   0538 9D                  892 	subb	a,r5
+   0539 F4                  893 	cpl	a
+   053A B3                  894 	cpl	c
+   053B FD                  895 	mov	r5,a
+   053C B3                  896 	cpl	c
+   053D 08                  897 	inc	r0
+   053E E2                  898 	movx	a,@r0
+   053F 9E                  899 	subb	a,r6
+   0540 F4                  900 	cpl	a
+   0541 B3                  901 	cpl	c
+   0542 FE                  902 	mov	r6,a
+   0543 B3                  903 	cpl	c
+   0544 08                  904 	inc	r0
+   0545 E2                  905 	movx	a,@r0
+   0546 9F                  906 	subb	a,r7
+   0547 F4                  907 	cpl	a
+   0548 FF                  908 	mov	r7,a
+   0549 C3                  909 	clr	c
+   054A EC                  910 	mov	a,r4
+   054B 94 F4               911 	subb	a,#0xF4
+   054D ED                  912 	mov	a,r5
+   054E 94 01               913 	subb	a,#0x01
+   0550 EE                  914 	mov	a,r6
+   0551 94 00               915 	subb	a,#0x00
+   0553 EF                  916 	mov	a,r7
+   0554 94 00               917 	subb	a,#0x00
+   0556 40 1A               918 	jc	00103$
+                    004F    919 	C$test_random.c$54$3$3 ==.
+                            920 ;	apps/test_random/test_random.c:54: LED_RED_TOGGLE();
+   0558 63 FF 02            921 	xrl	_P2DIR,#0x02
+                    0052    922 	C$test_random.c$55$2$2 ==.
+                            923 ;	apps/test_random/test_random.c:55: lastRedLedToggle = getMs();
+   055B 12 09 E9            924 	lcall	_getMs
+   055E AC 82               925 	mov	r4,dpl
+   0560 AD 83               926 	mov	r5,dph
+   0562 AE F0               927 	mov	r6,b
+   0564 FF                  928 	mov	r7,a
+   0565 78 00               929 	mov	r0,#_lastRedLedToggle
+   0567 EC                  930 	mov	a,r4
+   0568 F2                  931 	movx	@r0,a
+   0569 08                  932 	inc	r0
+   056A ED                  933 	mov	a,r5
+   056B F2                  934 	movx	@r0,a
+   056C 08                  935 	inc	r0
+   056D EE                  936 	mov	a,r6
+   056E F2                  937 	movx	@r0,a
+   056F 08                  938 	inc	r0
+   0570 EF                  939 	mov	a,r7
+   0571 F2                  940 	movx	@r0,a
+   0572                     941 00103$:
+                    0069    942 	C$test_random.c$57$2$1 ==.
+                    0069    943 	XG$updateHeartbeatLed$0$0 ==.
+   0572 22                  944 	ret
+                            945 ;------------------------------------------------------------
+                            946 ;Allocation info for local variables in function 'main'
+                            947 ;------------------------------------------------------------
+                    006A    948 	G$main$0$0 ==.
+                    006A    949 	C$test_random.c$112$2$1 ==.
+                            950 ;	apps/test_random/test_random.c:112: void main()
+                            951 ;	-----------------------------------------
+                            952 ;	 function main
+                            953 ;	-----------------------------------------
+   0573                     954 _main:
+                    006A    955 	C$test_random.c$114$1$1 ==.
+                            956 ;	apps/test_random/test_random.c:114: systemInit();
+   0573 12 06 31            957 	lcall	_systemInit
+                    006D    958 	C$test_random.c$115$1$1 ==.
+                            959 ;	apps/test_random/test_random.c:115: usbInit();
+   0576 12 0A 50            960 	lcall	_usbInit
+                    0070    961 	C$test_random.c$120$2$2 ==.
+                            962 ;	apps/test_random/test_random.c:120: LED_RED(0);
+   0579 AF FF               963 	mov	r7,_P2DIR
+   057B 53 07 FD            964 	anl	ar7,#0xFD
+   057E 8F FF               965 	mov	_P2DIR,r7
+                    0077    966 	C$test_random.c$121$2$3 ==.
+                            967 ;	apps/test_random/test_random.c:121: LED_RED_TOGGLE();
+   0580 63 FF 02            968 	xrl	_P2DIR,#0x02
+                    007A    969 	C$test_random.c$123$1$1 ==.
+                            970 ;	apps/test_random/test_random.c:123: delayMs(200);
+   0583 90 00 C8            971 	mov	dptr,#0x00C8
+   0586 12 0A 15            972 	lcall	_delayMs
+                    0080    973 	C$test_random.c$126$1$1 ==.
+                            974 ;	apps/test_random/test_random.c:126: for(i = 0; i < 70; i++) {
+   0589 78 09               975 	mov	r0,#_i
+   058B E4                  976 	clr	a
+   058C F2                  977 	movx	@r0,a
+   058D                     978 00104$:
+   058D 78 09               979 	mov	r0,#_i
+   058F E2                  980 	movx	a,@r0
+   0590 B4 46 00            981 	cjne	a,#0x46,00113$
+   0593                     982 00113$:
+   0593 50 17               983 	jnc	00107$
+                    008C    984 	C$test_random.c$127$3$5 ==.
+                            985 ;	apps/test_random/test_random.c:127: LED_RED_TOGGLE();
+   0595 63 FF 02            986 	xrl	_P2DIR,#0x02
+                    008F    987 	C$test_random.c$128$2$4 ==.
+                            988 ;	apps/test_random/test_random.c:128: boardService();
+   0598 12 06 3E            989 	lcall	_boardService
+                    0092    990 	C$test_random.c$129$2$4 ==.
+                            991 ;	apps/test_random/test_random.c:129: usbComService();
+   059B 12 08 62            992 	lcall	_usbComService
+                    0095    993 	C$test_random.c$130$2$4 ==.
+                            994 ;	apps/test_random/test_random.c:130: delayMs(100);
+   059E 90 00 64            995 	mov	dptr,#0x0064
+   05A1 12 0A 15            996 	lcall	_delayMs
+                    009B    997 	C$test_random.c$126$1$1 ==.
+                            998 ;	apps/test_random/test_random.c:126: for(i = 0; i < 70; i++) {
+   05A4 78 09               999 	mov	r0,#_i
+   05A6 E2                 1000 	movx	a,@r0
+   05A7 24 01              1001 	add	a,#0x01
+   05A9 F2                 1002 	movx	@r0,a
+   05AA 80 E1              1003 	sjmp	00104$
+   05AC                    1004 00107$:
+                    00A3   1005 	C$test_random.c$134$2$6 ==.
+                           1006 ;	apps/test_random/test_random.c:134: LED_RED(0);
+   05AC AF FF              1007 	mov	r7,_P2DIR
+   05AE 53 07 FD           1008 	anl	ar7,#0xFD
+   05B1 8F FF              1009 	mov	_P2DIR,r7
+                    00AA   1010 	C$test_random.c$140$1$1 ==.
+                           1011 ;	apps/test_random/test_random.c:140: P1SEL = 0x00;     // Force ALL P1 pins to GPIO mode
+   05B3 75 F4 00           1012 	mov	_P1SEL,#0x00
+                    00AD   1013 	C$test_random.c$141$1$1 ==.
+                           1014 ;	apps/test_random/test_random.c:141: P1DIR = 0x00;     // Start with all inputs
+   05B6 75 FE 00           1015 	mov	_P1DIR,#0x00
+                    00B0   1016 	C$test_random.c$142$1$1 ==.
+                           1017 ;	apps/test_random/test_random.c:142: P1 = 0x00;        // Clear all output values
+   05B9 75 90 00           1018 	mov	_P1,#0x00
+                    00B3   1019 	C$test_random.c$145$1$1 ==.
+                           1020 ;	apps/test_random/test_random.c:145: T1CTL = 0x00;
+   05BC 75 E4 00           1021 	mov	_T1CTL,#0x00
+                    00B6   1022 	C$test_random.c$146$1$1 ==.
+                           1023 ;	apps/test_random/test_random.c:146: T3CTL = 0x00;
+   05BF 75 CB 00           1024 	mov	_T3CTL,#0x00
+                    00B9   1025 	C$test_random.c$147$1$1 ==.
+                           1026 ;	apps/test_random/test_random.c:147: T4CTL = 0x00;
+   05C2 75 EB 00           1027 	mov	_T4CTL,#0x00
+                    00BC   1028 	C$test_random.c$152$1$1 ==.
+                           1029 ;	apps/test_random/test_random.c:152: P1DIR |= (1 << 1) | (1 << 2) | (1 << 7);  // RGB pins as outputs
+   05C5 43 FE 86           1030 	orl	_P1DIR,#0x86
+                    00BF   1031 	C$test_random.c$153$1$1 ==.
+                           1032 ;	apps/test_random/test_random.c:153: P1DIR |= (1 << 5);  // Motor direction as output
+   05C8 43 FE 20           1033 	orl	_P1DIR,#0x20
+                    00C2   1034 	C$test_random.c$156$1$1 ==.
+                           1035 ;	apps/test_random/test_random.c:156: P1SEL = 0x00;
+   05CB 75 F4 00           1036 	mov	_P1SEL,#0x00
+                    00C5   1037 	C$test_random.c$161$1$1 ==.
+                           1038 ;	apps/test_random/test_random.c:161: P1 = 0xFF;
+   05CE 75 90 FF           1039 	mov	_P1,#0xFF
+                    00C8   1040 	C$test_random.c$162$1$1 ==.
+                           1041 ;	apps/test_random/test_random.c:162: delayMs(1000);
+   05D1 90 03 E8           1042 	mov	dptr,#0x03E8
+   05D4 12 0A 15           1043 	lcall	_delayMs
+                    00CE   1044 	C$test_random.c$165$1$1 ==.
+                           1045 ;	apps/test_random/test_random.c:165: P1 = 0b11111101;  // Only bit 1 is 0
+   05D7 75 90 FD           1046 	mov	_P1,#0xFD
+                    00D1   1047 	C$test_random.c$166$1$1 ==.
+                           1048 ;	apps/test_random/test_random.c:166: delayMs(1000);
+   05DA 90 03 E8           1049 	mov	dptr,#0x03E8
+   05DD 12 0A 15           1050 	lcall	_delayMs
+                    00D7   1051 	C$test_random.c$169$1$1 ==.
+                           1052 ;	apps/test_random/test_random.c:169: P1 = 0b11111011;  // Only bit 2 is 0
+   05E0 75 90 FB           1053 	mov	_P1,#0xFB
+                    00DA   1054 	C$test_random.c$170$1$1 ==.
+                           1055 ;	apps/test_random/test_random.c:170: delayMs(1000);
+   05E3 90 03 E8           1056 	mov	dptr,#0x03E8
+   05E6 12 0A 15           1057 	lcall	_delayMs
+                    00E0   1058 	C$test_random.c$173$1$1 ==.
+                           1059 ;	apps/test_random/test_random.c:173: P1 = 0b01111111;  // Only bit 7 is 0
+   05E9 75 90 7F           1060 	mov	_P1,#0x7F
+                    00E3   1061 	C$test_random.c$174$1$1 ==.
+                           1062 ;	apps/test_random/test_random.c:174: delayMs(1000);
+   05EC 90 03 E8           1063 	mov	dptr,#0x03E8
+   05EF 12 0A 15           1064 	lcall	_delayMs
+                    00E9   1065 	C$test_random.c$177$1$1 ==.
+                           1066 ;	apps/test_random/test_random.c:177: P1 = 0xFF;
+   05F2 75 90 FF           1067 	mov	_P1,#0xFF
+                    00EC   1068 	C$test_random.c$178$1$1 ==.
+                           1069 ;	apps/test_random/test_random.c:178: delayMs(500);
+   05F5 90 01 F4           1070 	mov	dptr,#0x01F4
+   05F8 12 0A 15           1071 	lcall	_delayMs
+                    00F2   1072 	C$test_random.c$181$1$1 ==.
+                           1073 ;	apps/test_random/test_random.c:181: timer3Init();
+   05FB 12 05 09           1074 	lcall	_timer3Init
+                    00F5   1075 	C$test_random.c$186$1$1 ==.
+                           1076 ;	apps/test_random/test_random.c:186: P1 = 0b11011111;  // Bit 5 = 0 (direction), RGB bits high (off)
+   05FE 75 90 DF           1077 	mov	_P1,#0xDF
+                    00F8   1078 	C$test_random.c$187$1$1 ==.
+                           1079 ;	apps/test_random/test_random.c:187: T3CC0 = MOTOR_SPEED;
+   0601 75 CD 96           1080 	mov	_T3CC0,#0x96
+                    00FB   1081 	C$test_random.c$188$1$1 ==.
+                           1082 ;	apps/test_random/test_random.c:188: delayMs(2000);
+   0604 90 07 D0           1083 	mov	dptr,#0x07D0
+   0607 12 0A 15           1084 	lcall	_delayMs
+                    0101   1085 	C$test_random.c$191$1$1 ==.
+                           1086 ;	apps/test_random/test_random.c:191: T3CC0 = 0;
+   060A 75 CD 00           1087 	mov	_T3CC0,#0x00
+                    0104   1088 	C$test_random.c$192$1$1 ==.
+                           1089 ;	apps/test_random/test_random.c:192: delayMs(1000);
+   060D 90 03 E8           1090 	mov	dptr,#0x03E8
+   0610 12 0A 15           1091 	lcall	_delayMs
+                    010A   1092 	C$test_random.c$195$1$1 ==.
+                           1093 ;	apps/test_random/test_random.c:195: P1 = 0b11111111;  // Bit 5 = 1 (direction), RGB bits high (off)
+   0613 75 90 FF           1094 	mov	_P1,#0xFF
+                    010D   1095 	C$test_random.c$196$1$1 ==.
+                           1096 ;	apps/test_random/test_random.c:196: T3CC0 = MOTOR_SPEED;
+   0616 75 CD 96           1097 	mov	_T3CC0,#0x96
+                    0110   1098 	C$test_random.c$197$1$1 ==.
+                           1099 ;	apps/test_random/test_random.c:197: delayMs(2000);
+   0619 90 07 D0           1100 	mov	dptr,#0x07D0
+   061C 12 0A 15           1101 	lcall	_delayMs
+                    0116   1102 	C$test_random.c$200$1$1 ==.
+                           1103 ;	apps/test_random/test_random.c:200: T3CC0 = 0;
+   061F 75 CD 00           1104 	mov	_T3CC0,#0x00
+                    0119   1105 	C$test_random.c$202$1$1 ==.
+                           1106 ;	apps/test_random/test_random.c:202: while(1)
+   0622                    1107 00102$:
+                    0119   1108 	C$test_random.c$204$2$7 ==.
+                           1109 ;	apps/test_random/test_random.c:204: boardService();
+   0622 12 06 3E           1110 	lcall	_boardService
+                    011C   1111 	C$test_random.c$205$2$7 ==.
+                           1112 ;	apps/test_random/test_random.c:205: usbComService();
+   0625 12 08 62           1113 	lcall	_usbComService
+                    011F   1114 	C$test_random.c$206$2$7 ==.
+                           1115 ;	apps/test_random/test_random.c:206: delayMs(100);
+   0628 90 00 64           1116 	mov	dptr,#0x0064
+   062B 12 0A 15           1117 	lcall	_delayMs
+   062E 80 F2              1118 	sjmp	00102$
+                    0127   1119 	C$test_random.c$208$1$1 ==.
+                    0127   1120 	XG$main$0$0 ==.
+   0630 22                 1121 	ret
+                           1122 	.area CSEG    (CODE)
+                           1123 	.area CONST   (CODE)
+                           1124 	.area XINIT   (CODE)
+                           1125 	.area CABS    (ABS,CODE)
