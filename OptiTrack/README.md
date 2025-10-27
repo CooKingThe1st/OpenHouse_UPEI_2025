@@ -4,6 +4,11 @@
 Overview
 
 This folder documents the OptiTrack motion-capture integration used during demos and testing. It includes streaming choices (NATNet, VRPN), a lightweight NATNet->TCP bridge approach used for simple robot clients, tuning notes, sample client code, and diagrams.
+# OptiTrack
+
+Overview
+
+This folder documents the OptiTrack motion-capture integration used during demos and testing. It includes streaming choices (NATNet, VRPN), a lightweight NATNet->TCP bridge approach used for simple robot clients, tuning notes, sample client code, and diagrams.
 
 Status
 
@@ -46,4 +51,3 @@ Next steps (optional)
 - Add a small unit test for `client_rasp_opti.py` to validate parsing of common frame cases (missing fields, partial frames).
 
 Last updated: 2025-10-27
-																		robot --------------------------------->   should head y toward here
